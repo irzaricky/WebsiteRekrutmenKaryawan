@@ -8,8 +8,12 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard-tail', function () {
-    return view('dashboard-tail');
+    return view('./dashboard/dashboard-tail');
 })->name('dashboard-tail');
+
+Route::get('/dashboard-tukUI', function () {
+    return view('./dashboard/dashboard-tukUI');
+})->name('dashboard-tukUI');
 
 
 Route::get('/dashboard', function () {
