@@ -15,9 +15,12 @@ Route::get('/dashboard-tukUI', function () {
     return view('./dashboard/dashboard-tukUI');
 })->name('dashboard-tukUI');
 
+Route::get('/dashboard-vanila', function () {
+    return view('./dashboard/dashboard-vanila');
+})->name('dashboard-vanila');
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    return view('/dashboard/dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {

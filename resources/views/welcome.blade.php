@@ -919,7 +919,7 @@
                         </svg>
                     </div>
                     @if (Route::has('login'))
-                        <nav class="-mx-3 flex flex-1 justify-end">
+                        <nav class="-mx-5 flex flex-1 justify-end">
                             @auth
                                 <a href="{{ url('/dashboard') }}"
                                     class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white">
@@ -937,7 +937,7 @@
                                         Register
                                     </a>
 
-                                    <a href="{{ route('dashboard-tail') }}"
+                                    {{-- <a href="{{ route('dashboard-tail') }}"
                                         class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white">
                                         dashboard 1
                                     </a>
@@ -946,6 +946,11 @@
                                         class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white">
                                         dashboard 2
                                     </a>
+
+                                    <a href="{{ route('dashboard-vanila') }}"
+                                        class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white">
+                                        dashboard 3
+                                    </a> --}}
                                 @endif
                             @endauth
                         </nav>
