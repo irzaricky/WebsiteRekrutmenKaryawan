@@ -16,12 +16,12 @@ final class Factory
     private static ?Factory $instance = null;
 
     /**
-     * @var list<Comparator>
+     * @psalm-var list<Comparator>
      */
     private array $customComparators = [];
 
     /**
-     * @var list<Comparator>
+     * @psalm-var list<Comparator>
      */
     private array $defaultComparators = [];
 
@@ -97,7 +97,6 @@ final class Factory
         $this->registerDefaultComparator(new DOMNodeComparator);
         $this->registerDefaultComparator(new SplObjectStorageComparator);
         $this->registerDefaultComparator(new ExceptionComparator);
-        $this->registerDefaultComparator(new EnumerationComparator);
         $this->registerDefaultComparator(new ObjectComparator);
         $this->registerDefaultComparator(new ResourceComparator);
         $this->registerDefaultComparator(new ArrayComparator);
