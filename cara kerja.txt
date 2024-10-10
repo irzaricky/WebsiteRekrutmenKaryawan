@@ -1,0 +1,1 @@
+register user terjadi di register.blade.php dimana form akan dikirim ke 

@@ -7,6 +7,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/home', function () {
+    return view('home');
+});
+
 Route::get('/dashboard-tail', function () {
     return view('./dashboard/dashboard-tail');
 })->name('dashboard-tail');
