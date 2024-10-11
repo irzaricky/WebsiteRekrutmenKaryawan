@@ -90,10 +90,6 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
             Route::post('employee/update', 'employeeUpdateRecord')->name('hr/employee/update'); // update employee record
             Route::post('employee/delete', 'employeeDeleteRecord')->name('hr/employee/delete'); // delete employee record
 
-            Route::get('holidays/page', 'holidayPage')->name('hr/holidays/page');
-            Route::post('holidays/save', 'holidaySaveRecord')->name('hr/holidays/save'); // save or update record
-            Route::post('holidays/delete', 'holidayDeleteRecord')->name('hr/holidays/delete'); // delete record
-
             Route::get('leave/employee/page', 'leaveEmployee')->name('hr/leave/employee/page');
             Route::get('create/leave/employee/page', 'createLeaveEmployee')->name('hr/create/leave/employee/page');
             Route::post('create/leave/employee/save', 'saveRecordLeave')->name('hr/create/leave/employee/save');
@@ -106,9 +102,6 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
             Route::post('get/information/leave', 'getInformationLeave')->name('hr/get/information/leave');
 
             Route::get('attendance/main/page', 'attendanceMain')->name('hr/attendance/main/page');
-            Route::get('department/page', 'department')->name('hr/department/page');
-            Route::post('department/save', 'saveRecorddepartment')->name('hr/department/save');
-            Route::post('department/delete', 'deleteRecorddepartment')->name('hr/department/delete');
         });
     });
 });
