@@ -62,15 +62,15 @@ class LoginController extends Controller
                 // Update last login
                 $user->update(['last_login' => $todayDate]);
 
-                Toastr::success('Login successful :)', 'Success');
+                Toastr()->success('Login successful :)', 'Success');
                 return redirect()->intended('home');
             } else {
-                Toastr::error('Error: Wrong username or password :)', 'Error');
+                Toastr()->error('Error: Wrong username or password :)', 'Error');
                 return redirect('login');
             }
         } catch (\Exception $e) {
             Log::error($e);
-            Toastr::error('An error occurred during login :)', 'Error');
+            Toastr()->error('An error occurred during login :)', 'Error');
             return redirect()->back();
         }
     }
@@ -87,7 +87,7 @@ class LoginController extends Controller
         $request->session()->flush();
         Auth::logout();
 
-        Toastr::success('Logout successful :)', 'Success');
+        Toastr()->success('Logout successful :)', 'Success');
         return redirect('logout/page');
     }
 }
