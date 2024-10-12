@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit7e8c3c14ff33b199b4a0838993eb8423
+class ComposerStaticInite3cdbdeb6d6479708ee0dce4ede46883
 {
     public static $files = array (
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
@@ -125,7 +125,6 @@ class ComposerStaticInit7e8c3c14ff33b199b4a0838993eb8423
             'Laravel\\SerializableClosure\\' => 28,
             'Laravel\\Sail\\' => 13,
             'Laravel\\Prompts\\' => 16,
-            'Laravel\\Breeze\\' => 15,
         ),
         'I' => 
         array (
@@ -334,8 +333,8 @@ class ComposerStaticInit7e8c3c14ff33b199b4a0838993eb8423
         ),
         'Psr\\Http\\Message\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/http-factory/src',
-            1 => __DIR__ . '/..' . '/psr/http-message/src',
+            0 => __DIR__ . '/..' . '/psr/http-message/src',
+            1 => __DIR__ . '/..' . '/psr/http-factory/src',
         ),
         'Psr\\Http\\Client\\' => 
         array (
@@ -408,10 +407,6 @@ class ComposerStaticInit7e8c3c14ff33b199b4a0838993eb8423
         'Laravel\\Prompts\\' => 
         array (
             0 => __DIR__ . '/..' . '/laravel/prompts/src',
-        ),
-        'Laravel\\Breeze\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/laravel/breeze/src',
         ),
         'Illuminate\\Support\\' => 
         array (
@@ -509,23 +504,9 @@ class ComposerStaticInit7e8c3c14ff33b199b4a0838993eb8423
     );
 
     public static $classMap = array (
-        'App\\Http\\Controllers\\Auth\\AuthenticatedSessionController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/AuthenticatedSessionController.php',
-        'App\\Http\\Controllers\\Auth\\ConfirmablePasswordController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/ConfirmablePasswordController.php',
-        'App\\Http\\Controllers\\Auth\\EmailVerificationNotificationController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/EmailVerificationNotificationController.php',
-        'App\\Http\\Controllers\\Auth\\EmailVerificationPromptController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/EmailVerificationPromptController.php',
-        'App\\Http\\Controllers\\Auth\\NewPasswordController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/NewPasswordController.php',
-        'App\\Http\\Controllers\\Auth\\PasswordController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/PasswordController.php',
-        'App\\Http\\Controllers\\Auth\\PasswordResetLinkController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/PasswordResetLinkController.php',
-        'App\\Http\\Controllers\\Auth\\RegisteredUserController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/RegisteredUserController.php',
-        'App\\Http\\Controllers\\Auth\\VerifyEmailController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/VerifyEmailController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
-        'App\\Http\\Controllers\\ProfileController' => __DIR__ . '/../..' . '/app/Http/Controllers/ProfileController.php',
-        'App\\Http\\Requests\\Auth\\LoginRequest' => __DIR__ . '/../..' . '/app/Http/Requests/Auth/LoginRequest.php',
-        'App\\Http\\Requests\\ProfileUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/ProfileUpdateRequest.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
-        'App\\View\\Components\\AppLayout' => __DIR__ . '/../..' . '/app/View/Components/AppLayout.php',
-        'App\\View\\Components\\GuestLayout' => __DIR__ . '/../..' . '/app/View/Components/GuestLayout.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Brick\\Math\\BigDecimal' => __DIR__ . '/..' . '/brick/math/src/BigDecimal.php',
         'Brick\\Math\\BigInteger' => __DIR__ . '/..' . '/brick/math/src/BigInteger.php',
@@ -2844,12 +2825,6 @@ class ComposerStaticInit7e8c3c14ff33b199b4a0838993eb8423
         'Illuminate\\View\\ViewFinderInterface' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/View/ViewFinderInterface.php',
         'Illuminate\\View\\ViewName' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/View/ViewName.php',
         'Illuminate\\View\\ViewServiceProvider' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/View/ViewServiceProvider.php',
-        'Laravel\\Breeze\\BreezeServiceProvider' => __DIR__ . '/..' . '/laravel/breeze/src/BreezeServiceProvider.php',
-        'Laravel\\Breeze\\Console\\InstallCommand' => __DIR__ . '/..' . '/laravel/breeze/src/Console/InstallCommand.php',
-        'Laravel\\Breeze\\Console\\InstallsApiStack' => __DIR__ . '/..' . '/laravel/breeze/src/Console/InstallsApiStack.php',
-        'Laravel\\Breeze\\Console\\InstallsBladeStack' => __DIR__ . '/..' . '/laravel/breeze/src/Console/InstallsBladeStack.php',
-        'Laravel\\Breeze\\Console\\InstallsInertiaStacks' => __DIR__ . '/..' . '/laravel/breeze/src/Console/InstallsInertiaStacks.php',
-        'Laravel\\Breeze\\Console\\InstallsLivewireStack' => __DIR__ . '/..' . '/laravel/breeze/src/Console/InstallsLivewireStack.php',
         'Laravel\\Prompts\\Clear' => __DIR__ . '/..' . '/laravel/prompts/src/Clear.php',
         'Laravel\\Prompts\\Concerns\\Colors' => __DIR__ . '/..' . '/laravel/prompts/src/Concerns/Colors.php',
         'Laravel\\Prompts\\Concerns\\Cursor' => __DIR__ . '/..' . '/laravel/prompts/src/Concerns/Cursor.php',
@@ -5468,6 +5443,7 @@ class ComposerStaticInit7e8c3c14ff33b199b4a0838993eb8423
         'Symfony\\Component\\Console\\ConsoleEvents' => __DIR__ . '/..' . '/symfony/console/ConsoleEvents.php',
         'Symfony\\Component\\Console\\Cursor' => __DIR__ . '/..' . '/symfony/console/Cursor.php',
         'Symfony\\Component\\Console\\DataCollector\\CommandDataCollector' => __DIR__ . '/..' . '/symfony/console/DataCollector/CommandDataCollector.php',
+        'Symfony\\Component\\Console\\Debug\\CliRequest' => __DIR__ . '/..' . '/symfony/console/Debug/CliRequest.php',
         'Symfony\\Component\\Console\\DependencyInjection\\AddConsoleCommandPass' => __DIR__ . '/..' . '/symfony/console/DependencyInjection/AddConsoleCommandPass.php',
         'Symfony\\Component\\Console\\Descriptor\\ApplicationDescription' => __DIR__ . '/..' . '/symfony/console/Descriptor/ApplicationDescription.php',
         'Symfony\\Component\\Console\\Descriptor\\Descriptor' => __DIR__ . '/..' . '/symfony/console/Descriptor/Descriptor.php',
@@ -5632,6 +5608,8 @@ class ComposerStaticInit7e8c3c14ff33b199b4a0838993eb8423
         'Symfony\\Component\\ErrorHandler\\Internal\\TentativeTypes' => __DIR__ . '/..' . '/symfony/error-handler/Internal/TentativeTypes.php',
         'Symfony\\Component\\ErrorHandler\\ThrowableUtils' => __DIR__ . '/..' . '/symfony/error-handler/ThrowableUtils.php',
         'Symfony\\Component\\EventDispatcher\\Attribute\\AsEventListener' => __DIR__ . '/..' . '/symfony/event-dispatcher/Attribute/AsEventListener.php',
+        'Symfony\\Component\\EventDispatcher\\Debug\\TraceableEventDispatcher' => __DIR__ . '/..' . '/symfony/event-dispatcher/Debug/TraceableEventDispatcher.php',
+        'Symfony\\Component\\EventDispatcher\\Debug\\WrappedListener' => __DIR__ . '/..' . '/symfony/event-dispatcher/Debug/WrappedListener.php',
         'Symfony\\Component\\EventDispatcher\\DependencyInjection\\AddEventAliasesPass' => __DIR__ . '/..' . '/symfony/event-dispatcher/DependencyInjection/AddEventAliasesPass.php',
         'Symfony\\Component\\EventDispatcher\\DependencyInjection\\RegisterListenersPass' => __DIR__ . '/..' . '/symfony/event-dispatcher/DependencyInjection/RegisterListenersPass.php',
         'Symfony\\Component\\EventDispatcher\\EventDispatcher' => __DIR__ . '/..' . '/symfony/event-dispatcher/EventDispatcher.php',
@@ -5833,6 +5811,9 @@ class ComposerStaticInit7e8c3c14ff33b199b4a0838993eb8423
         'Symfony\\Component\\HttpKernel\\DataCollector\\RequestDataCollector' => __DIR__ . '/..' . '/symfony/http-kernel/DataCollector/RequestDataCollector.php',
         'Symfony\\Component\\HttpKernel\\DataCollector\\RouterDataCollector' => __DIR__ . '/..' . '/symfony/http-kernel/DataCollector/RouterDataCollector.php',
         'Symfony\\Component\\HttpKernel\\DataCollector\\TimeDataCollector' => __DIR__ . '/..' . '/symfony/http-kernel/DataCollector/TimeDataCollector.php',
+        'Symfony\\Component\\HttpKernel\\Debug\\ErrorHandlerConfigurator' => __DIR__ . '/..' . '/symfony/http-kernel/Debug/ErrorHandlerConfigurator.php',
+        'Symfony\\Component\\HttpKernel\\Debug\\TraceableEventDispatcher' => __DIR__ . '/..' . '/symfony/http-kernel/Debug/TraceableEventDispatcher.php',
+        'Symfony\\Component\\HttpKernel\\Debug\\VirtualRequestStack' => __DIR__ . '/..' . '/symfony/http-kernel/Debug/VirtualRequestStack.php',
         'Symfony\\Component\\HttpKernel\\DependencyInjection\\AddAnnotatedClassesToCachePass' => __DIR__ . '/..' . '/symfony/http-kernel/DependencyInjection/AddAnnotatedClassesToCachePass.php',
         'Symfony\\Component\\HttpKernel\\DependencyInjection\\ConfigurableExtension' => __DIR__ . '/..' . '/symfony/http-kernel/DependencyInjection/ConfigurableExtension.php',
         'Symfony\\Component\\HttpKernel\\DependencyInjection\\ControllerArgumentValueResolverPass' => __DIR__ . '/..' . '/symfony/http-kernel/DependencyInjection/ControllerArgumentValueResolverPass.php',
@@ -5921,6 +5902,9 @@ class ComposerStaticInit7e8c3c14ff33b199b4a0838993eb8423
         'Symfony\\Component\\HttpKernel\\Kernel' => __DIR__ . '/..' . '/symfony/http-kernel/Kernel.php',
         'Symfony\\Component\\HttpKernel\\KernelEvents' => __DIR__ . '/..' . '/symfony/http-kernel/KernelEvents.php',
         'Symfony\\Component\\HttpKernel\\KernelInterface' => __DIR__ . '/..' . '/symfony/http-kernel/KernelInterface.php',
+        'Symfony\\Component\\HttpKernel\\Log\\DebugLoggerConfigurator' => __DIR__ . '/..' . '/symfony/http-kernel/Log/DebugLoggerConfigurator.php',
+        'Symfony\\Component\\HttpKernel\\Log\\DebugLoggerInterface' => __DIR__ . '/..' . '/symfony/http-kernel/Log/DebugLoggerInterface.php',
+        'Symfony\\Component\\HttpKernel\\Log\\Logger' => __DIR__ . '/..' . '/symfony/http-kernel/Log/Logger.php',
         'Symfony\\Component\\HttpKernel\\Profiler\\FileProfilerStorage' => __DIR__ . '/..' . '/symfony/http-kernel/Profiler/FileProfilerStorage.php',
         'Symfony\\Component\\HttpKernel\\Profiler\\Profile' => __DIR__ . '/..' . '/symfony/http-kernel/Profiler/Profile.php',
         'Symfony\\Component\\HttpKernel\\Profiler\\Profiler' => __DIR__ . '/..' . '/symfony/http-kernel/Profiler/Profiler.php',
@@ -6422,14 +6406,7 @@ class ComposerStaticInit7e8c3c14ff33b199b4a0838993eb8423
         'Termwind\\ValueObjects\\Node' => __DIR__ . '/..' . '/nunomaduro/termwind/src/ValueObjects/Node.php',
         'Termwind\\ValueObjects\\Style' => __DIR__ . '/..' . '/nunomaduro/termwind/src/ValueObjects/Style.php',
         'Termwind\\ValueObjects\\Styles' => __DIR__ . '/..' . '/nunomaduro/termwind/src/ValueObjects/Styles.php',
-        'Tests\\Feature\\Auth\\AuthenticationTest' => __DIR__ . '/../..' . '/tests/Feature/Auth/AuthenticationTest.php',
-        'Tests\\Feature\\Auth\\EmailVerificationTest' => __DIR__ . '/../..' . '/tests/Feature/Auth/EmailVerificationTest.php',
-        'Tests\\Feature\\Auth\\PasswordConfirmationTest' => __DIR__ . '/../..' . '/tests/Feature/Auth/PasswordConfirmationTest.php',
-        'Tests\\Feature\\Auth\\PasswordResetTest' => __DIR__ . '/../..' . '/tests/Feature/Auth/PasswordResetTest.php',
-        'Tests\\Feature\\Auth\\PasswordUpdateTest' => __DIR__ . '/../..' . '/tests/Feature/Auth/PasswordUpdateTest.php',
-        'Tests\\Feature\\Auth\\RegistrationTest' => __DIR__ . '/../..' . '/tests/Feature/Auth/RegistrationTest.php',
         'Tests\\Feature\\ExampleTest' => __DIR__ . '/../..' . '/tests/Feature/ExampleTest.php',
-        'Tests\\Feature\\ProfileTest' => __DIR__ . '/../..' . '/tests/Feature/ProfileTest.php',
         'Tests\\TestCase' => __DIR__ . '/../..' . '/tests/TestCase.php',
         'Tests\\Unit\\ExampleTest' => __DIR__ . '/../..' . '/tests/Unit/ExampleTest.php',
         'TheSeer\\Tokenizer\\Exception' => __DIR__ . '/..' . '/theseer/tokenizer/src/Exception.php',
@@ -6478,9 +6455,9 @@ class ComposerStaticInit7e8c3c14ff33b199b4a0838993eb8423
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit7e8c3c14ff33b199b4a0838993eb8423::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit7e8c3c14ff33b199b4a0838993eb8423::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit7e8c3c14ff33b199b4a0838993eb8423::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInite3cdbdeb6d6479708ee0dce4ede46883::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInite3cdbdeb6d6479708ee0dce4ede46883::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInite3cdbdeb6d6479708ee0dce4ede46883::$classMap;
 
         }, null, ClassLoader::class);
     }
