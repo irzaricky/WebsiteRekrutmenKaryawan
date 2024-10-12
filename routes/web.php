@@ -19,6 +19,8 @@ function set_active($route)
     }
     return Request::path() == $route ? 'active' : '';
 }
+
+
 /** for side bar menu show */
 function set_show($route)
 {
@@ -29,15 +31,15 @@ function set_show($route)
 }
 
 Route::get('/', function () {
-    return view('auth.login');
+    return view('welcome');
 });
 
 Route::group(['middleware' => 'auth'], function () {
     Route::get('home', function () {
-        return view('dashboard.home');
+        return view('HRD.dashboard.home');
     });
     Route::get('home', function () {
-        return view('dashboard.home');
+        return view('HRD.dashboard.home');
     });
 });
 
