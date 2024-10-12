@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',          // Added role attribute to mass assignable attributes
+        'status',        // Added status attribute to mass assignable attributes
     ];
 
     /**
@@ -41,8 +43,10 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'email_verified_at' => 'datetime',  // Cast email_verified_at to a datetime
+            'password' => 'hashed',              // Automatically hash the password
+            'role' => 'string',                   // Cast role to string (optional, not strictly necessary)
+            'status' => 'string',                 // Cast status to string (optional, not strictly necessary)
         ];
     }
 }
