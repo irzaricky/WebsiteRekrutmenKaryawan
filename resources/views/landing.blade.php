@@ -11,17 +11,7 @@
 </head>
 
 <body>
-    <div id="LandingPage-hero">
-
-    </div>
-
-    <div id="LandingPage-feature"></div>
-    <div id="LandingPage-header"></div>
-    <div id="LandingPage-pricing">
-
-    </div>
-
-
+    <div id="LandingPage"></div>
 </body>
 
 </html>
