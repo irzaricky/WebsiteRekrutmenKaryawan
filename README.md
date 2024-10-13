@@ -31,12 +31,12 @@ npm run dev & php artisan serve
 
 ## Roadmap
 
-1. <a href="https://roadmap.sh/r/roadmap-backend-optimalisasi-penerimaan-karyawan" target="_blank">Roadmap</a>
+<a href="https://roadmap.sh/r/roadmap-backend-optimalisasi-penerimaan-karyawan" target="_blank">Roadmap</a>
 
 ## Use Case dan activity diagram
 
-1. <a href="https://drive.google.com/file/d/1-AWoY6_1C4c1hvLsW_3ePm5AMVJypLnb/view?usp=sharing" target="_blank">Draw.io</a>
+<a href="https://drive.google.com/file/d/1-AWoY6_1C4c1hvLsW_3ePm5AMVJypLnb/view?usp=sharing" target="_blank">Draw.io</a>
 
 ## Design Web
 
-1. <a href="https://www.figma.com/design/NlLjNJnHfkvCVbyHRJpklV/Arum-Maylan-Palupi's-team-library?node-id=0-1&t=HYeX4j0kkntqp5Ho-1">Figma version</a>
+<a href="https://www.figma.com/design/NlLjNJnHfkvCVbyHRJpklV/Arum-Maylan-Palupi's-team-library?node-id=0-1&t=HYeX4j0kkntqp5Ho-1">Figma version</a>
