@@ -19,45 +19,19 @@
                     <button
                         type="button"
                         class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
+                        @click="mobileMenuOpen = true"
                     >
                         <span class="sr-only">Open main menu</span>
-                        <svg
-                            class="h-6 w-6"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                            aria-hidden="true"
-                            data-slot="icon"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-                            />
-                        </svg>
+                        <Bars3Icon class="h-6 w-6" aria-hidden="true" />
                     </button>
                 </div>
                 <div class="hidden lg:flex lg:gap-x-12">
                     <a
-                        href="#"
+                        v-for="item in navigation"
+                        :key="item.name"
+                        :href="item.href"
                         class="text-sm font-semibold leading-6 text-gray-900"
-                        >Product</a
-                    >
-                    <a
-                        href="#"
-                        class="text-sm font-semibold leading-6 text-gray-900"
-                        >Features</a
-                    >
-                    <a
-                        href="#"
-                        class="text-sm font-semibold leading-6 text-gray-900"
-                        >Marketplace</a
-                    >
-                    <a
-                        href="#"
-                        class="text-sm font-semibold leading-6 text-gray-900"
-                        >Company</a
+                        >{{ item.name }}</a
                     >
                 </div>
                 <div class="hidden lg:flex lg:flex-1 lg:justify-end">
@@ -68,11 +42,13 @@
                     >
                 </div>
             </nav>
-            <!-- Mobile menu, show/hide based on menu open state. -->
-            <div class="lg:hidden" role="dialog" aria-modal="true">
-                <!-- Background backdrop, show/hide based on slide-over state. -->
-                <div class="fixed inset-0 z-50"></div>
-                <div
+            <Dialog
+                class="lg:hidden"
+                @close="mobileMenuOpen = false"
+                :open="mobileMenuOpen"
+            >
+                <div class="fixed inset-0 z-50" />
+                <DialogPanel
                     class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10"
                 >
                     <div class="flex items-center justify-between">
@@ -87,47 +63,21 @@
                         <button
                             type="button"
                             class="-m-2.5 rounded-md p-2.5 text-gray-700"
+                            @click="mobileMenuOpen = false"
                         >
                             <span class="sr-only">Close menu</span>
-                            <svg
-                                class="h-6 w-6"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke-width="1.5"
-                                stroke="currentColor"
-                                aria-hidden="true"
-                                data-slot="icon"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M6 18 18 6M6 6l12 12"
-                                />
-                            </svg>
+                            <XMarkIcon class="h-6 w-6" aria-hidden="true" />
                         </button>
                     </div>
                     <div class="mt-6 flow-root">
                         <div class="-my-6 divide-y divide-gray-500/10">
                             <div class="space-y-2 py-6">
                                 <a
-                                    href="#"
+                                    v-for="item in navigation"
+                                    :key="item.name"
+                                    :href="item.href"
                                     class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                                    >Product</a
-                                >
-                                <a
-                                    href="#"
-                                    class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                                    >Features</a
-                                >
-                                <a
-                                    href="#"
-                                    class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                                    >Marketplace</a
-                                >
-                                <a
-                                    href="#"
-                                    class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                                    >Company</a
+                                    >{{ item.name }}</a
                                 >
                             </div>
                             <div class="py-6">
@@ -139,8 +89,8 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                </DialogPanel>
+            </Dialog>
         </header>
 
         <div class="relative isolate px-6 pt-14 lg:px-8">
@@ -170,7 +120,7 @@
                             74.1% 44.1%
                         );
                     "
-                ></div>
+                />
             </div>
             <div class="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
                 <div class="hidden sm:mb-8 sm:flex sm:justify-center">
@@ -182,8 +132,8 @@
                             ><span
                                 class="absolute inset-0"
                                 aria-hidden="true"
-                            ></span
-                            >Read more <span aria-hidden="true">&rarr;</span></a
+                            />Read more
+                            <span aria-hidden="true">&rarr;</span></a
                         >
                     </div>
                 </div>
@@ -238,8 +188,23 @@
                             74.1% 44.1%
                         );
                     "
-                ></div>
+                />
             </div>
         </div>
     </div>
 </template>
+
+<script setup>
+import { ref } from "vue";
+import { Dialog, DialogPanel } from "@headlessui/vue";
+import { Bars3Icon, XMarkIcon } from "@heroicons/vue/24/outline";
+
+const navigation = [
+    { name: "Product", href: "#" },
+    { name: "Features", href: "#" },
+    { name: "Marketplace", href: "#" },
+    { name: "Company", href: "#" },
+];
+
+const mobileMenuOpen = ref(false);
+</script>
