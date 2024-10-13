@@ -2,6 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('landing');
-});
+Route::get('/{any}', function () {
+    return view('landing'); // Your main blade file
+})->where('any', '.*');
