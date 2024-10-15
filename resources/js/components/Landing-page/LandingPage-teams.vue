@@ -49,22 +49,22 @@ const people = [
     {
         name: "Arsyad Irfan Fauza",
         role: "Backend Developer",
-        imageUrl: "./assets/images/team-1.jpg",
+        imageUrl: "./assets/images/teams/team-1.jpg",
     },
     {
         name: "Arsyad Irfan Fauza",
         role: "Frontend Developer",
-        imageUrl: "./assets/images/team-1.jpg",
+        imageUrl: "./assets/images/teams/team-2.jpg",
     },
     {
         name: "Arsyad Irfan Fauza",
         role: "System Design",
-        imageUrl: "./assets/images/team-1.jpg",
+        imageUrl: "./assets/images/teams/team-3.jpg",
     },
     {
         name: "Arsyad Irfan Fauza",
         role: "Support",
-        imageUrl: "./assets/images/team-1.jpg",
+        imageUrl: "./assets/images/teams/team-4.jpg",
     },
 ];
 </script>

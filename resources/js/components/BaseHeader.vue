@@ -5,9 +5,13 @@
             aria-label="Global"
         >
             <div class="flex lg:flex-1">
-                <a href="#" class="-m-1.5 p-1.5">
-                    <span class="sr-only">Recrutier</span>
-                    <img :src="img[0].href" class="h-8 w-auto" alt="" />
+                <a :href="img[0].link" class="-m-1.5 p-1.5">
+                    <span class="sr-only">Recruiter</span>
+                    <img
+                        :src="img[0].href"
+                        class="h-16 w-auto"
+                        alt="Recruiter Logo"
+                    />
                 </a>
             </div>
             <div class="flex lg:hidden">
@@ -96,13 +100,12 @@ import { Dialog, DialogPanel } from "@headlessui/vue";
 import { Bars3Icon, XMarkIcon } from "@heroicons/vue/24/outline";
 
 const navigation = [
+    { name: "Company", href: "/company" },
     { name: "Product", href: "/product" },
     { name: "Features", href: "/features" },
-    { name: "Marketplace", href: "/marketplace" },
-    { name: "Company", href: "/company" },
 ];
 
-const img = [{ id: "1", href: "./assets/images/for.png" }];
+const img = [{ id: "1", href: "./assets/images/for.png", link: "/" }];
 
 const mobileMenuOpen = ref(false);
 </script>

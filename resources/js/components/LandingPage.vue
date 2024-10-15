@@ -1,18 +1,20 @@
 <template>
     <div>
+        <BaseHeader />
         <LandingPageHero />
         <LandingPageFeature />
-        <LandingPagePricing />
         <LandingPageHeader />
         <LandingPageTeams />
+        <BaseFooter />
     </div>
 </template>
 
 <script>
+import BaseHeader from "./BaseHeader.vue";
+import BaseFooter from "./BaseFooter.vue";
 import LandingPageHeader from "./Landing-page/LandingPage-header.vue";
 import LandingPageHero from "./Landing-page/LandingPage-hero.vue";
 import LandingPageFeature from "./Landing-page/LandingPage-FeatureSection.vue";
-import LandingPagePricing from "./Landing-page/LandingPage-pricing.vue";
 import LandingPageTeams from "./Landing-page/LandingPage-teams.vue";
 
 export default {
@@ -20,8 +22,9 @@ export default {
         LandingPageHeader,
         LandingPageHero,
         LandingPageFeature,
-        LandingPagePricing,
         LandingPageTeams,
+        BaseHeader,
+        BaseFooter,
     },
 };
 </script>
