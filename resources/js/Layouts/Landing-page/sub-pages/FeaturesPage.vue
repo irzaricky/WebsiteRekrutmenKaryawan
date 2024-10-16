@@ -100,8 +100,8 @@
 </template>
 
 <script setup>
-import BaseHeader from "../../BaseHeader.vue";
-import BaseFooter from "../../BaseFooter.vue";
+import BaseHeader from "../../../components/BaseHeader.vue";
+import BaseFooter from "../../../components/BaseFooter.vue";
 
 const data = [
     {
