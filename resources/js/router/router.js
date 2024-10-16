@@ -2,9 +2,9 @@ import { createRouter, createWebHistory } from "vue-router";
 
 // Import your components
 import LandingPage from "../Pages/LandingPage.vue";
-import ProductPage from "../Layouts/Landing-page/sub-pages/ProductPage.vue";
-import FeaturesPage from "../Layouts/Landing-page/sub-pages/FeaturesPage.vue";
-import CompanyPage from "../Layouts/Landing-page/sub-pages/CompanyPage.vue";
+import ProductPage from "../Pages/landing-subpages/ProductPage.vue";
+import FeaturesPage from "../Pages/landing-subpages/FeaturesPage.vue";
+import CompanyPage from "../Pages/landing-subpages/CompanyPage.vue";
 
 // Define your routes
 const routes = [

@@ -100,6 +100,7 @@ import { Dialog, DialogPanel } from "@headlessui/vue";
 import { Bars3Icon, XMarkIcon } from "@heroicons/vue/24/outline";
 
 const navigation = [
+    { name: "Home", href: "/" },
     { name: "Company", href: "/company" },
     { name: "Product", href: "/product" },
     { name: "Features", href: "/features" },

@@ -29,32 +29,33 @@
                 "
             />
         </div>
-        <div class="mx-auto max-w-2xl text-center lg:max-w-4xl">
+
+        <div class="my-64">
+            <div class="mx-auto max-w-2xl text-center lg:max-w-4xl">
+                <p
+                    class="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl"
+                >
+                    Tentang Bank Indonesia
+                </p>
+            </div>
             <p
-                class="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl"
+                class="mx-auto mt-6 max-w-2xl text-center text-lg leading-8 text-gray-600"
             >
-                Tentang Bank Indonesia
+                Penjaga Stabilitas Ekonomi Nasional Didirikan sebagai bank
+                sentral Republik Indonesia, Bank Indonesia memiliki misi utama
+                untuk mencapai dan memelihara kestabilan nilai rupiah. Tugas
+                kami tidak hanya terbatas pada pengelolaan moneter, tetapi juga
+                mencakup sistem pembayaran, pengawasan sektor keuangan, serta
+                menjaga stabilitas ekonomi nasional.
             </p>
         </div>
-        <p
-            class="mx-auto mt-6 max-w-2xl text-center text-lg leading-8 text-gray-600"
-        >
-            Penjaga Stabilitas Ekonomi Nasional Didirikan sebagai bank sentral
-            Republik Indonesia, Bank Indonesia memiliki misi utama untuk
-            mencapai dan memelihara kestabilan nilai rupiah. Tugas kami tidak
-            hanya terbatas pada pengelolaan moneter, tetapi juga mencakup sistem
-            pembayaran, pengawasan sektor keuangan, serta menjaga stabilitas
-            ekonomi nasional.
-        </p>
-
-        <div class="flex flex-wrap"></div>
     </div>
     <BaseFooter />
 </template>
 
 <script setup>
-import BaseHeader from "../../../components/BaseHeader.vue";
-import BaseFooter from "../../../components/BaseFooter.vue";
+import BaseHeader from "../../components/BaseHeader.vue";
+import BaseFooter from "../../components/BaseFooter.vue";
 
 const data = [
     {
