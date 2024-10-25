@@ -1,4 +1,5 @@
 <template>
+    <Head :title="title" />
     <BaseHeader />
     <div class="relative isolate bg-white px-6 py-24 sm:py-32 lg:px-8">
         <div
@@ -56,20 +57,11 @@
 <script setup>
 import BaseHeader from "../../components/BaseHeader.vue";
 import BaseFooter from "../../components/BaseFooter.vue";
+import { Head } from "@inertiajs/vue3";
 
-const data = [
-    {
-        name: "Moneter",
-        id: "0",
-        href: "https://www.bi.go.id/",
-        priceMonthly: "$69",
-        description:
-            "Memastikan keamanan dan efisiensi dalam setiap transaksi di seluruh pelosok negeri, sehingga memberikan kepercayaan penuh kepada masyarakat dan pelaku usaha.",
-        features: [
-            "Keamanan transaksi yang tinggi",
-            "Efisiensi biaya",
-            "Dukungan 24/7",
-        ],
+defineProps({
+    title: {
+        type: String,
     },
-];
+});
 </script>

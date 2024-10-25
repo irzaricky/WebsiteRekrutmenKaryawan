@@ -7,23 +7,32 @@ use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('LandingPage', [
+        'title' => "Home",
         // 'canLogin' => Route::has('login'),
         // 'canRegister' => Route::has('register'),
     ]);
 });
 
 Route::get('/login', function () {
-    return Inertia::render('Auth/Login');
-});
+    return Inertia::render('Auth/Login', [
+        'title' => "Login"
+    ]);
+})->name('login');
 
 Route::get('/company', function () {
-    return Inertia::render('Landing-subpages/CompanyPage');
+    return Inertia::render('Landing-subpages/CompanyPage', [
+        'title' => "Company"
+    ]);
 });
 Route::get('/features', function () {
-    return Inertia::render('Landing-subpages/FeaturesPage');
+    return Inertia::render('Landing-subpages/FeaturesPage', [
+        'title' => "Features"
+    ]);
 });
 Route::get('/product', function () {
-    return Inertia::render('Landing-subpages/ProductPage');
+    return Inertia::render('Landing-subpages/ProductPage', [
+        'title' => "Product"
+    ]);
 });
 
 

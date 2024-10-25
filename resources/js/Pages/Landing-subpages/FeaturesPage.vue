@@ -1,4 +1,5 @@
 <template>
+    <Head :title="title" />
     <BaseHeader />
     <div class="relative isolate bg-white px-6 py-24 sm:py-32 lg:px-8">
         <div
@@ -102,6 +103,12 @@
 <script setup>
 import BaseHeader from "../../components/BaseHeader.vue";
 import BaseFooter from "../../components/BaseFooter.vue";
+import { Head } from "@inertiajs/vue3";
+defineProps({
+    title: {
+        type: String,
+    },
+});
 
 const data = [
     {

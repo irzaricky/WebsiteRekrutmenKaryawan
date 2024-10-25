@@ -5,11 +5,14 @@
             aria-label="Global"
         >
             <div class="flex lg:flex-1">
-                <Link :href="img[0].link" class="-m-1.5 p-1.5">
-                    <span class="sr-only">Recruiter</span>
+                <Link
+                    :href="img[0].link"
+                    class="-m-1.5 p-1.5 btn btn-ghost avatar"
+                    style="height: 5rem"
+                >
                     <img
                         :src="img[0].href"
-                        class="h-16 w-auto"
+                        class="h-16 w-auto avatar"
                         alt="Recruiter Logo"
                     />
                 </Link>
@@ -29,15 +32,15 @@
                     v-for="item in navigation"
                     :key="item.name"
                     :href="item.href"
-                    class="text-sm font-semibold leading-6 text-gray-900"
+                    class="text-sm font-semibold leading-6 text-gray-900 btn btn-ghost"
                 >
                     {{ item.name }}
                 </Link>
             </div>
             <div class="hidden lg:flex lg:flex-1 lg:justify-end">
                 <Link
-                    :href="link_login"
-                    class="text-sm font-semibold leading-6 text-gray-900"
+                    :href="route('login')"
+                    class="text-sm font-semibold leading-6 text-gray-900 btn btn-ghost"
                 >
                     Log in <span aria-hidden="true">&rarr;</span>
                 </Link>
@@ -55,14 +58,6 @@
                 class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10"
             >
                 <div class="flex items-center justify-between">
-                    <Link href="#" class="-m-1.5 p-1.5">
-                        <span class="sr-only">Your Company</span>
-                        <img
-                            class="h-8 w-auto"
-                            src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600"
-                            alt=""
-                        />
-                    </Link>
                     <button
                         type="button"
                         class="-m-2.5 rounded-md p-2.5 text-gray-700"
@@ -84,9 +79,9 @@
                                 {{ item.name }}
                             </Link>
                         </div>
-                        <div class="py-6">
+                        <div class="py-6" v-if="canLogin">
                             <Link
-                                :href="link_login"
+                                :href="route('login')"
                                 class="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
                             >
                                 Log in
@@ -111,8 +106,6 @@ const navigation = [
     { name: "Product", href: "/product" },
     { name: "Features", href: "/features" },
 ];
-
-const link_login = "/login";
 
 const img = [{ id: "1", href: "./assets/images/for.png", link: "/" }];
 

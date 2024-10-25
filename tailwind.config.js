@@ -13,6 +13,10 @@ export default {
         "./resources/**/*.vue",
     ],
 
+    daisyui: {
+        themes: ["cupcake"],
+    },
+
     theme: {
         extend: {
             fontFamily: {
