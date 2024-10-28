@@ -19,6 +19,17 @@ Route::get('/login', function () {
     ]);
 })->name('login');
 
+
+
+Route::get('/dashboard/candidate', function () {
+    return Inertia::render('Candidate/Dashboard');
+})->name('dashboard.candidate');
+
+Route::get('/dashboard/hrd', function () {
+    return Inertia::render('Candidate/Dashboard');
+})->name('dashboard.hrd');
+
+
 Route::get('/company', function () {
     return Inertia::render('Landing-subpages/CompanyPage', [
         'title' => "Company"
@@ -36,9 +47,9 @@ Route::get('/product', function () {
 });
 
 
-// Route::get('/dashboard', function () {
-//     return Inertia::render('Dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', function () {
+    return Inertia::render('General-Dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
 // Route::middleware('auth')->group(function () {
 //     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -46,4 +57,10 @@ Route::get('/product', function () {
 //     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 // });
 
-// require __DIR__ . '/auth.php';
+require __DIR__ . '/auth.php';
+
+
+// Catch-all route for undefined routes
+Route::get('/{any}', function () {
+    return Inertia::render('Not-found'); // Render the 404 component
+})->where('any', '.*');

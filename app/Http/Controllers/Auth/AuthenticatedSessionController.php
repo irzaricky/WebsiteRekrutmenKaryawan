@@ -37,12 +37,15 @@ class AuthenticatedSessionController extends Controller
 
         if ($role === 'Candidate') {
             return redirect()->intended(route('dashboard.candidate', absolute: false));
-        } elseif ($role === 'HRD') {
+        }
+
+        if ($role === 'HRD') {
             return redirect()->intended(route('dashboard.hrd', absolute: false));
         }
 
         return redirect()->intended(route('dashboard', absolute: false));
     }
+
 
     /**
      * Destroy an authenticated session.

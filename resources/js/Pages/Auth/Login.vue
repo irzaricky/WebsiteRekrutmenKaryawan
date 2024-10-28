@@ -103,7 +103,7 @@ const submit = () => {
                     <InputError class="mt-2" :message="form.errors.password" />
                 </div>
 
-                <div class="mt-4 block">
+                <div class="mt-4">
                     <label class="flex items-center">
                         <Checkbox
                             name="remember"
@@ -113,6 +113,15 @@ const submit = () => {
                             >Remember me</span
                         >
                     </label>
+                </div>
+
+                <div>
+                    <Link
+                        href="/register"
+                        class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    >
+                        Belum register?
+                    </Link>
                 </div>
 
                 <div class="mt-4 flex items-center justify-end">
