@@ -36,14 +36,12 @@ class AuthenticatedSessionController extends Controller
         $role = Auth::user()->role;
 
         if ($role === 'Candidate') {
-            return redirect()->intended(route('dashboard.candidate', absolute: false));
+            return redirect()->intended(route('home'));
         }
 
         if ($role === 'HRD') {
-            return redirect()->intended(route('dashboard.hrd', absolute: false));
+            return redirect()->intended(route('dashboard-hrd'));
         }
-
-        return redirect()->intended(route('dashboard', absolute: false));
     }
 
 

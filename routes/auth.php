@@ -13,12 +13,24 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])
+    Route::get('register', [
+        RegisteredUserController::class,
+        'create',
+        [
+            'title' => "Login"
+        ]
+    ])
         ->name('register');
 
     Route::post('register', [RegisteredUserController::class, 'store']);
 
-    Route::get('login', [AuthenticatedSessionController::class, 'create'])
+    Route::get('login', [
+        AuthenticatedSessionController::class,
+        'create',
+        [
+            'title' => "Login"
+        ]
+    ])
         ->name('login');
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);

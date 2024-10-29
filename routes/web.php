@@ -8,26 +8,14 @@ use Inertia\Inertia;
 Route::get('/', function () {
     return Inertia::render('LandingPage', [
         'title' => "Home",
-        // 'canLogin' => Route::has('login'),
-        // 'canRegister' => Route::has('register'),
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
     ]);
-});
-
-Route::get('/login', function () {
-    return Inertia::render('Auth/Login', [
-        'title' => "Login"
-    ]);
-})->name('login');
-
-
-
-Route::get('/dashboard/candidate', function () {
-    return Inertia::render('Candidate/Dashboard');
-})->name('dashboard.candidate');
+})->name('home');
 
 Route::get('/dashboard/hrd', function () {
     return Inertia::render('Candidate/Dashboard');
-})->name('dashboard.hrd');
+})->name('dashboard-hrd');
 
 
 Route::get('/company', function () {
@@ -45,11 +33,6 @@ Route::get('/product', function () {
         'title' => "Product"
     ]);
 });
-
-
-Route::get('/dashboard', function () {
-    return Inertia::render('General-Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 // Route::middleware('auth')->group(function () {
 //     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
