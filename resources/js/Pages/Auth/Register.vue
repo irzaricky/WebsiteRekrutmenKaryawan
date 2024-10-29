@@ -15,6 +15,8 @@ const form = useForm({
     status: "active",
 });
 
+const img = [{ id: "1", href: "./assets/images/for.png", link: "/" }];
+
 defineProps({
     title: {
         type: String,
@@ -62,6 +64,19 @@ const submit = () => {
         <div
             class="mx-auto mt-24 mb-24 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg"
         >
+            <div class="flex justify-center items-center my-4">
+                <Link
+                    :href="img[0].link"
+                    class="-m-1.5 p-1.5 btn btn-ghost avatar"
+                    style="height: 5rem"
+                >
+                    <img
+                        :src="img[0].href"
+                        class="h-16 w-auto avatar"
+                        alt="Recruiter Logo"
+                    />
+                </Link>
+            </div>
             <form @submit.prevent="submit">
                 <div>
                     <InputLabel for="name" value="Name" />

@@ -19,6 +19,8 @@ defineProps({
     },
 });
 
+const img = [{ id: "1", href: "./assets/images/for.png", link: "/" }];
+
 const form = useForm({
     email: "",
     password: "",
@@ -69,7 +71,19 @@ const submit = () => {
             <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
                 {{ status }}
             </div>
-
+            <div class="flex justify-center items-center my-4">
+                <Link
+                    :href="img[0].link"
+                    class="-m-1.5 p-1.5 btn btn-ghost avatar"
+                    style="height: 5rem"
+                >
+                    <img
+                        :src="img[0].href"
+                        class="h-16 w-auto avatar"
+                        alt="Recruiter Logo"
+                    />
+                </Link>
+            </div>
             <form @submit.prevent="submit">
                 <div>
                     <InputLabel for="email" value="Email" />
@@ -103,15 +117,13 @@ const submit = () => {
                 </div>
 
                 <div class="mt-4">
-                    <label class="flex items-center">
-                        <Checkbox
-                            name="remember"
-                            v-model:checked="form.remember"
-                        />
-                        <span class="ms-2 text-sm text-gray-600"
-                            >Remember me</span
-                        >
-                    </label>
+                    <Link
+                        v-if="canResetPassword"
+                        :href="route('password.request')"
+                        class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    >
+                        Forgot your password?
+                    </Link>
                 </div>
 
                 <div>
@@ -124,14 +136,15 @@ const submit = () => {
                 </div>
 
                 <div class="mt-4 flex items-center justify-end">
-                    <Link
-                        v-if="canResetPassword"
-                        :href="route('password.request')"
-                        class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                        Forgot your password?
-                    </Link>
-
+                    <label class="flex items-center">
+                        <Checkbox
+                            name="remember"
+                            v-model:checked="form.remember"
+                        />
+                        <span class="ms-2 text-sm text-gray-600"
+                            >Remember me</span
+                        >
+                    </label>
                     <PrimaryButton
                         class="ms-4"
                         :class="{ 'opacity-25': form.processing }"
