@@ -30,8 +30,6 @@ const submit = () => {
 
 <template>
     <Head :title="title" />
-    <BaseHeader></BaseHeader>
-
     <div class="relative isolate bg-white px-6 py-24 sm:py-32 lg:px-8">
         <div
             class="absolute inset-x-0 -top-3 -z-10 transform-gpu overflow-hidden px-36 blur-3xl"
@@ -62,7 +60,7 @@ const submit = () => {
             />
         </div>
         <div
-            class="mx-auto mt-52 mb-56 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg"
+            class="mx-auto mt-24 mb-24 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg"
         >
             <form @submit.prevent="submit">
                 <div>
