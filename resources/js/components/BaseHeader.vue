@@ -27,29 +27,51 @@
                     {{ item.name }}
                 </Link>
             </div>
+
             <div class="flex flex-1 lg:justify-end">
-                <Link
-                    :href="route('login')"
-                    class="text-sm font-semibold leading-6 text-gray-900 btn btn-ghost"
-                >
-                    Log in <span aria-hidden="true">&rarr;</span>
-                </Link>
-                <Link
-                    :href="route('register')"
-                    class="text-sm font-semibold leading-6 text-gray-900 btn btn-ghost"
-                >
-                    Register <span aria-hidden="true">&rarr;</span>
-                </Link>
+                <template v-if="isLogin">
+                    <Link
+                        v-if="role === 'HRD'"
+                        :href="route('dashboard')"
+                        class="text-sm font-semibold leading-6 text-gray-900 btn btn-ghost"
+                    >
+                        Dashboard
+                    </Link>
+                    <Link
+                        v-else-if="role === 'Candidate'"
+                        :href="route('profile.edit')"
+                        class="text-sm font-semibold leading-6 text-gray-900 btn btn-ghost"
+                    >
+                        Profile
+                    </Link>
+                </template>
+
+                <template v-else>
+                    <Link
+                        :href="route('login')"
+                        class="text-sm font-semibold leading-6 text-gray-900 btn btn-ghost"
+                    >
+                        Log in <span aria-hidden="true">&rarr;</span>
+                    </Link>
+                    <Link
+                        :href="route('register')"
+                        class="text-sm font-semibold leading-6 text-gray-900 btn btn-ghost"
+                    >
+                        Register <span aria-hidden="true">&rarr;</span>
+                    </Link>
+                </template>
             </div>
         </nav>
     </header>
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { Dialog, DialogPanel } from "@headlessui/vue";
-import { Bars3Icon, XMarkIcon } from "@heroicons/vue/24/outline";
+import { usePage } from "@inertiajs/vue3";
 import { Link } from "@inertiajs/vue3"; // Import Link from Inertia
+
+const { props } = usePage();
+const isLogin = props.isLogin;
+const role = props.role;
 
 const navigation = [
     { name: "Home", href: "/" },
@@ -59,15 +81,4 @@ const navigation = [
 ];
 
 const img = [{ id: "1", href: "./assets/images/for.png", link: "/" }];
-
-const mobileMenuOpen = ref(false);
-
-defineProps({
-    canLogin: {
-        type: Boolean,
-    },
-    canRegister: {
-        type: Boolean,
-    },
-});
 </script>

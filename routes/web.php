@@ -4,13 +4,15 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Middleware\EnsureUserIsHRD;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+
 
 Route::get('/', function () {
     return Inertia::render('LandingPage', [
         'title' => "Home",
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
+        'isLogin' => Auth::check(),
+        'role' => Auth::check() ? Auth::user()->role : null,
     ]);
 })->name('home');
 
@@ -21,17 +23,25 @@ Route::get('/dashboard', function () {
 
 Route::get('/company', function () {
     return Inertia::render('Landing-subpages/CompanyPage', [
-        'title' => "Company"
+        'title' => "Company",
+        'isLogin' => Auth::check(),
+        'role' => Auth::check() ? Auth::user()->role : null,
     ]);
 });
+
 Route::get('/features', function () {
     return Inertia::render('Landing-subpages/FeaturesPage', [
-        'title' => "Features"
+        'title' => "Features",
+        'isLogin' => Auth::check(),
+        'role' => Auth::check() ? Auth::user()->role : null,
     ]);
 });
+
 Route::get('/product', function () {
     return Inertia::render('Landing-subpages/ProductPage', [
-        'title' => "Product"
+        'title' => "Product",
+        'isLogin' => Auth::check(),
+        'role' => Auth::check() ? Auth::user()->role : null,
     ]);
 });
 
