@@ -13,9 +13,9 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-Route::get('/dashboard/hrd', function () {
-    return Inertia::render('Candidate/Dashboard');
-})->name('dashboard-hrd');
+Route::get('/dashboard', function () {
+    return Inertia::render('Dashboard');
+})->name('dashboard');
 
 
 Route::get('/company', function () {
