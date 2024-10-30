@@ -74,12 +74,11 @@
 </template>
 
 <script setup>
-import { usePage } from "@inertiajs/vue3";
-import { Link } from "@inertiajs/vue3"; // Import Link from Inertia
+import { Link, usePage } from "@inertiajs/vue3"; // Import Link from Inertia
 
 const { props } = usePage();
-const isLogin = props.isLogin;
-const role = props.role;
+const isLogin = props.auth.user;
+const role = props.auth?.user?.role || null;
 
 const navigation = [
     { name: "Home", href: "/" },

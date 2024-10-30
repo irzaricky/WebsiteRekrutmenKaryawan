@@ -11,8 +11,6 @@ use Inertia\Inertia;
 Route::get('/', function () {
     return Inertia::render('LandingPage', [
         'title' => "Home",
-        'isLogin' => Auth::check(),
-        'role' => Auth::check() ? Auth::user()->role : null,
     ]);
 })->name('home');
 
@@ -24,24 +22,18 @@ Route::get('/dashboard', function () {
 Route::get('/company', function () {
     return Inertia::render('Landing-subpages/CompanyPage', [
         'title' => "Company",
-        'isLogin' => Auth::check(),
-        'role' => Auth::check() ? Auth::user()->role : null,
     ]);
 });
 
 Route::get('/features', function () {
     return Inertia::render('Landing-subpages/FeaturesPage', [
         'title' => "Features",
-        'isLogin' => Auth::check(),
-        'role' => Auth::check() ? Auth::user()->role : null,
     ]);
 });
 
 Route::get('/product', function () {
     return Inertia::render('Landing-subpages/ProductPage', [
         'title' => "Product",
-        'isLogin' => Auth::check(),
-        'role' => Auth::check() ? Auth::user()->role : null,
     ]);
 });
 
