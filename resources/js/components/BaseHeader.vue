@@ -44,6 +44,14 @@
                     >
                         Profile
                     </Link>
+                    <Link
+                        :href="route('logout')"
+                        class="text-sm font-semibold leading-6 text-gray-900 btn btn-ghost"
+                        method="post"
+                        as="button"
+                    >
+                        Log Out
+                    </Link>
                 </template>
 
                 <template v-else>
