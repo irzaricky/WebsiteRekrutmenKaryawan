@@ -14,11 +14,6 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', EnsureUserIsHRD::class])->name('dashboard');
-
-
 Route::get('/company', function () {
     return Inertia::render('Landing-subpages/CompanyPage', [
         'title' => "Company",
@@ -35,6 +30,26 @@ Route::get('/product', function () {
     return Inertia::render('Landing-subpages/ProductPage', [
         'title' => "Product",
     ]);
+});
+
+Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard', [
+            'title' => "Dashboard",
+        ]);
+    })->name('dashboard');
+
+    Route::get('/dashboard/data-candidate', function () {
+        return Inertia::render('SubDashboard/data-candidate', [
+            'title' => "Data Candidate",
+        ]);
+    });
+
+    Route::get('/dashboard/edit-data-candidate', function () {
+        return Inertia::render('SubDashboard/data-candidate', [
+            'title' => "Data Karyawan",
+        ]);
+    });
 });
 
 Route::middleware('auth')->group(function () {
