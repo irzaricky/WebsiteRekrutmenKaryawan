@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('tests', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // TIU, TWK, TKB, TW
+            $table->enum('name', ['TIU', 'TWK', 'TKB', 'TW']);
             $table->text('description')->nullable();
             $table->timestamps();
         });

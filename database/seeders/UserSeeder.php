@@ -30,21 +30,6 @@ class UserSeeder extends Seeder
                 'role' => 'Candidate',
                 'status' => 'active',
             ],
-            // Additional random users
-            [
-                'name' => 'Inactive Candidate',
-                'email' => 'inactive.candidate@example.com',
-                'password' => Hash::make('password123'),
-                'role' => 'Candidate',
-                'status' => 'inactive',
-            ],
-            [
-                'name' => 'Inactive HRD',
-                'email' => 'inactive.hrd@example.com',
-                'password' => Hash::make('password123'),
-                'role' => 'HRD',
-                'status' => 'inactive',
-            ],
         ];
 
         foreach ($users as $user) {
