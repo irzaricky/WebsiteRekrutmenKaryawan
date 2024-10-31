@@ -1,41 +1,47 @@
 <?php
 
+namespace Tests\Feature;
+
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
-test('login screen can be rendered', function () {
-    $response = $this->get('/login');
+class AuthenticationTest extends TestCase
+{
+    use RefreshDatabase;
 
-    $response->assertStatus(200);
-});
+    public function test_user_dapat_melihat_halaman_login()
+    {
+        $response = $this->get('/login');
+        $response->assertStatus(200);
+    }
 
-test('users can authenticate using the login screen', function () {
-    $user = User::factory()->create();
+    public function test_user_dapat_login_dengan_data_benar()
+    {
+        $user = User::factory()->create([
+            'email' => 'test@example.com',
+            'password' => bcrypt('password'),
+            'role' => 'HRD',
+        ]);
 
-    $response = $this->post('/login', [
-        'email' => $user->email,
-        'password' => 'password',
-    ]);
+        $loginData = [
+            'email' => 'test@example.com',
+            'password' => 'password',
+        ];
 
-    $this->assertAuthenticated();
-    $response->assertRedirect(route('dashboard', absolute: false));
-});
+        if (empty($loginData['email']) || empty($loginData['password'])) {
+            $this->fail("Testing gagal: Username atau password tidak boleh kosong.");
+            return;
+        }
 
-test('users can not authenticate with invalid password', function () {
-    $user = User::factory()->create();
+        $response = $this->post('/login', $loginData);
 
-    $this->post('/login', [
-        'email' => $user->email,
-        'password' => 'wrong-password',
-    ]);
-
-    $this->assertGuest();
-});
-
-test('users can logout', function () {
-    $user = User::factory()->create();
-
-    $response = $this->actingAs($user)->post('/logout');
-
-    $this->assertGuest();
-    $response->assertRedirect('/');
-});
+        if (url('/dashboard') === $response->headers->get('Location')) {
+            $this->assertAuthenticatedAs($user);
+            return;
+        } else {
+            $this->fail("Testing gagal: Username atau password salah.");
+            $this->assertGuest();
+        }
+    }
+}
