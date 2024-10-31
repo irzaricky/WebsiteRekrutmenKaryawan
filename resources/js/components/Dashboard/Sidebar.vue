@@ -15,7 +15,6 @@ function toggleSidebar() {
 const navigation = [
     { name: "Beranda", href: "/dashboard" },
     { name: "Data candidate", href: "/dashboard/data-candidate" },
-    { name: "Edit data candidate", href: "/dashboard/edit-data-candidate" },
 ];
 
 const img = [{ id: "1", href: "../assets/images/for.png", link: "/" }];

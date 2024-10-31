@@ -42,11 +42,11 @@ Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {
 
     Route::get('/dashboard/data-candidate', [DataCandidateController::class, 'getUser'])->name('dashboard.data-candidate');
 
-    Route::get('/dashboard/edit-data-candidate', function () {
-        return Inertia::render('SubDashboard/edit-data-candidate', [
-            'title' => "Data Karyawan",
-        ]);
-    });
+    Route::put('/dashboard/data-candidate/{id}', [DataCandidateController::class, 'update'])->name('dashboard.data-candidate-put');
+
+    Route::get('/dashboard/edit-data-candidate/{id}', [DataCandidateController::class, 'edit'])->name('dashboard.edit-data-candidate');
+
+
 });
 
 Route::middleware('auth')->group(function () {
