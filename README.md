@@ -21,7 +21,7 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-3. php artisan migrate
+3. php artisan migrate --seed
 
 ## Usage
 
