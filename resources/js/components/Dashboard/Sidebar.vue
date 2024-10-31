@@ -72,7 +72,7 @@ const img = [{ id: "1", href: "../assets/images/for.png", link: "/" }];
         </div>
 
         <!-- Main Content -->
-        <div class="p-7 flex-1">
+        <div class="p-6 pt-3 flex-1">
             <h1 class="text-2xl font-semibold">Dashboard</h1>
             <slot />
         </div>

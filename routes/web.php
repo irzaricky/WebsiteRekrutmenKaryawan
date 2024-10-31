@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DataCandidateController;
 use App\Http\Middleware\EnsureUserIsHRD;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -39,14 +40,10 @@ Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {
         ]);
     })->name('dashboard');
 
-    Route::get('/dashboard/data-candidate', function () {
-        return Inertia::render('SubDashboard/data-candidate', [
-            'title' => "Data Candidate",
-        ]);
-    });
+    Route::get('/dashboard/data-candidate', [DataCandidateController::class, 'getUser'])->name('dashboard.data-candidate');
 
     Route::get('/dashboard/edit-data-candidate', function () {
-        return Inertia::render('SubDashboard/data-candidate', [
+        return Inertia::render('SubDashboard/edit-data-candidate', [
             'title' => "Data Karyawan",
         ]);
     });
