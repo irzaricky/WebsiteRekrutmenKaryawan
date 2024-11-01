@@ -5,21 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Test extends Model
+class TestsList extends Model
 {
     use HasFactory;
 
-    // Tentukan nama tabel jika berbeda dari konvensi
-    protected $table = 'tests';
+    protected $table = 'tests_list';
 
-    // Kolom yang dapat diisi
     protected $fillable = [
         'name',
         'description',
     ];
 
-    // Definisikan enum untuk name
     protected $casts = [
-        'name' => 'string', // Laravel tidak mendukung enum secara langsung
+        'name' => 'string',
     ];
+
+    public function testResults()
+    {
+        return $this->hasMany(TestResult::class, 'test_id');
+    }
 }

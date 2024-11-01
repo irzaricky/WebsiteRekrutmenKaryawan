@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Test;
+use App\Models\TestsList;
 use App\Models\TestResult;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 
-class DataCandidateController extends Controller // Ubah ke huruf kapital
+class dataCandidateController extends Controller // Ubah ke huruf kapital
 {
     public function getUser()
     {
@@ -25,7 +25,7 @@ class DataCandidateController extends Controller // Ubah ke huruf kapital
     {
         $candidate = User::findOrFail($id);
         $testResults = TestResult::where('user_id', $id)->get();
-        $tests = Test::all();
+        $tests = TestsList::all();
 
         return Inertia::render('SubDashboard/edit-data-candidate', [
             'title' => "Edit Data Kandidat",
@@ -39,7 +39,7 @@ class DataCandidateController extends Controller // Ubah ke huruf kapital
     {
         $request->validate([
             'test_results' => 'required|array',
-            'test_results.*' => 'required|numeric|min:0|max:100'
+            'test_results.*' => 'required|numeric|min:0'
         ]);
         $candidate = User::findOrFail($id);
 

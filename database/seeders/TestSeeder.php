@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Test;
+use App\Models\TestsList;
 
 class TestSeeder extends Seeder
 {
@@ -22,7 +22,7 @@ class TestSeeder extends Seeder
         ];
 
         foreach ($tests as $test) {
-            Test::create($test);
+            TestsList::create($test);
         }
     }
 }

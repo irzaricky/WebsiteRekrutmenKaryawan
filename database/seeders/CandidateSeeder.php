@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
-use App\Models\Test; // Pastikan Anda menggunakan model User
+use App\Models\TestsList; // Pastikan Anda menggunakan model User
 use App\Models\TestResult; // Pastikan Anda menggunakan model TestResult
 use Illuminate\Support\Facades\DB;
 
@@ -159,7 +159,7 @@ class CandidateSeeder extends Seeder
             // Menyimpan skor setiap tes ke dalam tabel test_results
             foreach (['TIU', 'TWK', 'TKB', 'TW'] as $testName) {
                 // Temukan id test berdasarkan nama tesnya
-                $test = Test::where('name', $testName)->first();
+                $test = TestsList::where('name', $testName)->first();
 
                 // Cek apakah test ditemukan
                 if ($test) {
