@@ -67,7 +67,7 @@ defineProps({
                             class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-1 px-2 rounded inline-flex items-center"
                         >
                             <Link
-                                :href="`/dashboard/edit-data-candidate/${candidate.id}`"
+                                :href="`/edit-data-candidate/${candidate.id}`"
                                 class="edit-button"
                             >
                                 Edit Nilai
