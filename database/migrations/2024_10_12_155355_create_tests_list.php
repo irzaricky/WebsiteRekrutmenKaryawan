@@ -5,24 +5,18 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
-        Schema::create('tests', function (Blueprint $table) {
+        Schema::create('tests_list', function (Blueprint $table) {
             $table->id();
             $table->enum('name', ['TIU', 'TWK', 'TKB', 'TW']);
-            $table->text('description')->nullable();
+            $table->text('description');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
-        Schema::dropIfExists('tests');
+        Schema::dropIfExists('tests_list');
     }
 };

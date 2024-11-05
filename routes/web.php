@@ -44,7 +44,7 @@ Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {
 
     Route::put('/dashboard/data-candidate/{id}', [DataCandidateController::class, 'update'])->name('dashboard.data-candidate-put');
 
-    Route::get('/dashboard/edit-data-candidate/{id}', [DataCandidateController::class, 'edit'])->name('dashboard.edit-data-candidate');
+    Route::get('/edit-data-candidate/{id}', [DataCandidateController::class, 'edit'])->name('dashboard.edit-data-candidate');
 
 
 });
