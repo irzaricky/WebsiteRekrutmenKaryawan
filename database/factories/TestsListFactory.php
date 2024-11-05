@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Models\Test;
+use App\Models\TestsList;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class TestFactory extends Factory
+class TestsListFactory extends Factory
 {
-    protected $model = Test::class;
+    protected $model = TestsList::class;
 
     public function definition()
     {

@@ -4,7 +4,7 @@ namespace Database\Factories;
 
 use App\Models\TestResult;
 use App\Models\User;
-use App\Models\Test;
+use App\Models\TestsList;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TestResultFactory extends Factory
@@ -26,7 +26,7 @@ class TestResultFactory extends Factory
 
         return [
             'user_id' => User::factory(), // Buat user baru atau sesuaikan dengan ID yang sudah ada
-            'test_id' => Test::factory()->state(['name' => $testData['name']]),
+            'test_id' => TestsList::factory()->state(['name' => $testData['name']]),
             'score' => $testData['score'],
         ];
     }

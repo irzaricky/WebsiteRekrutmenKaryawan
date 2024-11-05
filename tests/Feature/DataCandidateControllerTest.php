@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\Test;
+use App\Models\TestsList;
 use App\Models\User;
 use App\Models\TestResult;
 use Database\Factories\TestResultFactory;
@@ -26,7 +26,7 @@ class DataCandidateControllerTest extends TestCase
         ]);
 
         // Buat sebuah test untuk keperluan test
-        $this->test = Test::factory()->create();
+        $this->test = TestsList::factory()->create();
     }
 
     /**
