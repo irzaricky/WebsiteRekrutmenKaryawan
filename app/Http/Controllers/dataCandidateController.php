@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\HrdAction;
 use App\Models\User;
 use App\Models\TestsList;
 use App\Models\TestResult;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class dataCandidateController extends Controller // Ubah ke huruf kapital
 {
@@ -44,11 +46,20 @@ class dataCandidateController extends Controller // Ubah ke huruf kapital
         $candidate = User::findOrFail($id);
 
         foreach ($request->test_results as $testId => $score) {
-            TestResult::updateOrCreate(
+            $testResult = TestResult::updateOrCreate(
                 ['user_id' => $id, 'test_id' => $testId],
                 ['score' => $score]
             );
         }
+
+        // Log the action in the hrd_actions table
+        HrdAction::create([
+            'hrd_id' => Auth::id(),
+            'user_id' => $candidate->id,
+            'action_type' => 'update',
+            'test_result_id' => $testResult->id,
+            'details' => "Memperbarui score Candidate bernama {$candidate->name} untuk test id {$testId} menjadi {$score}",
+        ]);
 
         return redirect()->route('dashboard.data-candidate')
             ->with('message', 'Nilai kandidat berhasil diperbarui');
