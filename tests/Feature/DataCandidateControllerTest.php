@@ -75,6 +75,54 @@ class DataCandidateControllerTest extends TestCase
             'test_id' => $this->test->id,
             'score' => 80,
         ]);
+
+
+    }
+
+    public function test_hrd_tidak_dapat_mengupdate_data_hasil_tes_candidate_yang_invalid()
+    {
+        $testResult = TestResult::factory()->create([
+            'user_id' => $this->user->id,
+            'test_id' => $this->test->id,
+            'score' => 50,
+        ]);
+
+        // Request data update dengan data invalid
+        $response = $this->actingAs($this->user)->put(route('dashboard.data-candidate-put', $this->user->id), [
+            'test_results' => [
+                $this->test->id => -50,  // Nilai invalid untuk score
+            ],
+        ]);
+
+        $response->assertSessionHasErrors(['test_results.*']);
+        $this->assertDatabaseHas('test_results', [
+            'user_id' => $this->user->id,
+            'test_id' => $this->test->id,
+            'score' => 50,  // Pastikan nilai tidak berubah
+        ]);
+    }
+
+    public function test_hrd_tidak_dapat_mengupdate_data_hasil_tes_candidate_yang_kosong()
+    {
+        $testResult = TestResult::factory()->create([
+            'user_id' => $this->user->id,
+            'test_id' => $this->test->id,
+            'score' => 50,
+        ]);
+
+        // Request data update dengan data invalid
+        $response = $this->actingAs($this->user)->put(route('dashboard.data-candidate-put', $this->user->id), [
+            'test_results' => [
+                $this->test->id => null,  // Nilai invalid untuk score
+            ],
+        ]);
+
+        $response->assertSessionHasErrors(['test_results.*']);
+        $this->assertDatabaseHas('test_results', [
+            'user_id' => $this->user->id,
+            'test_id' => $this->test->id,
+            'score' => 50,  // Pastikan nilai tidak berubah
+        ]);
     }
 
     /**

@@ -45,11 +45,11 @@ class AuthenticationTest extends TestCase
         }
     }
 
-    public function test_user_tidak_dapat_login_dengan_data_tidak_benar()
+    public function test_user_tidak_dapat_login_dengan_data_email_tidak_benar()
     {
         $loginData = [
             'email' => 'wrong@example.com',
-            'password' => 'wrongpassword',
+            'password' => 'password',
         ];
 
         $response = $this->post('/login', $loginData);
@@ -58,8 +58,36 @@ class AuthenticationTest extends TestCase
             $this->fail("Testing gagal: User berhasil login dengan data yang tidak benar.");
         }
 
-        $response->assertSessionHasErrors();
+        $response->assertSessionHasErrors(['email']);
         $this->assertGuest();
     }
 
+    public function test_user_tidak_dapat_login_dengan_data_password_tidak_benar()
+    {
+        $loginData = [
+            'email' => 'test@example.com',
+            'password' => 'password123',
+        ];
+
+        $response = $this->post('/login', $loginData);
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors(['email']);
+        $this->assertGuest();
+    }
+
+    public function test_user_tidak_dapat_login_dengan_data_kosong()
+    {
+        $loginData = [
+            'email' => '',
+            'password' => '',
+        ];
+
+        $response = $this->post('/login', $loginData);
+
+        $response->assertStatus(302);
+
+        $response->assertSessionHasErrors(['email', 'password']);
+        $this->assertGuest();
+    }
 }

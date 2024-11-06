@@ -19,7 +19,7 @@ class RegistrationTest extends TestCase
     public function test_pengguna_baru_dapat_mendaftar()
     {
         $response = $this->post('/register', [
-            'name' => 'Pengguna Uji',
+            'name' => 'Pengguna Uji 1',
             'email' => 'uji@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
@@ -29,17 +29,44 @@ class RegistrationTest extends TestCase
         $response->assertRedirect(route('home', absolute: false));
     }
 
-    public function test_pengguna_tidak_dapat_mendaftar_dengan_data_tidak_valid()
+    public function test_pengguna_tidak_dapat_mendaftar_dengan_data_email_tidak_valid()
     {
         $dataRegistrasi = [
-            'name' => '',
+            'name' => 'Pengguna Uji 2',
             'email' => 'email-tidak-valid',
             'password' => 'password',
-            'password_confirmation' => 'password_berbeda',
+            'password_confirmation' => 'password',
         ];
 
         $response = $this->post('/register', $dataRegistrasi);
 
-        $response->assertSessionHasErrors(['name', 'email', 'password']);
+        $response->assertSessionHasErrors(['email']);
+    }
+
+    public function test_pengguna_tidak_dapat_mendaftar_dengan_data_password_tidak_sama()
+    {
+        $dataRegistrasi = [
+            'name' => 'Pengguna Uji 3',
+            'email' => 'uji@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password123',
+        ];
+
+        $response = $this->post('/register', $dataRegistrasi);
+
+        $response->assertSessionHasErrors(['password']);
+    }
+    public function test_pengguna_tidak_dapat_mendaftar_dengan_data_nama_kosong()
+    {
+        $dataRegistrasi = [
+            'name' => '',
+            'email' => 'uji@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ];
+
+        $response = $this->post('/register', $dataRegistrasi);
+
+        $response->assertSessionHasErrors(['name']);
     }
 }
