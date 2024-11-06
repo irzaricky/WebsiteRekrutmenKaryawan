@@ -32,27 +32,27 @@ class DataCandidateControllerTest extends TestCase
     /**
      * Test untuk membaca data Test Result
      */
-    public function test_hrd_can_view_candidate_test_results()
-{
-    // Buat beberapa TestResult untuk kandidat
-    $testResults = TestResult::factory()->count(5)->create([
-        'user_id' => $this->user->id,
-    ]);
+    public function test_hrd_dapat_membaca_data_hasil_test_candidate()
+    {
+        // Buat beberapa TestResult untuk kandidat
+        $testResults = TestResult::factory()->count(5)->create([
+            'user_id' => $this->user->id,
+        ]);
 
-    // Lakukan autentikasi sebagai admin atau user yang memiliki akses yang tepat
-    $response = $this->actingAs($this->user)->get(route('dashboard.data-candidate'));
+        // Lakukan autentikasi sebagai admin atau user yang memiliki akses yang tepat
+        $response = $this->actingAs($this->user)->get(route('dashboard.data-candidate'));
 
-    // Pastikan status respons 200 (berhasil)
-    $response->assertStatus(status: 200);
+        // Pastikan status respons 200 (berhasil)
+        $response->assertStatus(status: 200);
 
-    // Periksa apakah view memiliki data kandidat
-    // $response->assertViewHas(key: 'candidates');
-}
+        // Periksa apakah view memiliki data kandidat
+        // $response->assertViewHas(key: 'candidates');
+    }
 
     /**
      * Test untuk memperbarui nilai Test Result kandidat
      */
-    public function test_hrd_can_update_candidate_test_result()
+    public function test_hrd_dapat_mengupdate_data_hasil_tes_candidate()
     {
         $testResult = TestResult::factory()->create([
             'user_id' => $this->user->id,

@@ -44,4 +44,22 @@ class AuthenticationTest extends TestCase
             $this->assertGuest();
         }
     }
+
+    public function test_user_tidak_dapat_login_dengan_data_tidak_benar()
+    {
+        $loginData = [
+            'email' => 'wrong@example.com',
+            'password' => 'wrongpassword',
+        ];
+
+        $response = $this->post('/login', $loginData);
+
+        if ($response->status() !== 302) {
+            $this->fail("Testing gagal: User berhasil login dengan data yang tidak benar.");
+        }
+
+        $response->assertSessionHasErrors();
+        $this->assertGuest();
+    }
+
 }
