@@ -10,7 +10,7 @@ class HRDHistoryController extends Controller
 {
     public function index()
     {
-        $actions = HrdAction::with('user', 'testResult')->paginate(10);
+        $actions = HrdAction::with('hrd', 'testResult')->paginate(10);
 
         return Inertia::render('SubDashboard/history', [
             'title' => 'History',

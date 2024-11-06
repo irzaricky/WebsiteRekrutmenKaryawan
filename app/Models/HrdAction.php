@@ -18,6 +18,11 @@ class HrdAction extends Model
 
     ];
 
+    public function hrd()
+    {
+        return $this->belongsTo(User::class, 'hrd_id');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
