@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\HrdAction;
 use App\Models\User;
 use App\Models\TestsList;
 use App\Models\TestResult;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class dataCandidateController extends Controller // Ubah ke huruf kapital
 {
@@ -44,10 +46,29 @@ class dataCandidateController extends Controller // Ubah ke huruf kapital
         $candidate = User::findOrFail($id);
 
         foreach ($request->test_results as $testId => $score) {
-            TestResult::updateOrCreate(
+            // Fetch the previous score
+            $previousTestResult = TestResult::where('user_id', $id)->where('test_id', $testId)->first();
+            $previousScore = $previousTestResult ? $previousTestResult->score : null;
+
+            // Update or create the test result
+            $testResult = TestResult::updateOrCreate(
                 ['user_id' => $id, 'test_id' => $testId],
                 ['score' => $score]
             );
+
+            // Log the action only if the score has changed
+            if ($previousScore !== null && $previousScore != $score) {
+                // Fetch the test name
+                $test = TestsList::findOrFail($testId);
+
+                HrdAction::create([
+                    'hrd_id' => Auth::id(),
+                    'user_id' => $candidate->id,
+                    'action_type' => 'update',
+                    'test_result_id' => $testResult->id,
+                    'details' => "Memperbarui score test {$test->name} untuk Candidate yang bernama {$candidate->name} dari {$previousScore} menjadi {$score}",
+                ]);
+            }
         }
 
         return redirect()->route('dashboard.data-candidate')

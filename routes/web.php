@@ -6,6 +6,7 @@ use App\Http\Middleware\EnsureUserIsHRD;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\HRDHistoryController;
 use Inertia\Inertia;
 
 
@@ -46,7 +47,7 @@ Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {
 
     Route::get('/edit-data-candidate/{id}', [DataCandidateController::class, 'edit'])->name('dashboard.edit-data-candidate');
 
-
+    Route::get('/dashboard/history', [HRDHistoryController::class, 'index'])->name('dashboard.history');
 });
 
 Route::middleware('auth')->group(function () {
