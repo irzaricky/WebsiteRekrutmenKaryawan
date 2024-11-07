@@ -102,7 +102,7 @@ class DataCandidateControllerTest extends TestCase
         ]);
     }
 
-    public function test_hrd_tidak_dapat_mengupdate_data_hasil_tes_candidate_yang_kosong()
+    public function test_hrd_tidak_dapat_mengupdate_data_hasil_tes_candidate_menjadi_kosong()
     {
         $testResult = TestResult::factory()->create([
             'user_id' => $this->user->id,
