@@ -16,7 +16,35 @@ class AuthenticationTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_user_dapat_login_dengan_data_benar()
+    public function test_Candidate_dapat_login_dengan_data_benar()
+    {
+        $user = User::factory()->create([
+            'email' => 'test@example.com',
+            'password' => bcrypt('password'),
+            'role' => 'Candidate',
+        ]);
+
+        $loginData = [
+            'email' => 'test@example.com',
+            'password' => 'password',
+        ];
+
+        if (empty($loginData['email']) || empty($loginData['password'])) {
+            $this->fail("Testing gagal: Username atau password tidak boleh kosong.");
+            return;
+        }
+
+        $response = $this->post('/login', $loginData);
+
+        if (url('/') === $response->headers->get('Location')) {
+            $this->assertAuthenticatedAs($user);
+            return;
+        } else {
+            $this->fail("Testing gagal: Username atau password salah.");
+            $this->assertGuest();
+        }
+    }
+    public function test_HRD_dapat_login_dengan_data_benar()
     {
         $user = User::factory()->create([
             'email' => 'test@example.com',
