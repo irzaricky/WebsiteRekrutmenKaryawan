@@ -5,7 +5,7 @@
 ## Install and .env setup
 
 1. npm install & composer install
-2. php artisan key:generate
+
 
 ## Database setup
 
@@ -21,7 +21,8 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-3. php artisan migrate --seed
+3. php artisan key:generate
+4. php artisan migrate --seed
 
 ## Usage
 
