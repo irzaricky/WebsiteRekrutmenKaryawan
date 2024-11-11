@@ -16,6 +16,7 @@ const navigation = [
     { name: "Beranda", href: "/dashboard" },
     { name: "Data candidate", href: "/dashboard/data-candidate" },
     { name: "Histori HRD", href: "/dashboard/history" },
+    { name: "Ranking candidate", href: "/dashboard/ranking" },
 ];
 
 const img = [{ id: "1", href: "../assets/images/for.png", link: "/" }];

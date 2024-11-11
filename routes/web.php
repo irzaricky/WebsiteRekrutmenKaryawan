@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DataCandidateController;
 use App\Http\Middleware\EnsureUserIsHRD;
+use App\Http\Controllers\CandidateRankingController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -48,6 +49,8 @@ Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {
     Route::get('/edit-data-candidate/{id}', [DataCandidateController::class, 'edit'])->name('dashboard.edit-data-candidate');
 
     Route::get('/dashboard/history', [HRDHistoryController::class, 'index'])->name('dashboard.history');
+
+    Route::get('/dashboard/ranking', [CandidateRankingController::class, 'calculateRanking'])->name('dashboard.ranking');
 });
 
 Route::middleware('auth')->group(function () {

@@ -23,13 +23,13 @@ class UserSeeder extends Seeder
                 'role' => 'HRD',
                 'status' => 'active',
             ],
-            [
-                'name' => 'Candidate User',
-                'email' => 'candidate@example.com',
-                'password' => Hash::make('password123'),
-                'role' => 'Candidate',
-                'status' => 'active',
-            ],
+            // [
+            //     'name' => 'Candidate User',
+            //     'email' => 'candidate@example.com',
+            //     'password' => Hash::make('password123'),
+            //     'role' => 'Candidate',
+            //     'status' => 'active',
+            // ],
         ];
 
         foreach ($users as $user) {

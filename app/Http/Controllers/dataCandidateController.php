@@ -12,10 +12,15 @@ use Illuminate\Support\Facades\Auth;
 
 class dataCandidateController extends Controller // Ubah ke huruf kapital
 {
-    public function getUser()
+    public function getUser(Request $request)
     {
-        // Mengambil data kandidat dari database
-        $candidates = User::where('role', 'Candidate')->paginate(10);
+        $search = $request->input('search');
+
+        $candidates = User::where('role', 'Candidate')
+            ->when($search, function ($query, $search) {
+                return $query->where('name', 'LIKE', "%{$search}%");
+            })
+            ->paginate(10);
 
         return Inertia::render('SubDashboard/data-candidate', [
             'title' => "Data Candidate",
