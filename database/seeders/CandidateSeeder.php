@@ -4,9 +4,10 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
-use App\Models\TestsList; // Pastikan Anda menggunakan model User
-use App\Models\TestResult; // Pastikan Anda menggunakan model TestResult
+use App\Models\TestsList;
+use App\Models\TestResult;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CandidateSeeder extends Seeder
 {
@@ -146,35 +147,42 @@ class CandidateSeeder extends Seeder
             ['name' => 'Zaky Zain', 'TIU' => 105, 'TWK' => 100, 'TKB' => 180, 'TW' => 376]
         ];
 
+        DB::beginTransaction();
+        try {
+            // Masukkan pengguna ke tabel users
+            foreach ($candidates as $candidate) {
+                $user = User::create([
+                    'name' => $candidate['name'],
+                    'role' => 'Candidate', // Asumsikan ada kolom role
+                    'email' => strtolower(str_replace(' ', '.', $candidate['name'])) . '@example.com', // Email unik
+                    'password' => bcrypt('password123'), // Kata sandi default (gunakan bcrypt untuk hashing)
+                ]);
 
-        // Masukkan pengguna ke tabel users
-        foreach ($candidates as $candidate) {
-            $user = User::create([
-                'name' => $candidate['name'],
-                'role' => 'Candidate', // Asumsikan ada kolom role
-                'email' => strtolower(str_replace(' ', '.', $candidate['name'])) . '@example.com', // Email unik
-                'password' => bcrypt('password123'), // Kata sandi default (gunakan bcrypt untuk hashing)
-            ]);
+                // Menyimpan skor setiap tes ke dalam tabel test_results
+                foreach (['TIU', 'TWK', 'TKB', 'TW'] as $testName) {
+                    // Temukan id test berdasarkan nama tesnya
+                    $test = TestsList::where('name', $testName)->first();
 
-            // Menyimpan skor setiap tes ke dalam tabel test_results
-            foreach (['TIU', 'TWK', 'TKB', 'TW'] as $testName) {
-                // Temukan id test berdasarkan nama tesnya
-                $test = TestsList::where('name', $testName)->first();
+                    // Cek apakah test ditemukan
+                    if (!$test) {
+                        throw new \Exception("Test not found: $testName");
+                    }
 
-                // Cek apakah test ditemukan
-                if ($test) {
                     // Menyimpan skor tes ke dalam tabel test_results
                     TestResult::create([
                         'user_id' => $user->id,
                         'test_id' => $test->id,
                         'score' => $candidate[$testName],
                     ]);
-                } else {
-                    // Opsional: Log error atau lakukan tindakan lain jika test tidak ditemukan
-                    // Log::error("Test not found for name: $testName");
                 }
             }
-        }
 
+            DB::commit();
+            Log::info('Candidate seeding completed successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Candidate seeding failed: ' . $e->getMessage());
+            throw $e;
+        }
     }
 }

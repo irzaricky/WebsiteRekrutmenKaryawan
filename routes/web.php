@@ -4,9 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DataCandidateController;
 use App\Http\Middleware\EnsureUserIsHRD;
 use App\Http\Controllers\CandidateRankingController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\HRDHistoryController;
 use Inertia\Inertia;
 
