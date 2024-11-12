@@ -30,18 +30,29 @@ class HRDHistoryController extends Controller
         // Filter by time
         if ($request->has('time_filter') && $request->input('time_filter') !== 'all') {
             $timeFilter = $request->input('time_filter');
+            $now = Carbon::now();
+
             switch ($timeFilter) {
                 case 'hour':
-                    $query->where('created_at', '>=', Carbon::now()->subHour());
+                    $query->whereBetween('created_at', [$now->copy()->subHour(), $now]);
                     break;
                 case 'day':
-                    $query->where('created_at', '>=', Carbon::now()->subDay());
+                    $query->whereBetween('created_at', [
+                        $now->copy()->subDay()->startOfDay(),
+                        $now->copy()->endOfDay()
+                    ]);
                     break;
                 case 'week':
-                    $query->where('created_at', '>=', Carbon::now()->subWeek());
+                    $query->whereBetween('created_at', [
+                        $now->copy()->subWeek()->startOfDay(),
+                        $now->copy()->endOfDay()
+                    ]);
                     break;
                 case 'month':
-                    $query->where('created_at', '>=', Carbon::now()->subMonth());
+                    $query->whereBetween('created_at', [
+                        $now->copy()->subMonth()->startOfDay(),
+                        $now->copy()->endOfDay()
+                    ]);
                     break;
             }
         }

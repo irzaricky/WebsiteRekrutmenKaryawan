@@ -1,6 +1,6 @@
 <script setup>
 import Sidebar from "../../components/Dashboard/Sidebar.vue";
-import { defineProps } from "vue";
+import { defineProps, ref, computed } from "vue";
 
 const props = defineProps({
     candidates: {
@@ -8,12 +8,43 @@ const props = defineProps({
         required: true,
     },
 });
+
+const rankFilter = ref("");
+
+const filteredCandidates = computed(() => {
+    if (!rankFilter.value || isNaN(rankFilter.value)) {
+        return props.candidates;
+    }
+    return props.candidates.slice(0, parseInt(rankFilter.value));
+});
 </script>
 
 <template>
     <Sidebar>
         <div class="container mx-auto p-4">
             <h1 class="text-2xl font-bold mb-4">Candidate Rankings</h1>
+
+            <!-- Filter Input -->
+            <div class="mb-4 flex justify-between">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Filter Ranking
+                    </label>
+                    <input
+                        type="number"
+                        v-model="rankFilter"
+                        placeholder="Masukkan batas ranking..."
+                        min="1"
+                        :max="candidates.length"
+                        class="w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                </div>
+                <!-- Menampilkan informasi total kandidat -->
+                <div class="pt-10 mt-4 text-sm text-gray-600">
+                    Showing {{ filteredCandidates.length }} out of
+                    {{ candidates.length }} candidates
+                </div>
+            </div>
 
             <div class="relative h-[600px] rounded-lg shadow-md">
                 <div
@@ -50,7 +81,7 @@ const props = defineProps({
                         </thead>
                         <tbody>
                             <tr
-                                v-for="(candidate, index) in candidates"
+                                v-for="(candidate, index) in filteredCandidates"
                                 :key="candidate.id"
                                 :class="{
                                     'bg-green-100 hover:bg-green-200':

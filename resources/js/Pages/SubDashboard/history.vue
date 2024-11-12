@@ -7,7 +7,7 @@ import debounce from "lodash/debounce";
 
 const searchQuery = ref("");
 const selectedTimeFilter = ref("all");
-const selectedActionType = ref("all"); // Add this
+const selectedActionType = ref("all");
 
 const props = defineProps({
     title: {
@@ -22,7 +22,7 @@ const props = defineProps({
 const timeFilters = [
     { value: "all", label: "Semua" },
     { value: "hour", label: "1 Jam Terakhir" },
-    { value: "day", label: "24 Jam Terakhir" },
+    { value: "day", label: "1 hari Terakhir" },
     { value: "week", label: "1 Minggu Terakhir" },
     { value: "month", label: "1 Bulan Terakhir" },
 ];

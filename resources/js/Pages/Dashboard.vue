@@ -11,5 +11,7 @@ defineProps({
 
 <template>
     <Head :title="title" />
-    <Sidebar></Sidebar>
+    <Sidebar>
+        
+    </Sidebar>
 </template>
