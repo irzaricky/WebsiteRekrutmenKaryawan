@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import Sidebar from "../../components/Dashboard/Sidebar.vue";
 import { Head } from "@inertiajs/vue3";
-import { ref } from "vue";
+import { ref, watch } from "vue";
+import { router } from "@inertiajs/vue3";
+import debounce from "lodash/debounce";
+
+const searchQuery = ref("");
+const selectedTimeFilter = ref("all");
+const selectedActionType = ref("all"); // Add this
 
 const props = defineProps({
     title: {
@@ -12,36 +18,124 @@ const props = defineProps({
         required: true,
     },
 });
+
+const timeFilters = [
+    { value: "all", label: "Semua" },
+    { value: "hour", label: "1 Jam Terakhir" },
+    { value: "day", label: "24 Jam Terakhir" },
+    { value: "week", label: "1 Minggu Terakhir" },
+    { value: "month", label: "1 Bulan Terakhir" },
+];
+
+const actionTypes = [
+    { value: "all", label: "All Action" },
+    { value: "create", label: "Create" },
+    { value: "update", label: "Update" },
+];
+
+// Debounced search function
+const handleSearch = debounce((value) => {
+    router.get(
+        route("dashboard.history"),
+        {
+            search: value,
+            time_filter: selectedTimeFilter.value,
+            action_type: selectedActionType.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+        }
+    );
+}, 300);
+
+// Watch for changes
+watch(
+    [searchQuery, selectedTimeFilter, selectedActionType],
+    ([searchValue, timeValue, actionValue]) => {
+        router.get(
+            route("dashboard.history"),
+            {
+                search: searchValue,
+                time_filter: timeValue,
+                action_type: actionValue,
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+            }
+        );
+    }
+);
 </script>
 
 <template>
     <Head :title="title" />
     <Sidebar>
         <div class="p-6 pt-3 flex-1">
-            <h1 class="text-2xl font-semibold">History</h1>
-            <table class="min-w-full divide-y divide-gray-200 mt-4">
+            <h1 class="text-2xl font-semibold mb-4">History</h1>
+
+            <!-- Filter Controls -->
+            <div class="flex gap-4 mb-6">
+                <!-- Search HRD Name -->
+                <div class="flex-1">
+                    <input
+                        v-model="searchQuery"
+                        type="text"
+                        placeholder="Cari nama HRD..."
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                </div>
+
+                <!-- Time Filter -->
+                <select
+                    v-model="selectedTimeFilter"
+                    class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                    <option
+                        v-for="filter in timeFilters"
+                        :key="filter.value"
+                        :value="filter.value"
+                    >
+                        {{ filter.label }}
+                    </option>
+                </select>
+
+                <!-- Action Type Filter -->
+                <select
+                    v-model="selectedActionType"
+                    class="pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                    <option
+                        v-for="type in actionTypes"
+                        :key="type.value"
+                        :value="type.value"
+                    >
+                        {{ type.label }}
+                    </option>
+                </select>
+            </div>
+
+            <!-- Table -->
+            <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
                         <th
-                            scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                         >
                             HRD
                         </th>
                         <th
-                            scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                         >
                             Action Type
                         </th>
                         <th
-                            scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                         >
                             Details
                         </th>
                         <th
-                            scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                         >
                             Timestamp
@@ -73,22 +167,6 @@ const props = defineProps({
                     </tr>
                 </tbody>
             </table>
-            <div class="mt-4">
-                <Link
-                    v-if="actions.prev_page_url"
-                    :href="actions.prev_page_url"
-                    class="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-200 transition"
-                >
-                    Previous
-                </Link>
-                <Link
-                    v-if="actions.next_page_url"
-                    :href="actions.next_page_url"
-                    class="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-200 transition"
-                >
-                    Next
-                </Link>
-            </div>
         </div>
     </Sidebar>
 </template>

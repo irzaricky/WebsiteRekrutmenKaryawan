@@ -48,11 +48,16 @@ class dataCandidateController extends Controller // Ubah ke huruf kapital
             'test_results' => 'required|array',
             'test_results.*' => 'required|numeric|min:0'
         ]);
+
         $candidate = User::findOrFail($id);
+        $historyController = new HRDHistoryController();
 
         foreach ($request->test_results as $testId => $score) {
             // Fetch the previous score
-            $previousTestResult = TestResult::where('user_id', $id)->where('test_id', $testId)->first();
+            $previousTestResult = TestResult::where('user_id', $id)
+                ->where('test_id', $testId)
+                ->first();
+
             $previousScore = $previousTestResult ? $previousTestResult->score : null;
 
             // Update or create the test result
@@ -61,18 +66,20 @@ class dataCandidateController extends Controller // Ubah ke huruf kapital
                 ['score' => $score]
             );
 
-            // Log the action only if the score has changed
-            if ($previousScore !== null && $previousScore != $score) {
-                // Fetch the test name
+            // Only log if score has changed or is new
+            if ($previousScore !== $score) {
                 $test = TestsList::findOrFail($testId);
 
-                HrdAction::create([
-                    'hrd_id' => Auth::id(),
-                    'user_id' => $candidate->id,
-                    'action_type' => 'update',
-                    'test_result_id' => $testResult->id,
-                    'details' => "Memperbarui score test {$test->name} untuk Candidate yang bernama {$candidate->name} dari {$previousScore} menjadi {$score}",
-                ]);
+                $historyController->SimpanAksi(
+                    Auth::id(),
+                    $candidate->id,
+                    $testResult->id,
+                    $test->name,
+                    $candidate->name,
+                    $previousScore === null ? 'create' : 'update',
+                    $previousScore,
+                    $score
+                );
             }
         }
 

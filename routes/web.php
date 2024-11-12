@@ -40,14 +40,19 @@ Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {
         ]);
     })->name('dashboard');
 
+    //menampilkan data kandidat
     Route::get('/dashboard/data-candidate', [DataCandidateController::class, 'getUser'])->name('dashboard.data-candidate');
 
-    Route::put('/dashboard/data-candidate/{id}', [DataCandidateController::class, 'update'])->name('dashboard.data-candidate-put');
-
+    //menghapus data kandidat
     Route::get('/edit-data-candidate/{id}', [DataCandidateController::class, 'edit'])->name('dashboard.edit-data-candidate');
 
+    //mengupdate data kandidat
+    Route::put('/dashboard/data-candidate/{id}', [DataCandidateController::class, 'update'])->name('dashboard.data-candidate-put');
+
+    //menampilkan data kandidat
     Route::get('/dashboard/history', [HRDHistoryController::class, 'index'])->name('dashboard.history');
 
+    //menampilkan data ranking
     Route::get('/dashboard/ranking', [CandidateRankingController::class, 'calculateRanking'])->name('dashboard.ranking');
 });
 
