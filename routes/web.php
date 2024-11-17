@@ -34,14 +34,15 @@ Route::get('/product', function () {
 });
 
 Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {
+
     Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard', [
-            'title' => "Dashboard",
-        ]);
-    })->name('dashboard');
+        $controller = new CandidateRankingController();
+        return Inertia::render('Dashboard', $controller->getDashboardAnalytics());
+    })->middleware(['auth'])->name('dashboard');
+    ;
 
     //menampilkan data kandidat
-    Route::get('/dashboard/data-candidate', [DataCandidateController::class, 'getUser'])->name('dashboard.data-candidate');
+    Route::get('/dashboard/data-candidate', [DataCandidateController::class,     'getUser'])->name('dashboard.data-candidate');
 
     //menghapus data kandidat
     Route::get('/edit-data-candidate/{id}', [DataCandidateController::class, 'edit'])->name('dashboard.edit-data-candidate');

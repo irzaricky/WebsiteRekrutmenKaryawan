@@ -157,4 +157,33 @@ class CandidateRankingController extends Controller
             'candidates' => $rankingData
         ]);
     }
+
+    public function getDashboardAnalytics()
+    {
+        $candidates = User::where('role', 'Candidate')->with('testResults')->get();
+
+        // Hitung rata-rata skor per test
+        $averageScores = [
+            'TIU' => round($candidates->avg(fn($c) => $c->testResults->where('test_id', 1)->first()?->score ?? 0), 2),
+            'TWK' => round($candidates->avg(fn($c) => $c->testResults->where('test_id', 2)->first()?->score ?? 0), 2),
+            'TKB' => round($candidates->avg(fn($c) => $c->testResults->where('test_id', 3)->first()?->score ?? 0), 2),
+            'TW' => round($candidates->avg(fn($c) => $c->testResults->where('test_id', 4)->first()?->score ?? 0), 2)
+        ];
+
+        // Hitung statistik kandidat
+        $totalCandidates = $candidates->count();
+        $acceptedCandidates = $candidates->filter(fn($c) => $c->is_accepted)->count();
+        $latestCandidates = $candidates->sortByDesc('created_at')->take(5);
+
+        return [
+            'title' => 'Dashboard',
+            'averageScores' => $averageScores,
+            'statistics' => [
+                'total_candidates' => $totalCandidates,
+                'accepted_candidates' => $acceptedCandidates,
+                'acceptance_rate' => $totalCandidates > 0 ? round(($acceptedCandidates / $totalCandidates) * 100, 2) : 0,
+                'latest_candidates' => $latestCandidates
+            ]
+        ];
+    }
 }

@@ -24,6 +24,8 @@
         "@headlessui/vue": "^1.7.23",
         "@heroicons/vue": "^2.1.5",
         "bootstrap-icons": "^1.11.3",
-        "lodash": "^4.17.21"
+        "chart.js": "^4.4.6",
+        "lodash": "^4.17.21",
+        "vue-chartjs": "^5.3.2"
     }
 }

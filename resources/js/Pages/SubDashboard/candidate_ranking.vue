@@ -46,7 +46,7 @@ const filteredCandidates = computed(() => {
                 </div>
             </div>
 
-            <div class="relative h-[600px] rounded-lg shadow-md">
+            <div class="relative h-[530px] rounded-lg shadow-md">
                 <div
                     class="overflow-y-auto h-full scrollbar scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
                 >
