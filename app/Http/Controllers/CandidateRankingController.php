@@ -11,12 +11,12 @@ use Inertia\Inertia;
 
 class CandidateRankingController extends Controller
 {
-    public function calculateRanking()
+    private function calculateRankingData()
     {
         // Step 1: Mengambil semua data hasil test dari candidate
         $candidates = User::where('role', 'Candidate')->with('testResults')->get();
 
-        // Step 2: Decision Matrix (Mengkuadratkan setiap hasil test)
+        // Step 2: Decision Matrix
         $decisionMatrix = [];
         foreach ($candidates as $candidate) {
             $decisionMatrix[$candidate->id] = [
@@ -27,11 +27,7 @@ class CandidateRankingController extends Controller
             ];
         }
 
-        // dd($decisionMatrix);
-
         // Step 3: Normalized Decision Matrix
-
-        // Kalkulasi total nilai dari decision matrix yang dipangkatkan 0.5
         $decisionMatrixTotal = [
             'TIU' => pow(array_sum(array_column($decisionMatrix, 'TIU')), 0.5),
             'TWK' => pow(array_sum(array_column($decisionMatrix, 'TWK')), 0.5),
@@ -39,9 +35,6 @@ class CandidateRankingController extends Controller
             'TW' => pow(array_sum(array_column($decisionMatrix, 'TW')), 0.5),
         ];
 
-        // dd($decisionMatrixTotal);
-
-        // kalkulasi normalized matrix menggunakan score awal test dibagi dengan total nilai decision matrix dipangkatkan 0.5
         $normalizedMatrix = [];
         foreach ($candidates as $candidate) {
             $normalizedMatrix[$candidate->id] = [
@@ -52,11 +45,7 @@ class CandidateRankingController extends Controller
             ];
         }
 
-        //dd($normalizedMatrix);
-
-        // Step 4: Normalized Weighted Matrix (mengalikan setiap skor yang dinormalisasi dengan bobotnya)
-
-        //membuat list bobot setiap hasil test
+        // Step 4: Weighted Matrix
         $weights = [
             'TIU' => 0.3,
             'TWK' => 0.1,
@@ -64,7 +53,6 @@ class CandidateRankingController extends Controller
             'TW' => 0.4,
         ];
 
-        //mengalikan setiap skor yang dinormalisasi dengan bobotnya
         $weightedMatrix = [];
         foreach ($normalizedMatrix as $candidateId => $scores) {
             $weightedMatrix[$candidateId] = [
@@ -75,9 +63,7 @@ class CandidateRankingController extends Controller
             ];
         }
 
-        // dd($weightedMatrix);
-
-        // Step 5: Kalkulasi A+ and A- untuk setiap tests
+        // Step 5: Calculate A+ and A-
         $Aplus = [
             'TIU' => min(array_column($weightedMatrix, 'TIU')),
             'TWK' => min(array_column($weightedMatrix, 'TWK')),
@@ -92,9 +78,7 @@ class CandidateRankingController extends Controller
             'TW' => max(array_column($weightedMatrix, 'TW')),
         ];
 
-        // dd($Aplus, $Aminus);
-
-        // Step 6: Kalkulasi Dj+, Dj-, Dj, and Normalized Dj
+        // Step 6: Calculate preferences
         $preferences = [];
         foreach ($weightedMatrix as $candidateId => $scores) {
             $DjPlus = sqrt(
@@ -115,26 +99,14 @@ class CandidateRankingController extends Controller
             $preferences[$candidateId] = $Dj;
         }
 
-        //dd($preferences);
-
-        // Normalize Dj
+        // Normalize preferences
         $totalDj = array_sum($preferences);
         foreach ($preferences as $candidateId => $Dj) {
             $preferences[$candidateId] = ($Dj / $totalDj) * 1000;
         }
 
-        // Step 7: Ranking semua candidates
-        arsort($preferences);
-
-        // menyimpan rank candidate ke dalam database
-        foreach ($preferences as $candidateId => $ranking) {
-            CandidateRanking::updateOrCreate(
-                ['user_id' => $candidateId],
-                ['ranking' => $ranking]
-            );
-        }
-
-        $rankingData = $candidates->map(function ($candidate, $index) use ($preferences) {
+        // Create ranking data
+        return $candidates->map(function ($candidate) use ($preferences) {
             $finalScore = $preferences[$candidate->id] ?? 0;
             return [
                 'id' => $candidate->id,
@@ -145,12 +117,15 @@ class CandidateRankingController extends Controller
                 'tw_score' => $candidate->testResults->where('test_id', 4)->first()?->score,
                 'final_score' => $finalScore,
             ];
-        })->sortByDesc('final_score')
-            ->values()
-            ->map(function ($candidate, $index) {
-                $candidate['is_accepted'] = $index < 20;
-                return $candidate;
-            });
+        })->sortByDesc('final_score')->values();
+    }
+
+    public function calculateRanking()
+    {
+        $rankingData = $this->calculateRankingData()->map(function ($candidate, $index) {
+            $candidate['is_accepted'] = $index < 20;
+            return $candidate;
+        });
 
         //Meneruskan data ke view
         return Inertia::render('SubDashboard/candidate_ranking', [
@@ -170,19 +145,20 @@ class CandidateRankingController extends Controller
             'TW' => round($candidates->avg(fn($c) => $c->testResults->where('test_id', 4)->first()?->score ?? 0), 2)
         ];
 
-        // Hitung statistik kandidat
-        $totalCandidates = $candidates->count();
-        $acceptedCandidates = $candidates->filter(fn($c) => $c->is_accepted)->count();
-        $latestCandidates = $candidates->sortByDesc('created_at')->take(5);
+        // Calculate rankings first
+        $rankings = $this->calculateRankingData();
+
+        // Get accepted candidates (top 20)
+        $acceptedCandidates = $rankings->take(20);
 
         return [
             'title' => 'Dashboard',
             'averageScores' => $averageScores,
             'statistics' => [
-                'total_candidates' => $totalCandidates,
-                'accepted_candidates' => $acceptedCandidates,
-                'acceptance_rate' => $totalCandidates > 0 ? round(($acceptedCandidates / $totalCandidates) * 100, 2) : 0,
-                'latest_candidates' => $latestCandidates
+                'total_candidates' => $candidates->count(),
+                'accepted_candidates' => $acceptedCandidates->count(),
+                'acceptance_rate' => round(($acceptedCandidates->count() / $candidates->count()) * 100, 2),
+                'accepted_list' => $acceptedCandidates
             ]
         ];
     }

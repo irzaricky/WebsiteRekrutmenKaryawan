@@ -87,8 +87,9 @@ const testScoresData = {
                 </div>
             </div>
 
-            <!-- Charts -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <!-- Charts and Accepted Candidates -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Average Test Scores Chart -->
                 <div class="bg-white rounded-lg shadow p-6">
                     <h3 class="text-lg font-semibold mb-4">
                         Rata-rata Skor Test
@@ -98,61 +99,60 @@ const testScoresData = {
                         :options="{ responsive: true }"
                     />
                 </div>
-            </div>
 
-            <!-- Latest Candidates -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold mb-4">Kandidat Terbaru</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead>
-                            <tr>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                >
-                                    Nama
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                >
-                                    Email
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                >
-                                    Status
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            <tr
-                                v-for="candidate in statistics.latest_candidates"
-                                :key="candidate.id"
-                            >
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    {{ candidate.name }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    {{ candidate.email }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span
-                                        :class="`px-2 py-1 rounded-full text-xs ${
-                                            candidate.is_accepted
-                                                ? 'bg-green-100 text-green-800'
-                                                : 'bg-red-100 text-red-800'
-                                        }`"
+                <!-- Accepted Candidates Table -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold mb-4">
+                        Kandidat Diterima
+                    </h3>
+                    <div class="max-h-[400px] overflow-y-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-white sticky top-0">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase bg-white"
                                     >
-                                        {{
-                                            candidate.is_accepted
-                                                ? "Diterima"
-                                                : "Tidak Diterima"
-                                        }}
-                                    </span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                        Rank
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase bg-white"
+                                    >
+                                        Nama
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase bg-white"
+                                    >
+                                        Final Score
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr
+                                    v-for="(
+                                        candidate, index
+                                    ) in statistics.accepted_list"
+                                    :key="candidate.id"
+                                    class="hover:bg-gray-50"
+                                >
+                                    <td
+                                        class="px-6 py-4 whitespace-nowrap text-sm"
+                                    >
+                                        {{ index + 1 }}
+                                    </td>
+                                    <td
+                                        class="px-6 py-4 whitespace-nowrap text-sm"
+                                    >
+                                        {{ candidate.name }}
+                                    </td>
+                                    <td
+                                        class="px-6 py-4 whitespace-nowrap text-sm"
+                                    >
+                                        {{ candidate.final_score.toFixed(2) }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
