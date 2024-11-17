@@ -2,8 +2,11 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DataCandidateController;
+use App\Http\Middleware\EnsureUserIsCandidate;
 use App\Http\Middleware\EnsureUserIsHRD;
 use App\Http\Controllers\CandidateRankingController;
+use App\Http\Controllers\CandidateUploadController;
+use App\Http\Controllers\CandidateProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HRDHistoryController;
 use Inertia\Inertia;
@@ -33,6 +36,15 @@ Route::get('/product', function () {
     ]);
 });
 
+Route::middleware(['auth', EnsureUserIsCandidate::class])->group(function () {
+    // Routes khusus untuk Candidate
+    Route::get('/candidate/upload', [CandidateUploadController::class, 'index'])
+        ->name('candidate.upload');
+
+    Route::post('/candidate/upload', [CandidateUploadController::class, 'store'])
+        ->name('candidate.upload.store');
+});
+
 Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {
 
     Route::get('/dashboard', function () {
@@ -42,7 +54,7 @@ Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {
     ;
 
     //menampilkan data kandidat
-    Route::get('/dashboard/data-candidate', [DataCandidateController::class,     'getUser'])->name('dashboard.data-candidate');
+    Route::get('/dashboard/data-candidate', [DataCandidateController::class, 'getUser'])->name('dashboard.data-candidate');
 
     //menghapus data kandidat
     Route::get('/edit-data-candidate/{id}', [DataCandidateController::class, 'edit'])->name('dashboard.edit-data-candidate');
@@ -55,6 +67,14 @@ Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {
 
     //menampilkan data ranking
     Route::get('/dashboard/ranking', [CandidateRankingController::class, 'calculateRanking'])->name('dashboard.ranking');
+});
+
+Route::middleware(['auth', EnsureUserIsCandidate::class])->group(function () {
+    // Profile routes
+    Route::controller(CandidateProfileController::class)->group(function () {
+        Route::get('/profile/candidate', 'index')->name('profile.candidate.show');
+        Route::post('/profile/candidate', 'update')->name('profile.candidate.update');
+    });
 });
 
 Route::middleware('auth')->group(function () {

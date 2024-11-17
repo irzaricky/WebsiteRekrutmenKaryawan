@@ -17,6 +17,7 @@
                     />
                 </Link>
             </div>
+
             <div class="flex gap-x-12">
                 <Link
                     v-for="item in navigation"
@@ -37,18 +38,20 @@
                     >
                         Dashboard
                     </Link>
+
                     <Link
                         v-else-if="role === 'Candidate'"
-                        :href="route('profile.edit')"
+                        :href="route('profile.candidate.show')"
                         class="text-sm font-semibold leading-6 text-gray-900 btn btn-ghost"
                     >
                         Profile
                     </Link>
+
                     <Link
                         :href="route('logout')"
-                        class="text-sm font-semibold leading-6 text-gray-900 btn btn-ghost"
                         method="post"
                         as="button"
+                        class="text-sm font-semibold leading-6 text-gray-900 btn btn-ghost"
                     >
                         Log Out
                     </Link>
@@ -61,6 +64,7 @@
                     >
                         Log in <span aria-hidden="true">&rarr;</span>
                     </Link>
+
                     <Link
                         :href="route('register')"
                         class="text-sm font-semibold leading-6 text-gray-900 btn btn-ghost"
@@ -74,7 +78,7 @@
 </template>
 
 <script setup>
-import { Link, usePage } from "@inertiajs/vue3"; // Import Link from Inertia
+import { Link, usePage } from "@inertiajs/vue3";
 
 const { props } = usePage();
 const isLogin = props.auth.user;
