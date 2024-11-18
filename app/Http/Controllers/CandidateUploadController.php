@@ -58,4 +58,72 @@ class CandidateUploadController extends Controller
 
         return redirect()->back()->with('message', 'Data berhasil disimpan');
     }
+
+    public function getFile($type, $filename)
+    {
+        // Dapatkan user yang sedang login
+        $user = Auth::user();
+
+        // Cek apakah file milik user yang login
+        $candidateDetail = $user->candidateDetail;
+        if (!$candidateDetail) {
+            abort(404);
+        }
+
+        // Tentukan field berdasarkan tipe file
+        $field = $type . '_path';
+        $expectedPath = $candidateDetail->$field;
+
+        // Buat path lengkap berdasarkan tipe
+        $path = "";
+        switch ($type) {
+            case 'photo':
+                $path = 'candidate-photos/' . $filename;
+                break;
+            case 'cv':
+                $path = 'candidate-cvs/' . $filename;
+                break;
+            case 'certificate':
+                $path = 'candidate-certificates/' . $filename;
+                break;
+            default:
+                abort(404);
+        }
+
+        // Validasi apakah path file sesuai dengan yang tersimpan di database
+        if ($expectedPath !== $path) {
+            abort(403, 'Unauthorized access');
+        }
+
+        if (!Storage::exists($path)) {
+            abort(404);
+        }
+
+        return Storage::response($path);
+    }
+
+    public function deleteFile(Request $request)
+    {
+        $request->validate([
+            'type' => 'required|in:photo,cv,certificate'
+        ]);
+
+        $user = Auth::user();
+        $candidateDetail = $user->candidateDetail;
+
+        if (!$candidateDetail) {
+            return response()->json(['message' => 'File not found'], 404);
+        }
+
+        $field = $request->type . '_path';
+        $path = $candidateDetail->$field;
+
+        if ($path && Storage::exists($path)) {
+            Storage::delete($path);
+            $candidateDetail->$field = null;
+            $candidateDetail->save();
+        }
+
+        return response()->json(['message' => 'File deleted successfully']);
+    }
 }

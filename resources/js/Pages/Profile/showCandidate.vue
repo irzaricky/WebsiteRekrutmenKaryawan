@@ -6,8 +6,14 @@ const props = defineProps({
     title: String,
     user: Object,
     candidateDetail: Object,
-    flash: Object, // Add this to receive flash messages
+    flash: Object,
 });
+
+// Add getFilename function
+const getFilename = (path) => {
+    if (!path) return "";
+    return path.split("/").pop();
+};
 
 // Format the date to YYYY-MM-DD
 const formatDate = (dateString) => {
@@ -222,6 +228,60 @@ const submit = () => {
                             accept=".pdf"
                             class="mt-1 block w-full"
                         />
+                    </div>
+                </div>
+
+                <!-- Preview file yang sudah diupload -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Preview Foto -->
+                    <div v-if="candidateDetail?.photo_path">
+                        <img
+                            :src="
+                                route('candidate.file', {
+                                    type: 'photo',
+                                    filename: getFilename(
+                                        candidateDetail.photo_path
+                                    ),
+                                })
+                            "
+                            class="h-32 w-32 object-cover rounded"
+                        />
+                    </div>
+
+                    <!-- Preview CV -->
+                    <div v-if="candidateDetail?.cv_path">
+                        <a
+                            :href="
+                                route('candidate.file', {
+                                    type: 'cv',
+                                    filename: getFilename(
+                                        candidateDetail.cv_path
+                                    ),
+                                })
+                            "
+                            target="_blank"
+                            class="text-blue-600 hover:text-blue-800"
+                        >
+                            Lihat CV
+                        </a>
+                    </div>
+
+                    <!-- Preview Ijazah -->
+                    <div v-if="candidateDetail?.certificate_path">
+                        <a
+                            :href="
+                                route('candidate.file', {
+                                    type: 'certificate',
+                                    filename: getFilename(
+                                        candidateDetail.certificate_path
+                                    ),
+                                })
+                            "
+                            target="_blank"
+                            class="text-blue-600 hover:text-blue-800"
+                        >
+                            Lihat Ijazah
+                        </a>
                     </div>
                 </div>
 

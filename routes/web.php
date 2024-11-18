@@ -36,6 +36,11 @@ Route::get('/product', function () {
     ]);
 });
 
+// Pindahkan rute file di luar group middleware
+Route::get('/candidate/file/{type}/{filename}', [CandidateUploadController::class, 'getFile'])
+    ->name('candidate.file')
+    ->middleware('auth'); // Hanya perlu auth
+
 Route::middleware(['auth', EnsureUserIsCandidate::class])->group(function () {
     // Routes khusus untuk Candidate
     Route::get('/candidate/upload', [CandidateUploadController::class, 'index'])
@@ -43,6 +48,9 @@ Route::middleware(['auth', EnsureUserIsCandidate::class])->group(function () {
 
     Route::post('/candidate/upload', [CandidateUploadController::class, 'store'])
         ->name('candidate.upload.store');
+
+    Route::delete('/candidate/file', [CandidateUploadController::class, 'deleteFile'])
+        ->name('candidate.file.delete');
 });
 
 Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {

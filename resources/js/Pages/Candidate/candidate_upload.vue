@@ -1,6 +1,7 @@
 <script setup>
 import Sidebar from "../../components/Dashboard/Sidebar.vue";
 import { Head, useForm } from "@inertiajs/vue3";
+import axios from "axios";
 
 const props = defineProps({
     title: String,
@@ -28,6 +29,20 @@ const submit = () => {
             form.reset("photo", "cv", "certificate");
         },
     });
+};
+
+const getFilename = (path) => {
+    return path.split("/").pop();
+};
+
+const removeFile = async (type) => {
+    try {
+        await axios.delete(route("candidate.file.delete"), { data: { type } });
+        // Refresh data
+        window.location.reload();
+    } catch (error) {
+        console.error("Error removing file:", error);
+    }
 };
 </script>
 
@@ -150,6 +165,26 @@ const submit = () => {
                         <label class="block text-sm font-medium text-gray-700"
                             >Foto</label
                         >
+                        <!-- Preview foto yang sudah diupload -->
+                        <div v-if="candidateDetail?.photo_path" class="mt-2">
+                            <img
+                                :src="
+                                    route('candidate.file', {
+                                        type: 'photo',
+                                        filename: getFilename(
+                                            candidateDetail.photo_path
+                                        ),
+                                    })
+                                "
+                                class="h-32 w-32 object-cover rounded"
+                            />
+                            <button
+                                @click="removeFile('photo')"
+                                class="text-red-600 text-sm mt-1 hover:text-red-800"
+                            >
+                                Hapus Foto
+                            </button>
+                        </div>
                         <input
                             type="file"
                             @input="form.photo = $event.target.files[0]"
@@ -162,6 +197,29 @@ const submit = () => {
                         <label class="block text-sm font-medium text-gray-700"
                             >CV (PDF)</label
                         >
+                        <!-- Preview CV yang sudah diupload -->
+                        <div v-if="candidateDetail?.cv_path" class="mt-2">
+                            <a
+                                :href="
+                                    route('candidate.file', {
+                                        type: 'cv',
+                                        filename: getFilename(
+                                            candidateDetail.cv_path
+                                        ),
+                                    })
+                                "
+                                target="_blank"
+                                class="text-blue-600 hover:text-blue-800"
+                            >
+                                Lihat CV
+                            </a>
+                            <button
+                                @click="removeFile('cv')"
+                                class="text-red-600 text-sm ml-2 hover:text-red-800"
+                            >
+                                Hapus CV
+                            </button>
+                        </div>
                         <input
                             type="file"
                             @input="form.cv = $event.target.files[0]"
@@ -174,6 +232,32 @@ const submit = () => {
                         <label class="block text-sm font-medium text-gray-700"
                             >Ijazah (PDF)</label
                         >
+                        <!-- Preview ijazah yang sudah diupload -->
+                        <div
+                            v-if="candidateDetail?.certificate_path"
+                            class="mt-2"
+                        >
+                            <a
+                                :href="
+                                    route('candidate.file', {
+                                        type: 'certificate',
+                                        filename: getFilename(
+                                            candidateDetail.certificate_path
+                                        ),
+                                    })
+                                "
+                                target="_blank"
+                                class="text-blue-600 hover:text-blue-800"
+                            >
+                                Lihat Ijazah
+                            </a>
+                            <button
+                                @click="removeFile('certificate')"
+                                class="text-red-600 text-sm ml-2 hover:text-red-800"
+                            >
+                                Hapus Ijazah
+                            </button>
+                        </div>
                         <input
                             type="file"
                             @input="form.certificate = $event.target.files[0]"

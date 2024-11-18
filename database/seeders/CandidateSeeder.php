@@ -22,7 +22,7 @@ class CandidateSeeder extends Seeder
             ['name' => 'Adib Fahmi', 'TIU' => 95, 'TWK' => 85, 'TKB' => 195, 'TW' => 250],
             ['name' => 'Affandi', 'TIU' => 105, 'TWK' => 90, 'TKB' => 185, 'TW' => 380],
             ['name' => 'Aini Sukma', 'TIU' => 95, 'TWK' => 120, 'TKB' => 200, 'TW' => 270],
-            ['name' => 'Airlangga ', 'TIU' => 100, 'TWK' => 100, 'TKB' => 180, 'TW' => 290],
+            ['name' => 'Airlangga', 'TIU' => 100, 'TWK' => 100, 'TKB' => 180, 'TW' => 290],
             ['name' => 'Ajeng Fitri', 'TIU' => 85, 'TWK' => 70, 'TKB' => 167, 'TW' => 275],
             ['name' => 'Annisa Triani', 'TIU' => 85, 'TWK' => 100, 'TKB' => 180, 'TW' => 325],
             ['name' => 'Arga Saputra', 'TIU' => 105, 'TWK' => 95, 'TKB' => 180, 'TW' => 286],
