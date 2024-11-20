@@ -61,20 +61,28 @@ class CandidateUploadController extends Controller
 
     public function getFile($type, $filename)
     {
-        // Dapatkan user yang sedang login
+        // Get current logged in user
         $user = Auth::user();
+        
+        // Get candidate ID from filename or request
+        $candidateUserId = request()->query('candidate_id');
+        
+        // If user is HRD, allow access with candidate_id
+        if ($user->role === 'HRD') {
+            $candidateDetail = CandidateDetail::where('user_id', $candidateUserId)->first();
+        } else {
+            // For candidates, only allow access to their own files
+            $candidateDetail = $user->candidateDetail;
+        }
 
-        // Cek apakah file milik user yang login
-        $candidateDetail = $user->candidateDetail;
         if (!$candidateDetail) {
             abort(404);
         }
 
-        // Tentukan field berdasarkan tipe file
+        // Rest of the validation and file serving logic
         $field = $type . '_path';
         $expectedPath = $candidateDetail->$field;
 
-        // Buat path lengkap berdasarkan tipe
         $path = "";
         switch ($type) {
             case 'photo':
@@ -90,7 +98,6 @@ class CandidateUploadController extends Controller
                 abort(404);
         }
 
-        // Validasi apakah path file sesuai dengan yang tersimpan di database
         if ($expectedPath !== $path) {
             abort(403, 'Unauthorized access');
         }

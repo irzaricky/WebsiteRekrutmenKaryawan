@@ -75,6 +75,9 @@ Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {
 
     //menampilkan data ranking
     Route::get('/dashboard/ranking', [CandidateRankingController::class, 'calculateRanking'])->name('dashboard.ranking');
+
+    Route::get('/dashboard/candidate-details/{id}', [DataCandidateController::class, 'show'])
+        ->name('dashboard.candidate-details');
 });
 
 Route::middleware(['auth', EnsureUserIsCandidate::class])->group(function () {

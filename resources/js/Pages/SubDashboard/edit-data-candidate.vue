@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Sidebar from "../../components/Dashboard/Sidebar.vue";
-import { Head, useForm } from "@inertiajs/vue3";
+import { Head, useForm, Link } from "@inertiajs/vue3"; // Add Link import
 const props = defineProps({
     title: {
         type: String,
@@ -19,13 +19,6 @@ const props = defineProps({
     },
 });
 
-// const form = useForm({
-//     test_results: props.testResults.reduce((acc: any, result: any) => {
-//         acc[result.test_id] = result.score;
-//         return acc;
-//     }, {}),
-// });
-
 const form = useForm({
     test_results: props.testResults.reduce((acc: any, result: any) => {
         acc[result.test_id] = result.score;
@@ -42,7 +35,10 @@ const submitForm = () => {
 <template>
     <Head :title="title" />
     <Sidebar>
-        <h2 class="text-lg font-light">Edit Data Candidate</h2>
+        <div class="mb-4">
+            <h2 class="text-lg font-light">Edit Candidate Data</h2>
+        </div>
+
         <form
             @submit.prevent="submitForm"
             class="w-full max-w mx-auto my-20 bg-gray-200 p-16 rounded-[50px]"
@@ -98,11 +94,17 @@ const submitForm = () => {
                 </div>
             </div>
 
-            <!-- Tombol Submit -->
-            <div class="flex justify-end">
+            <!-- Button group at bottom of form -->
+            <div class="flex gap-4 mt-6">
+                <Link
+                    :href="route('dashboard.data-candidate')"
+                    class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2.5 rounded-md text-sm"
+                >
+                    Back
+                </Link>
                 <button
                     type="submit"
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2.5 rounded-md text-sm"
                 >
                     Simpan Perubahan
                 </button>

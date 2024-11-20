@@ -86,4 +86,13 @@ class dataCandidateController extends Controller // Ubah ke huruf kapital
         return redirect()->route('dashboard.data-candidate')
             ->with('message', 'Nilai kandidat berhasil diperbarui');
     }
+
+    public function show($id)
+    {
+        $candidate = User::with('candidateDetail')->findOrFail($id);
+        return Inertia::render('SubDashboard/CandidateDetails', [
+            'title' => 'Candidate Details',
+            'candidateDetails' => $candidate
+        ]);
+    }
 }
