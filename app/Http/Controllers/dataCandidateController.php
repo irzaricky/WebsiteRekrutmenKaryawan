@@ -22,7 +22,7 @@ class dataCandidateController extends Controller // Ubah ke huruf kapital
             })
             ->paginate(10);
 
-        return Inertia::render('SubDashboard/data-candidate', [
+        return Inertia::render('HRD/data-candidate', [
             'title' => "Data Candidate",
             'candidates' => $candidates, // Mengirim data kandidat ke komponen
         ]);
@@ -34,7 +34,7 @@ class dataCandidateController extends Controller // Ubah ke huruf kapital
         $testResults = TestResult::where('user_id', $id)->get();
         $tests = TestsList::all();
 
-        return Inertia::render('SubDashboard/edit-data-candidate', [
+        return Inertia::render('HRD/edit-data-candidate', [
             'title' => "Edit Data Kandidat",
             'candidate' => $candidate,
             'testResults' => $testResults,
@@ -90,7 +90,7 @@ class dataCandidateController extends Controller // Ubah ke huruf kapital
     public function show($id)
     {
         $candidate = User::with('candidateDetail')->findOrFail($id);
-        return Inertia::render('SubDashboard/CandidateDetails', [
+        return Inertia::render('HRD/CandidateDetails', [
             'title' => 'Candidate Details',
             'candidateDetails' => $candidate
         ]);

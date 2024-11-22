@@ -128,7 +128,7 @@ class CandidateRankingController extends Controller
         });
 
         //Meneruskan data ke view
-        return Inertia::render('SubDashboard/candidate_ranking', [
+        return Inertia::render('HRD/candidate_ranking', [
             'candidates' => $rankingData
         ]);
     }

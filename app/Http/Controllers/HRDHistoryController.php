@@ -59,7 +59,7 @@ class HRDHistoryController extends Controller
 
         $actions = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        return Inertia::render('SubDashboard/history', [
+        return Inertia::render('HRD/history', [
             'title' => 'History',
             'actions' => $actions,
         ]);
