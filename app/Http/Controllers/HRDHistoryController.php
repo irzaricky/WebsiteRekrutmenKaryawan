@@ -3,73 +3,50 @@
 namespace App\Http\Controllers;
 
 use App\Models\HrdAction;
-use Inertia\Inertia;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Carbon\Carbon;
 
 class HRDHistoryController extends Controller
 {
     public function index(Request $request)
     {
-        $query = HrdAction::with('hrd', 'testResult.test');
+        $query = HrdAction::query()
+            ->with(['hrd', 'candidate'])
+            ->orderBy('created_at', 'desc');
 
-        // Filter by HRD name
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->whereHas('hrd', function ($q) use ($search) {
-                $q->where('name', 'LIKE', "%{$search}%");
+        // Apply filters
+        if ($request->action_type && $request->action_type !== 'all') {
+            $query->where('action_type', $request->action_type);
+        }
+
+        // Time filter
+        if ($request->time_filter) {
+            $query->where('created_at', '>=', match ($request->time_filter) {
+                'hour' => Carbon::now()->subHour(),
+                'day' => Carbon::now()->subDay(),
+                'week' => Carbon::now()->subWeek(),
+                'month' => Carbon::now()->subMonth(),
+                default => Carbon::now()->subYears(100)
             });
         }
 
-        // Filter by action type
-        if ($request->has('action_type') && $request->input('action_type') !== 'all') {
-            $actionType = $request->input('action_type');
-            $query->where('action_type', $actionType);
-        }
-
-        // Filter by time
-        if ($request->has('time_filter') && $request->input('time_filter') !== 'all') {
-            $timeFilter = $request->input('time_filter');
-            $now = Carbon::now();
-
-            switch ($timeFilter) {
-                case 'hour':
-                    $query->whereBetween('created_at', [$now->copy()->subHour(), $now]);
-                    break;
-                case 'day':
-                    $query->whereBetween('created_at', [
-                        $now->copy()->subDay()->startOfDay(),
-                        $now->copy()->endOfDay()
-                    ]);
-                    break;
-                case 'week':
-                    $query->whereBetween('created_at', [
-                        $now->copy()->subWeek()->startOfDay(),
-                        $now->copy()->endOfDay()
-                    ]);
-                    break;
-                case 'month':
-                    $query->whereBetween('created_at', [
-                        $now->copy()->subMonth()->startOfDay(),
-                        $now->copy()->endOfDay()
-                    ]);
-                    break;
-            }
-        }
-
-        $actions = $query->orderBy('created_at', 'desc')->paginate(10);
+        $actions = $query->paginate(10);
 
         return Inertia::render('HRD/history', [
             'title' => 'History',
-            'actions' => $actions,
+            'actions' => $actions
         ]);
     }
 
-    public function SimpanAksi($hrdId, $candidateId, $testResultId, $testName, $candidateName, $actionType, $previousScore, $newScore)
+    public function SimpanAksi($hrdId, $candidateId, $testResultId = null, $testName = null, $candidateName, $actionType, $previousScore = null, $newScore = null, $fileType = null)
     {
-        $details = $actionType === 'create'
-            ? "Mengisi score test {$testName} untuk Candidate yang bernama {$candidateName} dengan nilai {$newScore}"
-            : "Memperbarui score test {$testName} untuk Candidate yang bernama {$candidateName} dari {$previousScore} menjadi {$newScore}";
+        $details = match ($actionType) {
+            'create' => "Mengisi score test {$testName} untuk Candidate yang bernama {$candidateName} dengan nilai {$newScore}",
+            'update' => "Memperbarui score test {$testName} untuk Candidate yang bernama {$candidateName} dari {$previousScore} menjadi {$newScore}",
+            'update_file_status' => "Mengubah status file {$fileType} untuk Candidate yang bernama {$candidateName} menjadi {$newScore}",
+            default => "Melakukan aksi {$actionType}"
+        };
 
         return HrdAction::create([
             'hrd_id' => $hrdId,

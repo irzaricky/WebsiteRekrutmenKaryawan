@@ -1,6 +1,8 @@
 <script setup>
+import { Head, Link } from "@inertiajs/vue3";
 import Sidebar from "../../components/Dashboard/Sidebar.vue";
-import { Head, Link, router } from "@inertiajs/vue3";
+import axios from "axios";
+import { ref } from "vue";
 
 const props = defineProps({
     title: String,
@@ -16,23 +18,64 @@ const getFileUrl = (type, path) => {
     });
 };
 
-const confirmFile = async (type) => {
+// Add success/error message handling
+const message = ref("");
+const errorMessage = ref("");
+
+const updateFileStatus = async (fileType, status) => {
     try {
-        await router.post(route("candidate.confirm-file"), {
-            candidate_id: props.candidateDetails.id,
-            file_type: type,
-        });
+        const response = await axios.post(
+            route("dashboard.update-file-status"),
+            {
+                candidate_id: props.candidateDetails.id,
+                file_type: fileType,
+                status: status,
+            }
+        );
+
+        // Show success message
+        message.value = response.data.message;
+
+        // Optional: Refresh the page or update component state
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
     } catch (error) {
-        console.error("Error confirming file:", error);
+        console.error("Error updating file status:", error);
+        errorMessage.value =
+            error.response?.data?.message || "Error updating file status";
     }
+};
+
+const formatDate = (date) => {
+    if (!date) return "";
+    return new Date(date).toLocaleDateString("id-ID", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
 };
 </script>
 
 <template>
     <Head :title="title" />
     <Sidebar>
-        <div class="p-6">
-            <div class="flex justify-between items-center mb-6">
+        <!-- Add success/error messages -->
+        <div
+            v-if="message"
+            class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
+        >
+            {{ message }}
+        </div>
+        <div
+            v-if="errorMessage"
+            class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
+        >
+            {{ errorMessage }}
+        </div>
+
+        <div class="p-4">
+            <div class="flex justify-between items-center mb-2">
                 <h1 class="text-2xl font-semibold">Candidate Details</h1>
             </div>
 
@@ -55,7 +98,12 @@ const confirmFile = async (type) => {
                     <div>
                         <p class="text-sm font-semibold">Birth Date:</p>
                         <p>
-                            {{ candidateDetails.candidate_detail?.birth_date }}
+                            {{
+                                formatDate(
+                                    candidateDetails.candidate_detail
+                                        ?.birth_date
+                                )
+                            }}
                         </p>
                     </div>
                     <div>
@@ -85,28 +133,42 @@ const confirmFile = async (type) => {
                     <!-- Photo Preview -->
                     <div v-if="candidateDetails.candidate_detail?.photo_path">
                         <p class="text-sm font-semibold">Photo:</p>
-                        <img
-                            :src="
-                                getFileUrl(
-                                    'photo',
-                                    candidateDetails.candidate_detail.photo_path
-                                )
-                            "
-                            class="h-32 w-32 object-cover rounded mt-2"
-                        />
-                        <div class="flex items-center gap-2 mt-2">
-                            <input
-                                type="checkbox"
-                                :checked="
-                                    candidateDetails.candidate_detail
-                                        .photo_confirmed
+                        <div class="flex flex-col gap-2 mt-2">
+                            <a
+                                :href="
+                                    getFileUrl(
+                                        'photo',
+                                        candidateDetails.candidate_detail
+                                            .photo_path
+                                    )
                                 "
-                                @change="confirmFile('photo')"
-                                class="rounded border-gray-300"
-                            />
-                            <label class="text-sm text-gray-600"
-                                >Konfirmasi Foto</label
+                                target="_blank"
+                                class="text-blue-600 hover:text-blue-800"
                             >
+                                View Photo
+                            </a>
+                            <div class="flex items-center gap-2">
+                                <select
+                                    :value="
+                                        candidateDetails.candidate_detail
+                                            ?.photo_status
+                                    "
+                                    @change="
+                                        updateFileStatus(
+                                            'photo',
+                                            $event.target.value
+                                        )
+                                    "
+                                    class="rounded border-gray-300"
+                                >
+                                    <option value="pending">Pending</option>
+                                    <option value="accepted">Diterima</option>
+                                    <option value="rejected">Ditolak</option>
+                                </select>
+                                <label class="text-sm text-gray-600"
+                                    >Status Foto</label
+                                >
+                            </div>
                         </div>
                     </div>
 
@@ -126,17 +188,21 @@ const confirmFile = async (type) => {
                             View CV
                         </a>
                         <div class="flex items-center gap-2 mt-2">
-                            <input
-                                type="checkbox"
-                                :checked="
-                                    candidateDetails.candidate_detail
-                                        .cv_confirmed
+                            <select
+                                :value="
+                                    candidateDetails.candidate_detail?.cv_status
                                 "
-                                @change="confirmFile('cv')"
+                                @change="
+                                    updateFileStatus('cv', $event.target.value)
+                                "
                                 class="rounded border-gray-300"
-                            />
+                            >
+                                <option value="pending">Pending</option>
+                                <option value="accepted">Diterima</option>
+                                <option value="rejected">Ditolak</option>
+                            </select>
                             <label class="text-sm text-gray-600"
-                                >Konfirmasi CV</label
+                                >Status CV</label
                             >
                         </div>
                     </div>
@@ -162,17 +228,25 @@ const confirmFile = async (type) => {
                             View Certificate
                         </a>
                         <div class="flex items-center gap-2 mt-2">
-                            <input
-                                type="checkbox"
-                                :checked="
+                            <select
+                                :value="
                                     candidateDetails.candidate_detail
-                                        .certificate_confirmed
+                                        ?.certificate_status
                                 "
-                                @change="confirmFile('certificate')"
+                                @change="
+                                    updateFileStatus(
+                                        'certificate',
+                                        $event.target.value
+                                    )
+                                "
                                 class="rounded border-gray-300"
-                            />
+                            >
+                                <option value="pending">Pending</option>
+                                <option value="accepted">Diterima</option>
+                                <option value="rejected">Ditolak</option>
+                            </select>
                             <label class="text-sm text-gray-600"
-                                >Konfirmasi Ijazah</label
+                                >Status Ijazah</label
                             >
                         </div>
                     </div>

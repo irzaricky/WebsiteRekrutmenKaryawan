@@ -15,7 +15,6 @@ class HrdAction extends Model
         'action_type',
         'test_result_id',
         'details',
-
     ];
 
     public function hrd()
@@ -23,7 +22,8 @@ class HrdAction extends Model
         return $this->belongsTo(User::class, 'hrd_id');
     }
 
-    public function user()
+    // Rename 'user' to 'candidate' for better semantics
+    public function candidate()
     {
         return $this->belongsTo(User::class, 'user_id');
     }

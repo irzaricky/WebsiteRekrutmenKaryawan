@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\HrdAction;
+use App\Models\CandidateDetail;
 use App\Models\User;
 use App\Models\TestsList;
 use App\Models\TestResult;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class dataCandidateController extends Controller // Ubah ke huruf kapital
 {
@@ -90,9 +92,52 @@ class dataCandidateController extends Controller // Ubah ke huruf kapital
     public function show($id)
     {
         $candidate = User::with('candidateDetail')->findOrFail($id);
+
+        // Format the date while preserving the model relationship
+        if ($candidate->candidateDetail) {
+            $candidate->candidateDetail->birth_date = Carbon::parse($candidate->candidateDetail->birth_date)
+                ->format('Y-m-d');
+        }
+
         return Inertia::render('HRD/CandidateDetails', [
             'title' => 'Candidate Details',
             'candidateDetails' => $candidate
         ]);
+    }
+
+    public function updateFileStatus(Request $request)
+    {
+        $request->validate([
+            'candidate_id' => 'required|exists:users,id',
+            'file_type' => 'required|in:photo,cv,certificate',
+            'status' => 'required|in:pending,accepted,rejected'
+        ]);
+
+        $candidateDetail = CandidateDetail::where('user_id', $request->candidate_id)->first();
+
+        if (!$candidateDetail) {
+            return response()->json(['message' => 'Candidate detail not found'], 404);
+        }
+
+        $field = $request->file_type . '_status';
+        $oldStatus = $candidateDetail->$field;
+        $candidateDetail->$field = $request->status;
+        $candidateDetail->save();
+
+        $candidate = User::find($request->candidate_id);
+        $historyController = new HRDHistoryController();
+        $historyController->SimpanAksi(
+            Auth::id(),
+            $request->candidate_id,
+            null,
+            null,
+            $candidate->name,
+            'update_file_status',
+            $oldStatus,
+            $request->status,
+            $request->file_type
+        );
+
+        return response()->json(['message' => 'File status updated successfully']);
     }
 }
