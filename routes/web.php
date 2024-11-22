@@ -81,8 +81,8 @@ Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {
     Route::get('/dashboard/candidate-details/{id}', [DataCandidateController::class, 'show'])
         ->name('dashboard.candidate-details');
 
-    Route::post('/dashboard/candidate/confirm-file', [CandidateUploadController::class, 'confirmFile'])
-        ->name('candidate.confirm-file');
+    Route::post('/dashboard/update-file-status', [DataCandidateController::class, 'updateFileStatus'])
+        ->name('dashboard.update-file-status');
 });
 
 Route::middleware(['auth', EnsureUserIsCandidate::class])->group(function () {

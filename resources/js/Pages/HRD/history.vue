@@ -28,9 +28,10 @@ const timeFilters = [
 ];
 
 const actionTypes = [
-    { value: "all", label: "All Action" },
-    { value: "create", label: "Create" },
-    { value: "update", label: "Update" },
+    { value: "all", label: "All Actions" },
+    { value: "create", label: "Create Score" },
+    { value: "update", label: "Update Score" },
+    { value: "update_file_status", label: "Update File Status" },
 ];
 
 // Debounced search function
@@ -67,6 +68,20 @@ watch(
         );
     }
 );
+
+// Format the action type for display
+const formatActionType = (type) => {
+    switch (type) {
+        case "create":
+            return "Create Score";
+        case "update":
+            return "Update Score";
+        case "update_file_status":
+            return "Update File Status";
+        default:
+            return type;
+    }
+};
 </script>
 
 <template>
@@ -149,10 +164,8 @@ watch(
                         >
                             {{ action.hrd.name }}
                         </td>
-                        <td
-                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                        >
-                            {{ action.action_type }}
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {{ formatActionType(action.action_type) }}
                         </td>
                         <td
                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"

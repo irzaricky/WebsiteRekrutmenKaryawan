@@ -178,9 +178,66 @@ class CandidateUploadController extends Controller
         $field = $request->file_type . '_confirmed';
         $currentValue = $candidateDetail->$field;
 
+        // Toggle confirmation status
         $candidateDetail->$field = !$currentValue;
         $candidateDetail->save();
 
+        // Get candidate name
+        $candidate = User::find($request->candidate_id);
+
+        // Create history record
+        $historyController = new HRDHistoryController();
+        $historyController->SimpanAksi(
+            Auth::id(), // HRD ID
+            $request->candidate_id, // Candidate ID
+            null, // Test Result ID
+            null, // Test Name
+            $candidate->name, // Candidate Name
+            $candidateDetail->$field ? 'confirm_file' : 'unconfirm_file', // Action Type
+            null, // Previous Score
+            null, // New Score
+            $request->file_type // File Type
+        );
+
         return back()->with('message', 'File confirmation status updated');
+    }
+
+    public function updateFileStatus(Request $request)
+    {
+        $request->validate([
+            'candidate_id' => 'required|exists:users,id',
+            'file_type' => 'required|in:photo,cv,certificate',
+            'status' => 'required|in:pending,accepted,rejected'
+        ]);
+
+        $candidateDetail = CandidateDetail::where('user_id', $request->candidate_id)->first();
+
+        if (!$candidateDetail) {
+            return response()->json(['message' => 'Candidate detail not found'], 404);
+        }
+
+        $field = $request->file_type . '_status';
+        $oldStatus = $candidateDetail->$field;
+        $candidateDetail->$field = $request->status;
+        $candidateDetail->save();
+
+        // Get candidate name
+        $candidate = User::find($request->candidate_id);
+
+        // Create history record
+        $historyController = new HRDHistoryController();
+        $historyController->SimpanAksi(
+            Auth::id(),
+            $request->candidate_id,
+            null,
+            null,
+            $candidate->name,
+            'update_file_status',
+            null,
+            null,
+            "{$request->file_type} ({$request->status})"
+        );
+
+        return back()->with('message', 'File status updated successfully');
     }
 }
