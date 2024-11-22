@@ -45,19 +45,36 @@ class CandidateUploadController extends Controller
             'certificate' => 'nullable|mimes:pdf|max:2048'
         ]);
 
-
-
         $user = Auth::user();
         $data = $request->except(['photo', 'cv', 'certificate']);
 
-        // Handle file uploads
+        // Get existing candidate detail
+        $existingDetail = CandidateDetail::where('user_id', $user->id)->first();
+
+        // Handle photo upload
         if ($request->hasFile('photo')) {
+            // Delete old photo if exists
+            if ($existingDetail && $existingDetail->photo_path) {
+                Storage::delete($existingDetail->photo_path);
+            }
             $data['photo_path'] = $request->file('photo')->store('candidate-photos');
         }
+
+        // Handle CV upload
         if ($request->hasFile('cv')) {
+            // Delete old CV if exists
+            if ($existingDetail && $existingDetail->cv_path) {
+                Storage::delete($existingDetail->cv_path);
+            }
             $data['cv_path'] = $request->file('cv')->store('candidate-cvs');
         }
+
+        // Handle certificate upload
         if ($request->hasFile('certificate')) {
+            // Delete old certificate if exists
+            if ($existingDetail && $existingDetail->certificate_path) {
+                Storage::delete($existingDetail->certificate_path);
+            }
             $data['certificate_path'] = $request->file('certificate')->store('candidate-certificates');
         }
 
