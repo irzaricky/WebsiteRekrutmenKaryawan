@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\HrdAction;
 use App\Models\CandidateDetail;
+use App\Models\CandidateDetail;
 use App\Models\User;
 use App\Models\TestsList;
 use App\Models\TestResult;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 use Carbon\Carbon;
 
 class dataCandidateController extends Controller // Ubah ke huruf kapital
@@ -92,6 +94,13 @@ class dataCandidateController extends Controller // Ubah ke huruf kapital
     public function show($id)
     {
         $candidate = User::with('candidateDetail')->findOrFail($id);
+
+        // Format the date while preserving the model relationship
+        if ($candidate->candidateDetail) {
+            $candidate->candidateDetail->birth_date = Carbon::parse($candidate->candidateDetail->birth_date)
+                ->format('Y-m-d');
+        }
+
 
         // Format the date while preserving the model relationship
         if ($candidate->candidateDetail) {
