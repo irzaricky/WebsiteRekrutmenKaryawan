@@ -112,7 +112,7 @@ watch(searchQuery, (value) => {
                         </div>
                     </div>
                     <div
-                        class="hidden shrink-0 sm:flex sm:flex-col sm:items-end space-y-2"
+                        class="hidden shrink-0 sm:flex sm:items-center space-x-2"
                     >
                         <button
                             class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-1 px-2 rounded inline-flex items-center"

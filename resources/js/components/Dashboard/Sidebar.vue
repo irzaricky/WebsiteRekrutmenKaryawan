@@ -19,7 +19,7 @@ const navigation = [
     { name: "Ranking candidate", href: "/dashboard/ranking" },
 ];
 
-const img = [{ id: "1", href: "../assets/images/for.png", link: "/" }];
+const img = [{ id: "1", href: "/assets/images/for.png", link: "/" }];
 </script>
 
 <template>

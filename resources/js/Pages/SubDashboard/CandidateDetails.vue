@@ -23,12 +23,6 @@ const getFileUrl = (type, path) => {
         <div class="p-6">
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-2xl font-semibold">Candidate Details</h1>
-                <Link
-                    :href="route('dashboard.data-candidate')"
-                    class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
-                >
-                    Back
-                </Link>
             </div>
 
             <div class="bg-white rounded-lg shadow p-6">
@@ -129,6 +123,14 @@ const getFileUrl = (type, path) => {
                             View Certificate
                         </a>
                     </div>
+                </div>
+                <div class="flex gap-4 mt-6">
+                    <Link
+                        :href="route('dashboard.data-candidate')"
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+                    >
+                        Back
+                    </Link>
                 </div>
             </div>
         </div>
