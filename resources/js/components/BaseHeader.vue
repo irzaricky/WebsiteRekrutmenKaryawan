@@ -51,20 +51,20 @@
 
                     <template v-else-if="role === 'Candidate'">
                         <div class="relative ml-3">
-                            <button 
+                            <button
                                 @click="toggleDropdown"
                                 class="flex items-center gap-x-2 text-sm font-semibold leading-6 text-gray-900 hover:text-gray-700"
                             >
                                 <span>{{ user?.name }}</span>
-                                <svg 
-                                    class="h-5 w-5" 
+                                <svg
+                                    class="h-5 w-5"
                                     :class="{ 'rotate-180': isDropdownOpen }"
-                                    viewBox="0 0 20 20" 
+                                    viewBox="0 0 20 20"
                                     fill="currentColor"
                                 >
-                                    <path 
-                                        fill-rule="evenodd" 
-                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" 
+                                    <path
+                                        fill-rule="evenodd"
+                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
                                         clip-rule="evenodd"
                                     />
                                 </svg>
@@ -75,10 +75,16 @@
                                 class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
                             >
                                 <Link
-                                    :href="route('profile.candidate.show')"
+                                    :href="route('candidate.profile')"
                                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                 >
                                     Profile
+                                </Link>
+                                <Link
+                                    :href="route('candidate.upload')"
+                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                >
+                                    Upload Documents
                                 </Link>
                                 <Link
                                     :href="route('candidate.file-status')"
@@ -86,7 +92,7 @@
                                 >
                                     Document Status
                                 </Link>
-                                <hr class="my-1">
+                                <hr class="my-1" />
                                 <Link
                                     :href="route('logout')"
                                     method="post"
@@ -121,20 +127,20 @@
 </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { Link } from "@inertiajs/vue3";
+import { ref } from "vue";
 
 const props = defineProps({
-  isLogin: Boolean,
-  role: String,
-  user: Object,
-})
+    isLogin: Boolean,
+    role: String,
+    user: Object,
+});
 
-const isDropdownOpen = ref(false)
+const isDropdownOpen = ref(false);
 
 const toggleDropdown = () => {
-  isDropdownOpen.value = !isDropdownOpen.value
-}
+    isDropdownOpen.value = !isDropdownOpen.value;
+};
 
 const navigation = [
     { name: "Home", href: "/" },
@@ -148,6 +154,6 @@ const img = [{ id: "1", href: "./assets/images/for.png", link: "/" }];
 
 <style scoped>
 .rotate-180 {
-  transform: rotate(180deg);
+    transform: rotate(180deg);
 }
 </style>

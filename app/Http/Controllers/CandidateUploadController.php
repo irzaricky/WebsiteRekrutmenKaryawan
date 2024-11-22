@@ -14,77 +14,158 @@ use App\Rules\ValidNIK;
 
 class CandidateUploadController extends Controller
 {
+    private $maxFileSize = 2048; // 2MB
+    private $allowedImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+
     public function index()
     {
         $user = Auth::user();
-        return Inertia::render('SubDashboard/candidate_upload', [
+        return Inertia::render('Candidate/candidate_upload', [
             'title' => 'Upload Document',
             'candidateDetail' => $user->candidateDetail
         ]);
     }
 
-    public function store(Request $request)
+    public function store_files(Request $request)
     {
-        $request->validate([
-            'nik' => [
-                'required',
-                'string',
-                'size:16',
-                'unique:candidate_details,nik,' . Auth::id() . ',user_id',
-                new ValidNIK
-            ],
-            'full_name' => 'required|string|max:255',
-            'address' => 'required|string',
-            'birth_date' => 'required|date',
-            'education_level' => 'required|in:SMA,D3,S1,S2,S3',
-            'major' => 'required|string',
-            'institution' => 'required|string',
-            'graduation_year' => 'required|integer|min:1900|max:' . date('Y'),
-            'photo' => 'nullable|image|max:2048',
-            'cv' => 'nullable|mimes:pdf|max:2048',
-            'certificate' => 'nullable|mimes:pdf|max:2048'
-        ]);
-
-        $user = Auth::user();
-        $data = $request->except(['photo', 'cv', 'certificate']);
-
-        // Get existing candidate detail
-        $existingDetail = CandidateDetail::where('user_id', $user->id)->first();
-
-        // Handle photo upload
-        if ($request->hasFile('photo')) {
-            // Delete old photo if exists
-            if ($existingDetail && $existingDetail->photo_path) {
-                Storage::delete($existingDetail->photo_path);
+        try {
+            // Validate at least one file is uploaded
+            if (!$request->hasAny(['photo', 'cv', 'certificate'])) {
+                return redirect()->back()->with([
+                    'message' => 'Please upload at least one file.',
+                    'type' => 'warning'
+                ]);
             }
-            $data['photo_path'] = $request->file('photo')->store('candidate-photos');
+
+            $request->validate([
+                'photo' => [
+                    'nullable',
+                    'image',
+                    'max:' . $this->maxFileSize,
+                    function ($attribute, $value, $fail) {
+                        if ($value && !in_array($value->getMimeType(), $this->allowedImageTypes)) {
+                            $fail('The photo must be a JPEG, PNG or JPG image.');
+                        }
+                    },
+                ],
+                'cv' => 'nullable|mimes:pdf|max:' . $this->maxFileSize,
+                'certificate' => 'nullable|mimes:pdf|max:' . $this->maxFileSize,
+            ]);
+
+            $user = Auth::user();
+            $messages = [];
+
+            // Handle file uploads
+            if ($request->hasFile('photo')) {
+                try {
+                    $this->handleFileUpload($request, 'photo', 'candidate-photos', $user);
+                    $messages[] = 'Photo uploaded successfully.';
+                } catch (\Exception $e) {
+                    $messages[] = 'Failed to upload photo: ' . $e->getMessage();
+                }
+            }
+
+            if ($request->hasFile('cv')) {
+                try {
+                    $this->handleFileUpload($request, 'cv', 'candidate-cvs', $user);
+                    $messages[] = 'CV uploaded successfully.';
+                } catch (\Exception $e) {
+                    $messages[] = 'Failed to upload CV: ' . $e->getMessage();
+                }
+            }
+
+            if ($request->hasFile('certificate')) {
+                try {
+                    $this->handleFileUpload($request, 'certificate', 'candidate-certificates', $user);
+                    $messages[] = 'Certificate uploaded successfully.';
+                } catch (\Exception $e) {
+                    $messages[] = 'Failed to upload certificate: ' . $e->getMessage();
+                }
+            }
+
+            return redirect()->back()->with([
+                'message' => implode(' ', $messages),
+                'type' => empty($messages) ? 'warning' : 'success'
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()->withErrors($e->validator)->with([
+                'message' => 'Please check your file requirements.',
+                'type' => 'error'
+            ]);
+        }
+    }
+
+    public function store_profile(Request $request)
+    {
+        try {
+            $user = Auth::user();
+
+            $request->validate([
+                'nik' => [
+                    'required',
+                    'string',
+                    'size:16',
+                    'unique:candidate_details,nik,' . Auth::id() . ',user_id',
+                    new ValidNIK
+                ],
+                'full_name' => 'required|string|max:255',
+                'birth_date' => 'required|date',
+                'address' => 'required|string',
+                'education_level' => 'required|in:SMA,D3,S1,S2,S3',
+                'major' => 'required|string',
+                'institution' => 'required|string',
+                'graduation_year' => 'required|integer|min:1900|max:' . date('Y'),
+            ]);
+
+            $data = $request->only([
+                'nik',
+                'full_name',
+                'birth_date',
+                'address',
+                'education_level',
+                'major',
+                'institution',
+                'graduation_year'
+            ]);
+
+            CandidateDetail::updateOrCreate(
+                ['user_id' => $user->id],
+                $data
+            );
+
+            return redirect()->back()->with([
+                'message' => 'Profile updated successfully',
+                'type' => 'success'
+            ]);
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with([
+                'message' => 'Failed to update profile: ' . $e->getMessage(),
+                'type' => 'error'
+            ]);
+        }
+    }
+
+    private function handleFileUpload($request, $field, $path, $user)
+    {
+        $file = $request->file($field);
+        $existingDetail = $user->candidateDetail;
+
+        // Delete old file if exists
+        $fieldPath = $field . '_path';
+        if ($existingDetail && $existingDetail->$fieldPath) {
+            Storage::delete($existingDetail->$fieldPath);
         }
 
-        // Handle CV upload
-        if ($request->hasFile('cv')) {
-            // Delete old CV if exists
-            if ($existingDetail && $existingDetail->cv_path) {
-                Storage::delete($existingDetail->cv_path);
-            }
-            $data['cv_path'] = $request->file('cv')->store('candidate-cvs');
-        }
+        // Store new file
+        $filePath = $file->store($path);
 
-        // Handle certificate upload
-        if ($request->hasFile('certificate')) {
-            // Delete old certificate if exists
-            if ($existingDetail && $existingDetail->certificate_path) {
-                Storage::delete($existingDetail->certificate_path);
-            }
-            $data['certificate_path'] = $request->file('certificate')->store('candidate-certificates');
-        }
-
-        // Update or create candidate details
+        // Update or create candidate detail
         CandidateDetail::updateOrCreate(
             ['user_id' => $user->id],
-            $data
+            [$fieldPath => $filePath]
         );
-
-        return redirect()->back()->with('message', 'Data berhasil disimpan');
     }
 
     public function getFile($type, $filename)

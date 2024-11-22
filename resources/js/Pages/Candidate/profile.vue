@@ -1,31 +1,16 @@
 <script setup>
-import { Head, useForm, Link } from "@inertiajs/vue3";
-import { onMounted } from "vue";
+import Sidebar from "../../components/Dashboard/Sidebar.vue";
+import { Head, useForm } from "@inertiajs/vue3";
 
 const props = defineProps({
     title: String,
-    user: Object,
     candidateDetail: Object,
-    flash: Object,
 });
-
-// Add getFilename function
-const getFilename = (path) => {
-    if (!path) return "";
-    return path.split("/").pop();
-};
-
-// Format the date to YYYY-MM-DD
-const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toISOString().split("T")[0];
-};
 
 const form = useForm({
     nik: props.candidateDetail?.nik || "",
-    full_name: props.user?.name || "",
-    birth_date: formatDate(props.candidateDetail?.birth_date) || "", // Format the date
+    full_name: props.candidateDetail?.full_name || "",
+    birth_date: props.candidateDetail?.birth_date || "",
     address: props.candidateDetail?.address || "",
     education_level: props.candidateDetail?.education_level || "",
     major: props.candidateDetail?.major || "",
@@ -34,49 +19,24 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route("profile.candidate.update"), {
+    form.post(route("candidate.profile.update"), {
         preserveScroll: true,
-        forceFormData: true,
-        onSuccess: () => {
-            form.reset("photo", "cv", "certificate");
-        },
     });
 };
 </script>
 
 <template>
     <Head :title="title" />
+    <Sidebar>
+        <div class="container mx-auto p-6">
+            <h1 class="text-2xl font-bold mb-6">Profile Kandidat</h1>
 
-    <div class="container mx-auto p-6">
-        <!-- Success Message -->
-        <div
-            v-if="$page.props.flash.success"
-            class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded"
-        >
-            {{ $page.props.flash.success }}
-        </div>
-
-        <!-- Error Message -->
-        <div
-            v-if="$page.props.flash.error"
-            class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded"
-        >
-            {{ $page.props.flash.error }}
-        </div>
-
-        <div class="flex items-center gap-4 mb-6">
-            <h1 class="text-2xl font-bold">Profile</h1>
-        </div>
-
-        <!-- Add form enctype for file uploads -->
-        <form
-            @submit.prevent="submit"
-            enctype="multipart/form-data"
-            class="space-y-6"
-        >
-            <div class="bg-white rounded-lg shadow p-6">
+            <form
+                @submit.prevent="submit"
+                class="space-y-6 bg-white rounded-lg shadow p-6"
+            >
                 <!-- Personal Information -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700"
                             >NIK</label
@@ -87,12 +47,6 @@ const submit = () => {
                             maxlength="16"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                         />
-                        <div
-                            v-if="form.errors.nik"
-                            class="text-red-500 text-sm mt-1"
-                        >
-                            {{ form.errors.nik }}
-                        </div>
                     </div>
 
                     <div>
@@ -103,7 +57,6 @@ const submit = () => {
                             type="text"
                             v-model="form.full_name"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                            disabled
                         />
                     </div>
 
@@ -116,12 +69,6 @@ const submit = () => {
                             v-model="form.birth_date"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                         />
-                        <div
-                            v-if="form.errors.birth_date"
-                            class="text-red-500 text-sm mt-1"
-                        >
-                            {{ form.errors.birth_date }}
-                        </div>
                     </div>
 
                     <div>
@@ -137,7 +84,7 @@ const submit = () => {
                 </div>
 
                 <!-- Education Information -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700"
                             >Pendidikan Terakhir</label
@@ -184,26 +131,23 @@ const submit = () => {
                         <input
                             type="number"
                             v-model="form.graduation_year"
+                            min="1900"
+                            :max="new Date().getFullYear()"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                         />
                     </div>
                 </div>
-                <div class="flex justify-end mt-6 space-x-4">
-                    <Link
-                        href="/"
-                        class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium rounded-md transition-colors duration-150 ease-in-out"
-                    >
-                        Back
-                    </Link>
+
+                <div class="flex justify-end">
                     <button
                         type="submit"
                         :disabled="form.processing"
-                        class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-md transition-colors duration-150 ease-in-out"
+                        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                     >
-                        {{ form.processing ? "Updating..." : "Update Profile" }}
+                        Simpan Profile
                     </button>
                 </div>
-            </div>
-        </form>
-    </div>
+            </form>
+        </div>
+    </Sidebar>
 </template>

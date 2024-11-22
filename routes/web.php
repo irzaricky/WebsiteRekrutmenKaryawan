@@ -49,7 +49,7 @@ Route::middleware(['auth', EnsureUserIsCandidate::class])->group(function () {
         ->name('candidate.upload');
 
     Route::post('/candidate/upload', [CandidateUploadController::class, 'store'])
-        ->name('candidate.upload.store');
+        ->name('candidate.files.update');
 
     Route::delete('/candidate/file', [CandidateUploadController::class, 'deleteFile'])
         ->name('candidate.file.delete');
@@ -89,12 +89,23 @@ Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {
         ->name('dashboard.pending-files');
 });
 
+
 Route::middleware(['auth', EnsureUserIsCandidate::class])->group(function () {
     // Profile routes
-    Route::controller(CandidateProfileController::class)->group(function () {
-        Route::get('/profile/candidate', 'index')->name('profile.candidate.show');
-        Route::post('/profile/candidate', 'update')->name('profile.candidate.update');
-    });
+    Route::get('/candidate/profile', [CandidateProfileController::class, 'index'])
+        ->name('candidate.profile');
+    Route::post('/candidate/profile', [CandidateUploadController::class, 'store_profile'])
+        ->name('candidate.profile.update');
+
+    // File upload routes  
+    Route::get('/candidate/upload', [CandidateUploadController::class, 'index'])
+        ->name('candidate.upload');
+    Route::post('/candidate/upload', [CandidateUploadController::class, 'store_files'])
+        ->name('candidate.files.update');
+    Route::delete('/candidate/file', [CandidateUploadController::class, 'deleteFile'])
+        ->name('candidate.file.delete');
+    Route::get('/candidate/file-status', [CandidateUploadController::class, 'fileStatus'])
+        ->name('candidate.file-status');
 });
 
 Route::middleware('auth')->group(function () {
