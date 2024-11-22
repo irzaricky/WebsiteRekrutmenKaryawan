@@ -1,6 +1,10 @@
 <template>
     <Head :title="title" />
-    <BaseHeader />
+    <BaseHeader
+        :is-login="$page.props.auth.user !== null"
+        :role="$page.props.auth.user?.role"
+        :user="$page.props.auth.user"
+    />
     <div class="relative isolate bg-white px-6 py-24 sm:py-32 lg:px-8">
         <div
             class="absolute inset-x-0 -top-3 -z-10 transform-gpu overflow-hidden px-36 blur-3xl"

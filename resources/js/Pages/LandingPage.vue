@@ -1,7 +1,11 @@
 <template>
     <div>
         <Head :title="title" />
-        <BaseHeader />
+        <BaseHeader
+            :is-login="$page.props.auth.user !== null"
+            :role="$page.props.auth.user?.role"
+            :user="$page.props.auth.user"
+        />
         <LandingPageHero />
         <LandingPageFeature />
         <LandingPageTeams />

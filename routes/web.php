@@ -53,6 +53,8 @@ Route::middleware(['auth', EnsureUserIsCandidate::class])->group(function () {
 
     Route::delete('/candidate/file', [CandidateUploadController::class, 'deleteFile'])
         ->name('candidate.file.delete');
+    Route::get('/candidate/file-status', [CandidateUploadController::class, 'fileStatus'])
+        ->name('candidate.file-status');
 });
 
 Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {
