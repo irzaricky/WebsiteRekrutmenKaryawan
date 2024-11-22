@@ -14,7 +14,8 @@ const getStatusBadgeClass = (status) => {
             pending: "bg-yellow-100 text-yellow-800",
             accepted: "bg-green-100 text-green-800",
             rejected: "bg-red-100 text-red-800",
-        }[status] || "bg-gray-100 text-gray-800"
+            "not uploaded": "bg-gray-100 text-gray-500",
+        }[status] || "bg-gray-100 text-gray-500"
     );
 };
 </script>
@@ -22,7 +23,7 @@ const getStatusBadgeClass = (status) => {
 <template>
     <Sidebar>
         <div class="p-6">
-            <h2 class="text-2xl font-bold mb-6">Pending Files Review</h2>
+            <h2 class="text-2xl font-bold mb-6">Files Review</h2>
 
             <div class="bg-white shadow rounded-lg overflow-hidden">
                 <table class="min-w-full divide-y divide-gray-200">
@@ -69,7 +70,7 @@ const getStatusBadgeClass = (status) => {
                                         'px-2 py-1 rounded-full text-xs',
                                         getStatusBadgeClass(
                                             candidate.candidate_detail
-                                                ?.photo_status
+                                                ?.photo_status || 'not uploaded'
                                         ),
                                     ]"
                                 >
@@ -85,7 +86,7 @@ const getStatusBadgeClass = (status) => {
                                         'px-2 py-1 rounded-full text-xs',
                                         getStatusBadgeClass(
                                             candidate.candidate_detail
-                                                ?.cv_status
+                                                ?.cv_status || 'not uploaded'
                                         ),
                                     ]"
                                 >
@@ -101,7 +102,8 @@ const getStatusBadgeClass = (status) => {
                                         'px-2 py-1 rounded-full text-xs',
                                         getStatusBadgeClass(
                                             candidate.candidate_detail
-                                                ?.certificate_status
+                                                ?.certificate_status ||
+                                                'not uploaded'
                                         ),
                                     ]"
                                 >
@@ -128,6 +130,46 @@ const getStatusBadgeClass = (status) => {
                         </tr>
                     </tbody>
                 </table>
+
+                <!-- Modify the pagination controls section -->
+                <div class="px-6 py-4 bg-white border-t border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-gray-500">
+                            Showing {{ candidates.from }} to
+                            {{ candidates.to }} of
+                            {{ candidates.total }} results
+                        </div>
+                        <div class="flex gap-2">
+                            <!-- Previous button -->
+                            <Link
+                                :href="candidates.prev_page_url"
+                                :class="[
+                                    'px-4 py-2 text-sm rounded-md',
+                                    candidates.prev_page_url
+                                        ? 'bg-blue-500 text-white hover:bg-blue-600'
+                                        : 'bg-gray-200 text-gray-500 cursor-not-allowed',
+                                ]"
+                                :disabled="!candidates.prev_page_url"
+                            >
+                                Previous
+                            </Link>
+
+                            <!-- Next button -->
+                            <Link
+                                :href="candidates.next_page_url"
+                                :class="[
+                                    'px-4 py-2 text-sm rounded-md',
+                                    candidates.next_page_url
+                                        ? 'bg-blue-500 text-white hover:bg-blue-600'
+                                        : 'bg-gray-200 text-gray-500 cursor-not-allowed',
+                                ]"
+                                :disabled="!candidates.next_page_url"
+                            >
+                                Next
+                            </Link>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </Sidebar>

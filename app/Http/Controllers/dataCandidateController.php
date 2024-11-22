@@ -150,24 +150,14 @@ class dataCandidateController extends Controller // Ubah ke huruf kapital
 
     public function getPendingFiles(Request $request)
     {
-        $pendingCandidates = User::where('role', 'Candidate')
-            ->with([
-                'candidateDetail' => function ($query) {
-                    $query->where('photo_status', 'pending')
-                        ->orWhere('cv_status', 'pending')
-                        ->orWhere('certificate_status', 'pending');
-                }
-            ])
-            ->whereHas('candidateDetail', function ($query) {
-                $query->where('photo_status', 'pending')
-                    ->orWhere('cv_status', 'pending')
-                    ->orWhere('certificate_status', 'pending');
-            })
-            ->paginate(10);
+        // Get all candidates, not just pending ones
+        $candidates = User::where('role', 'Candidate')
+            ->with('candidateDetail') // Load all candidate details
+            ->paginate(8);
 
         return Inertia::render('HRD/pending-files', [
-            'title' => "Pending Files",
-            'candidates' => $pendingCandidates
+            'title' => "Files Review",
+            'candidates' => $candidates
         ]);
     }
 }
