@@ -4,14 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\HrdAction;
 use App\Models\CandidateDetail;
-use App\Models\CandidateDetail;
 use App\Models\User;
 use App\Models\TestsList;
 use App\Models\TestResult;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 use Carbon\Carbon;
 
 class dataCandidateController extends Controller // Ubah ke huruf kapital
