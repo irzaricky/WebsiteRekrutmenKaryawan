@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Carbon\Carbon;
+use Illuminate\Validation\Rule;
+use App\Rules\ValidNIK;
 
 class CandidateUploadController extends Controller
 {
@@ -23,7 +26,13 @@ class CandidateUploadController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nik' => 'required|string|size:16|unique:candidate_details,nik,' . Auth::id() . ',user_id',
+            'nik' => [
+                'required',
+                'string',
+                'size:16',
+                'unique:candidate_details,nik,' . Auth::id() . ',user_id',
+                new ValidNIK
+            ],
             'full_name' => 'required|string|max:255',
             'address' => 'required|string',
             'birth_date' => 'required|date',
@@ -35,6 +44,8 @@ class CandidateUploadController extends Controller
             'cv' => 'nullable|mimes:pdf|max:2048',
             'certificate' => 'nullable|mimes:pdf|max:2048'
         ]);
+
+
 
         $user = Auth::user();
         $data = $request->except(['photo', 'cv', 'certificate']);
@@ -63,10 +74,10 @@ class CandidateUploadController extends Controller
     {
         // Get current logged in user
         $user = Auth::user();
-        
+
         // Get candidate ID from filename or request
         $candidateUserId = request()->query('candidate_id');
-        
+
         // If user is HRD, allow access with candidate_id
         if ($user->role === 'HRD') {
             $candidateDetail = CandidateDetail::where('user_id', $candidateUserId)->first();

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use App\Rules\ValidNIK;
 
 class CandidateProfileController extends Controller
 {
@@ -29,7 +30,13 @@ class CandidateProfileController extends Controller
             $user = Auth::user();
 
             $request->validate([
-                'nik' => 'required|string|size:16|unique:candidate_details,nik,' . $user->id . ',user_id',
+                'nik' => [
+                    'required',
+                    'string',
+                    'size:16',
+                    'unique:candidate_details,nik,' . Auth::id() . ',user_id',
+                    new ValidNIK
+                ],
                 'full_name' => 'required|string|max:255',
                 'birth_date' => 'required|date_format:Y-m-d', // Validate date format
                 'address' => 'required|string',
