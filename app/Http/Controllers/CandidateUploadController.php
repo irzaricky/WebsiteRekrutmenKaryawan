@@ -161,4 +161,26 @@ class CandidateUploadController extends Controller
 
         return response()->json(['message' => 'File deleted successfully']);
     }
+
+    public function confirmFile(Request $request)
+    {
+        $request->validate([
+            'candidate_id' => 'required|exists:users,id',
+            'file_type' => 'required|in:photo,cv,certificate'
+        ]);
+
+        $candidateDetail = CandidateDetail::where('user_id', $request->candidate_id)->first();
+
+        if (!$candidateDetail) {
+            return response()->json(['message' => 'Candidate detail not found'], 404);
+        }
+
+        $field = $request->file_type . '_confirmed';
+        $currentValue = $candidateDetail->$field;
+
+        $candidateDetail->$field = !$currentValue;
+        $candidateDetail->save();
+
+        return back()->with('message', 'File confirmation status updated');
+    }
 }

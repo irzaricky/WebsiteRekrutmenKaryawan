@@ -1,6 +1,6 @@
 <script setup>
 import Sidebar from "../../components/Dashboard/Sidebar.vue";
-import { Head, Link } from "@inertiajs/vue3";
+import { Head, Link, router } from "@inertiajs/vue3";
 
 const props = defineProps({
     title: String,
@@ -14,6 +14,17 @@ const getFileUrl = (type, path) => {
         filename: filename,
         candidate_id: props.candidateDetails.id, // Access candidateDetails through props
     });
+};
+
+const confirmFile = async (type) => {
+    try {
+        await router.post(route("candidate.confirm-file"), {
+            candidate_id: props.candidateDetails.id,
+            file_type: type,
+        });
+    } catch (error) {
+        console.error("Error confirming file:", error);
+    }
 };
 </script>
 
@@ -83,6 +94,20 @@ const getFileUrl = (type, path) => {
                             "
                             class="h-32 w-32 object-cover rounded mt-2"
                         />
+                        <div class="flex items-center gap-2 mt-2">
+                            <input
+                                type="checkbox"
+                                :checked="
+                                    candidateDetails.candidate_detail
+                                        .photo_confirmed
+                                "
+                                @change="confirmFile('photo')"
+                                class="rounded border-gray-300"
+                            />
+                            <label class="text-sm text-gray-600"
+                                >Konfirmasi Foto</label
+                            >
+                        </div>
                     </div>
 
                     <!-- CV Preview -->
@@ -100,6 +125,20 @@ const getFileUrl = (type, path) => {
                         >
                             View CV
                         </a>
+                        <div class="flex items-center gap-2 mt-2">
+                            <input
+                                type="checkbox"
+                                :checked="
+                                    candidateDetails.candidate_detail
+                                        .cv_confirmed
+                                "
+                                @change="confirmFile('cv')"
+                                class="rounded border-gray-300"
+                            />
+                            <label class="text-sm text-gray-600"
+                                >Konfirmasi CV</label
+                            >
+                        </div>
                     </div>
 
                     <!-- Certificate Preview -->
@@ -122,6 +161,20 @@ const getFileUrl = (type, path) => {
                         >
                             View Certificate
                         </a>
+                        <div class="flex items-center gap-2 mt-2">
+                            <input
+                                type="checkbox"
+                                :checked="
+                                    candidateDetails.candidate_detail
+                                        .certificate_confirmed
+                                "
+                                @change="confirmFile('certificate')"
+                                class="rounded border-gray-300"
+                            />
+                            <label class="text-sm text-gray-600"
+                                >Konfirmasi Ijazah</label
+                            >
+                        </div>
                     </div>
                 </div>
                 <div class="flex gap-4 mt-6">

@@ -41,6 +41,8 @@ Route::get('/candidate/file/{type}/{filename}', [CandidateUploadController::clas
     ->name('candidate.file')
     ->middleware('auth'); // Hanya perlu auth
 
+
+
 Route::middleware(['auth', EnsureUserIsCandidate::class])->group(function () {
     // Routes khusus untuk Candidate
     Route::get('/candidate/upload', [CandidateUploadController::class, 'index'])
@@ -78,6 +80,9 @@ Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {
 
     Route::get('/dashboard/candidate-details/{id}', [DataCandidateController::class, 'show'])
         ->name('dashboard.candidate-details');
+
+    Route::post('/dashboard/candidate/confirm-file', [CandidateUploadController::class, 'confirmFile'])
+        ->name('candidate.confirm-file');
 });
 
 Route::middleware(['auth', EnsureUserIsCandidate::class])->group(function () {
