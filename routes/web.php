@@ -83,6 +83,8 @@ Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {
 
     Route::post('/dashboard/update-file-status', [DataCandidateController::class, 'updateFileStatus'])
         ->name('dashboard.update-file-status');
+    Route::get('/dashboard/pending-files', [DataCandidateController::class, 'getPendingFiles'])
+        ->name('dashboard.pending-files');
 });
 
 Route::middleware(['auth', EnsureUserIsCandidate::class])->group(function () {

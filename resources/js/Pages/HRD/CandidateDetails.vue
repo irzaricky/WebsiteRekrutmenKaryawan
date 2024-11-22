@@ -253,7 +253,7 @@ const formatDate = (date) => {
                 </div>
                 <div class="flex gap-4 mt-6">
                     <Link
-                        :href="route('dashboard.data-candidate')"
+                        :href="route('dashboard.pending-files')"
                         class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
                     >
                         Back

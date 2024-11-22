@@ -14,7 +14,8 @@ function toggleSidebar() {
 
 const navigation = [
     { name: "Beranda", href: "/dashboard" },
-    { name: "Data candidate", href: "/dashboard/data-candidate" },
+    { name: "Edit Nilai candidate", href: "/dashboard/data-candidate" },
+    { name: "Konfirmasi Files candidate", href: "/dashboard/pending-files" },
     { name: "Histori HRD", href: "/dashboard/history" },
     { name: "Ranking candidate", href: "/dashboard/ranking" },
 ];

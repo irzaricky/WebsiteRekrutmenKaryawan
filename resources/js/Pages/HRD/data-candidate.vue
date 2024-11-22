@@ -124,17 +124,6 @@ watch(searchQuery, (value) => {
                                 Edit Nilai
                             </Link>
                         </button>
-                        <Link
-                            :href="
-                                route(
-                                    'dashboard.candidate-details',
-                                    candidate.id
-                                )
-                            "
-                            class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded inline-flex items-center"
-                        >
-                            Data Candidate
-                        </Link>
                     </div>
                 </li>
             </ul>

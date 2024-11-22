@@ -140,4 +140,27 @@ class dataCandidateController extends Controller // Ubah ke huruf kapital
 
         return response()->json(['message' => 'File status updated successfully']);
     }
+
+    public function getPendingFiles(Request $request)
+    {
+        $pendingCandidates = User::where('role', 'Candidate')
+            ->with([
+                'candidateDetail' => function ($query) {
+                    $query->where('photo_status', 'pending')
+                        ->orWhere('cv_status', 'pending')
+                        ->orWhere('certificate_status', 'pending');
+                }
+            ])
+            ->whereHas('candidateDetail', function ($query) {
+                $query->where('photo_status', 'pending')
+                    ->orWhere('cv_status', 'pending')
+                    ->orWhere('certificate_status', 'pending');
+            })
+            ->paginate(10);
+
+        return Inertia::render('HRD/pending-files', [
+            'title' => "Pending Files",
+            'candidates' => $pendingCandidates
+        ]);
+    }
 }
