@@ -118,32 +118,20 @@ class CandidateUploadController extends Controller
                 'graduation_year' => 'required|integer|min:1900|max:' . date('Y'),
             ]);
 
-            $data = $request->only([
-                'nik',
-                'full_name',
-                'birth_date',
-                'address',
-                'education_level',
-                'major',
-                'institution',
-                'graduation_year'
-            ]);
+            // Format date 
+            $data = $request->all();
+            $data['birth_date'] = Carbon::parse($request->birth_date)->format('Y-m-d');
 
+            // Update candidate details
             CandidateDetail::updateOrCreate(
                 ['user_id' => $user->id],
                 $data
             );
 
-            return redirect()->back()->with([
-                'message' => 'Profile updated successfully',
-                'type' => 'success'
-            ]);
+            return redirect()->back()->with('success', 'Profile updated successfully');
 
         } catch (\Exception $e) {
-            return redirect()->back()->with([
-                'message' => 'Failed to update profile: ' . $e->getMessage(),
-                'type' => 'error'
-            ]);
+            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 
@@ -320,5 +308,14 @@ class CandidateUploadController extends Controller
         );
 
         return back()->with('message', 'File status updated successfully');
+    }
+
+    public function fileStatus()
+    {
+        $user = Auth::user();
+        return Inertia::render('Candidate/FileSubmissionStatus', [
+            'title' => 'File Status',
+            'candidateDetail' => $user->candidateDetail
+        ]);
     }
 }

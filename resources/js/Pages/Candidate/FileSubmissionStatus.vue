@@ -1,6 +1,8 @@
 <script setup>
 import { useForm } from "@inertiajs/vue3";
 import Sidebar from "../../components/Dashboard/Sidebar.vue";
+import { Link } from "@inertiajs/vue3";
+import { computed } from "vue";
 
 const props = defineProps({
     title: String,
@@ -14,7 +16,7 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route("candidate.files.upload"), {
+    form.post(route("candidate.files.update"), {
         preserveScroll: true,
         onSuccess: () => {
             form.reset("photo", "cv", "certificate");
@@ -52,33 +54,41 @@ const getStatusMessage = (status) => {
         }[status] || "Status tidak diketahui"
     );
 };
+
+// Add computed property to check if all files are accepted
+const allFilesAccepted = computed(() => {
+    return (
+        props.candidateDetail?.photo_status === "accepted" &&
+        props.candidateDetail?.cv_status === "accepted" &&
+        props.candidateDetail?.certificate_status === "accepted"
+    );
+});
 </script>
 
 <template>
-    <Sidebar>
+    <div>
         <div class="container mx-auto p-6">
-            <h1 class="text-2xl font-bold mb-6">Document Upload</h1>
-
-            <!-- File upload form -->
-            <form
-                @submit.prevent="submit"
-                class="mb-8 bg-white rounded-lg shadow p-6"
-            >
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- File upload fields... -->
-                </div>
-                <div class="flex justify-end mt-4">
-                    <button
-                        type="submit"
-                        :disabled="form.processing"
-                        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            <!-- Header with both buttons -->
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold">Document Status</h1>
+                <div class="flex gap-4">
+                    <Link
+                        :href="route('home')"
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
                     >
-                        Upload Files
-                    </button>
+                        Back
+                    </Link>
+                    <Link
+                        v-if="!allFilesAccepted"
+                        :href="route('candidate.upload')"
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+                    >
+                        Upload Document
+                    </Link>
                 </div>
-            </form>
+            </div>
 
-            <!-- Status cards -->
+            <!-- Rest of existing template code -->
             <div class="space-y-6">
                 <!-- Photo Status -->
                 <div class="bg-white p-6 rounded-lg shadow">
@@ -93,25 +103,27 @@ const getStatusMessage = (status) => {
                             ]"
                         >
                             {{
-                                candidateDetail?.photo_status || "Not uploaded"
+                                props.candidateDetail?.photo_status ||
+                                "Not uploaded"
                             }}
                         </span>
                     </div>
                     <p class="text-sm text-gray-600">
                         {{ getStatusMessage(candidateDetail?.photo_status) }}
                     </p>
-                    <div v-if="candidateDetail?.photo_path" class="mt-4">
-                        <img
-                            :src="
-                                route('candidate.file', {
-                                    type: 'photo',
-                                    filename: candidateDetail.photo_path
-                                        .split('/')
-                                        .pop(),
-                                })
-                            "
-                            class="h-32 w-32 object-cover rounded"
-                        />
+                    <div v-if="props.candidateDetail?.photo_path" class="mt-4">
+                        <a
+                            :href="route('candidate.file', {
+                                type: 'photo',
+                                filename: props.candidateDetail.photo_path
+                                    .split('/')
+                                    .pop(),
+                            })"
+                            target="_blank"
+                            class="text-blue-600 hover:text-blue-800"
+                        >
+                            View Photo
+                        </a>
                     </div>
                 </div>
 
@@ -193,5 +205,5 @@ const getStatusMessage = (status) => {
                 </div>
             </div>
         </div>
-    </Sidebar>
+    </div>
 </template>

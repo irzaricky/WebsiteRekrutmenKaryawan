@@ -11,9 +11,9 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('candidate_details', function (Blueprint $table) {
-            $table->enum('photo_status', ['pending', 'accepted', 'rejected'])->default('pending');
-            $table->enum('cv_status', ['pending', 'accepted', 'rejected'])->default('pending');
-            $table->enum('certificate_status', ['pending', 'accepted', 'rejected'])->default('pending');
+            $table->enum('photo_status', ['pending', 'accepted', 'rejected'])->nullable();
+            $table->enum('cv_status', ['pending', 'accepted', 'rejected'])->nullable();
+            $table->enum('certificate_status', ['pending', 'accepted', 'rejected'])->nullable();
         });
     }
 
