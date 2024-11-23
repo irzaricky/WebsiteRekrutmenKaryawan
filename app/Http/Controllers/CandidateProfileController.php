@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use App\Rules\ValidNIK;
+use Carbon\Carbon;
 
 class CandidateProfileController extends Controller
 {
@@ -38,7 +39,7 @@ class CandidateProfileController extends Controller
                     new ValidNIK
                 ],
                 'full_name' => 'required|string|max:255',
-                'birth_date' => 'required|date_format:Y-m-d', // Validate date format
+                'birth_date' => 'required|date', // Simplified date validation
                 'address' => 'required|string',
                 'education_level' => 'required|in:SMA,D3,S1,S2,S3',
                 'major' => 'required|string',
@@ -46,31 +47,12 @@ class CandidateProfileController extends Controller
                 'graduation_year' => 'required|integer|min:1900|max:' . date('Y')
             ]);
 
-            // Handle file uploads
+            // Get all request data except files
             $data = $request->except(['cv', 'photo', 'certificate']);
 
-            // Format the date before saving
-            $data['birth_date'] = date('Y-m-d', strtotime($request->birth_date));
-
-            if ($request->hasFile('photo')) {
-                if ($user->candidateDetail && $user->candidateDetail->photo_path) {
-                    Storage::delete($user->candidateDetail->photo_path);
-                }
-                $data['photo_path'] = $request->file('photo')->store('candidate-photos');
-            }
-
-            if ($request->hasFile('cv')) {
-                if ($user->candidateDetail && $user->candidateDetail->cv_path) {
-                    Storage::delete($user->candidateDetail->cv_path);
-                }
-                $data['cv_path'] = $request->file('cv')->store('candidate-cvs');
-            }
-
-            if ($request->hasFile('certificate')) {
-                if ($user->candidateDetail && $user->candidateDetail->certificate_path) {
-                    Storage::delete($user->candidateDetail->certificate_path);
-                }
-                $data['certificate_path'] = $request->file('certificate')->store('candidate-certificates');
+            // Format date only once
+            if ($request->birth_date) {
+                $data['birth_date'] = Carbon::parse($request->birth_date)->format('Y-m-d');
             }
 
             // Update or create candidate details
@@ -79,9 +61,10 @@ class CandidateProfileController extends Controller
                 $data
             );
 
-            return redirect()->route('profile.candidate.show')->with('success', 'Profile updated successfully');
+            return redirect()->back()->with('success', 'Profile updated successfully');
+
         } catch (\Exception $e) {
-            return redirect()->back()->withErrors(['error' => 'Failed to update profile: ' . $e->getMessage()]);
+            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 }

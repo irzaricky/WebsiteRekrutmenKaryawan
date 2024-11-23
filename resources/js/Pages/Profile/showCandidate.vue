@@ -25,7 +25,7 @@ const formatDate = (dateString) => {
 const form = useForm({
     nik: props.candidateDetail?.nik || "",
     full_name: props.user?.name || "",
-    birth_date: formatDate(props.candidateDetail?.birth_date) || "", // Format the date
+    birth_date: formatDate(props.candidateDetail?.birth_date) || "",
     address: props.candidateDetail?.address || "",
     education_level: props.candidateDetail?.education_level || "",
     major: props.candidateDetail?.major || "",
@@ -34,12 +34,9 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route("profile.candidate.update"), {
+    form.post(route("candidate.profile.update"), {
         preserveScroll: true,
         forceFormData: true,
-        onSuccess: () => {
-            form.reset("photo", "cv", "certificate");
-        },
     });
 };
 </script>
