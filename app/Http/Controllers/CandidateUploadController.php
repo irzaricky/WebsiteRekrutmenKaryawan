@@ -223,7 +223,9 @@ class CandidateUploadController extends Controller
         $path = $candidateDetail->$field;
 
         if ($path && Storage::exists($path)) {
+            // Menghapus file dari storage server
             Storage::delete($path);
+            // Menghapus path file dari database
             $candidateDetail->$field = null;
             $candidateDetail->save();
         }

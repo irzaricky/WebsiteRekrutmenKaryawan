@@ -39,6 +39,21 @@ const getFilename = (path) => {
 };
 
 const removeFile = async (type) => {
+    // Show confirmation dialog with file type specific message
+    const fileTypes = {
+        photo: "Foto",
+        cv: "CV",
+        certificate: "Ijazah",
+    };
+
+    const confirmed = window.confirm(
+        `Anda yakin ingin menghapus ${fileTypes[type]} ini?`
+    );
+
+    if (!confirmed) {
+        return; // Exit if not confirmed
+    }
+
     try {
         await axios.delete(route("candidate.file.delete"), { data: { type } });
         window.location.reload();
