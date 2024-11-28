@@ -61,7 +61,7 @@ Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {
 
     Route::get('/dashboard', function () {
         $controller = new CandidateRankingController();
-        return Inertia::render('Dashboard', $controller->getDashboardAnalytics());
+        return Inertia::render('HRD/Dashboard', $controller->getDashboardAnalytics()); // Update path
     })->middleware(['auth'])->name('dashboard');
     ;
 
