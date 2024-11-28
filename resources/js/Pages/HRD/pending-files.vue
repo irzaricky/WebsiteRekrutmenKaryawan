@@ -1,4 +1,5 @@
 <script setup>
+import { Head } from "@inertiajs/vue3";
 import { ref } from "vue";
 import Sidebar from "../../components/Dashboard/Sidebar.vue";
 import { Link } from "@inertiajs/vue3";
@@ -21,6 +22,7 @@ const getStatusBadgeClass = (status) => {
 </script>
 
 <template>
+    <Head :title="title" />
     <Sidebar :title="title">
         <div class="p-4">
             <div class="bg-white shadow rounded-lg overflow-hidden">

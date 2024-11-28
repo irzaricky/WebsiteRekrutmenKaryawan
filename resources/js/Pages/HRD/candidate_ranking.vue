@@ -1,4 +1,5 @@
 <script setup>
+import { Head } from "@inertiajs/vue3";
 import Sidebar from "../../components/Dashboard/Sidebar.vue";
 import { defineProps, ref, computed } from "vue";
 
@@ -21,6 +22,7 @@ const filteredCandidates = computed(() => {
 </script>
 
 <template>
+    <Head :title="title" />
     <Sidebar :title="title">
         <div class="container mx-auto px-4">
             <h1 class="text-2xl font-bold mb-4"></h1>
