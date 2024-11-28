@@ -19,14 +19,15 @@ class dataCandidateController extends Controller // Ubah ke huruf kapital
         $search = $request->input('search');
 
         $candidates = User::where('role', 'Candidate')
+            ->with(['testResults.test']) // Include test results and test names
             ->when($search, function ($query, $search) {
                 return $query->where('name', 'LIKE', "%{$search}%");
             })
-            ->paginate(10);
+            ->paginate(6);
 
         return Inertia::render('HRD/data-candidate', [
             'title' => "Data Candidate",
-            'candidates' => $candidates, // Mengirim data kandidat ke komponen
+            'candidates' => $candidates,
         ]);
     }
 

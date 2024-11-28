@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Sidebar from "../../components/Dashboard/Sidebar.vue";
 import { Head, Link } from "@inertiajs/vue3";
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { router } from "@inertiajs/vue3";
 import debounce from "lodash/debounce";
 
@@ -27,6 +27,21 @@ const handleSearch = debounce((value) => {
 watch(searchQuery, (value) => {
     handleSearch(value);
 });
+
+// Add test name constants
+const TEST_NAMES = ["TIU", "TWK", "TKB", "TW"];
+
+const TABLE_HEADER_CLASSES =
+    "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider";
+const TABLE_CELL_CLASSES = "px-6 py-4 whitespace-nowrap text-sm text-gray-900";
+
+// Get score for specific test
+const getTestScore = (candidate: any, testName: string) => {
+    return (
+        candidate.test_results?.find((result) => result.test.name === testName)
+            ?.score || "-"
+    );
+};
 </script>
 
 <template>
@@ -59,39 +74,96 @@ watch(searchQuery, (value) => {
                 </div>
             </div>
 
-            <!-- Candidate List -->
-            <ul role="list" class="divide-y divide-gray-100 mb-6">
-                <li
-                    v-for="candidate in candidates.data"
-                    :key="candidate.id"
-                    class="flex justify-between items-center py-4"
-                >
-                    <div class="flex items-center gap-4">
-                        <img
-                            :src="img[0].href"
-                            alt=""
-                            class="h-12 w-12 rounded-full bg-gray-50"
-                        />
-                        <div>
-                            <p class="text-sm font-semibold text-gray-900">
-                                {{ candidate.name }}
-                            </p>
-                            <p class="text-xs text-gray-500">
-                                {{ candidate.email }}
-                            </p>
-                        </div>
-                    </div>
-                    <Link
-                        :href="`/edit-data-candidate/${candidate.id}`"
-                        class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-1.5 px-3 rounded text-sm"
-                    >
-                        Edit Nilai
-                    </Link>
-                </li>
-            </ul>
+            <!-- Candidates Table -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" :class="TABLE_HEADER_CLASSES">
+                                Photo
+                            </th>
+                            <th scope="col" :class="TABLE_HEADER_CLASSES">
+                                Name
+                            </th>
+                            <th
+                                v-for="test in TEST_NAMES"
+                                :key="test"
+                                scope="col"
+                                :class="TABLE_HEADER_CLASSES"
+                            >
+                                {{ test }}
+                            </th>
+                            <th scope="col" :class="TABLE_HEADER_CLASSES">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr
+                            v-for="candidate in candidates.data"
+                            :key="candidate.id"
+                        >
+                            <td :class="TABLE_CELL_CLASSES">
+                                <img
+                                    :src="img[0].href"
+                                    :alt="candidate.name"
+                                    class="h-10 w-10 rounded-full"
+                                />
+                            </td>
+                            <td :class="TABLE_CELL_CLASSES">
+                                <div>
+                                    <div class="font-medium">
+                                        {{ candidate.name }}
+                                    </div>
+                                    <div class="text-gray-500 text-xs">
+                                        {{ candidate.email }}
+                                    </div>
+                                </div>
+                            </td>
+                            <td
+                                v-for="test in TEST_NAMES"
+                                :key="test"
+                                :class="TABLE_CELL_CLASSES"
+                            >
+                                <span
+                                    :class="{
+                                        'font-medium': true,
+                                        'text-green-600':
+                                            getTestScore(candidate, test) >= 80,
+                                        'text-yellow-600':
+                                            getTestScore(candidate, test) >=
+                                                60 &&
+                                            getTestScore(candidate, test) < 80,
+                                        'text-red-600':
+                                            getTestScore(candidate, test) <
+                                                60 &&
+                                            getTestScore(candidate, test) !==
+                                                '-',
+                                    }"
+                                >
+                                    {{ getTestScore(candidate, test) }}
+                                </span>
+                            </td>
+                            <td :class="TABLE_CELL_CLASSES">
+                                <Link
+                                    :href="
+                                        route(
+                                            'dashboard.edit-data-candidate',
+                                            candidate.id
+                                        )
+                                    "
+                                    class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                                >
+                                    Edit Nilai
+                                </Link>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
             <!-- Pagination Footer -->
-            <div class="border-t border-gray-200 pt-4">
+            <div class="border-t border-gray-200 pt-4 mt-4">
                 <div class="flex items-center justify-between">
                     <p class="text-sm text-gray-500">
                         Showing {{ candidates.from }} to {{ candidates.to }} of
@@ -99,28 +171,21 @@ watch(searchQuery, (value) => {
                     </p>
                     <div class="flex gap-2">
                         <Link
-                            :href="candidates.prev_page_url"
+                            v-for="(url, label) in {
+                                prev_page_url: 'Previous',
+                                next_page_url: 'Next',
+                            }"
+                            :key="label"
+                            :href="candidates[label]"
                             :class="[
                                 'px-4 py-2 text-sm rounded-md transition-colors duration-150',
-                                candidates.prev_page_url
+                                candidates[label]
                                     ? 'bg-blue-500 text-white hover:bg-blue-600'
                                     : 'bg-gray-200 text-gray-500 cursor-not-allowed',
                             ]"
-                            :disabled="!candidates.prev_page_url"
+                            :disabled="!candidates[label]"
                         >
-                            Previous
-                        </Link>
-                        <Link
-                            :href="candidates.next_page_url"
-                            :class="[
-                                'px-4 py-2 text-sm rounded-md transition-colors duration-150',
-                                candidates.next_page_url
-                                    ? 'bg-blue-500 text-white hover:bg-blue-600'
-                                    : 'bg-gray-200 text-gray-500 cursor-not-allowed',
-                            ]"
-                            :disabled="!candidates.next_page_url"
-                        >
-                            Next
+                            {{ url }}
                         </Link>
                     </div>
                 </div>
