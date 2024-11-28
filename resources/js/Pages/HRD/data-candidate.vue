@@ -35,11 +35,10 @@ watch(searchQuery, (value) => {
 
 <template>
     <Head :title="title" />
-    <Sidebar>
+    <Sidebar :title="title">
         <div class="space-y-4">
             <!-- Header with Search -->
             <div class="flex justify-between items-center">
-                <h2 class="text-lg font-light">Data Candidate</h2>
                 <!-- Search Input -->
                 <div class="relative w-64">
                     <!-- Reduced width with w-64 -->

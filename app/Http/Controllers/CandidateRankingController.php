@@ -129,6 +129,7 @@ class CandidateRankingController extends Controller
 
         //Meneruskan data ke view
         return Inertia::render('HRD/candidate_ranking', [
+            'title' => 'Candidate Rankings',
             'candidates' => $rankingData
         ]);
     }

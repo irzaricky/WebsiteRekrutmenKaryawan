@@ -4,6 +4,10 @@ import { ref } from "vue";
 import { Link, usePage } from "@inertiajs/vue3";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
+const props = defineProps({
+    title: String, // Add title prop
+});
+
 const isCollapsed = ref(false);
 const user = usePage().props.auth.user; // Get logged in user data
 
@@ -27,7 +31,7 @@ const img = [{ id: "1", href: "/assets/images/for.png", link: "/" }];
         <!-- Sidebar -->
         <div
             :class="[
-                'bg-gray-800 min-h-screen p-7 pt-4 relative transition-all top-0',
+                'bg-gray-800 min-h-screen p-7 pt-4 relative transition-all   top-0',
                 {
                     'w-64 duration-700': !isCollapsed,
                     'w-28 duration-700': isCollapsed,
@@ -79,8 +83,8 @@ const img = [{ id: "1", href: "/assets/images/for.png", link: "/" }];
 
         <!-- Main Content Area -->
         <div class="flex-1">
-            <!-- Header -->
-            <DashboardHeader :user="user" />
+            <!-- Header with title -->
+            <DashboardHeader :user="user" :title="title" />
 
             <!-- Page Content -->
             <div class="p-6 pt-3">

@@ -21,10 +21,8 @@ const getStatusBadgeClass = (status) => {
 </script>
 
 <template>
-    <Sidebar>
+    <Sidebar :title="title">
         <div class="p-6">
-            <h2 class="text-2xl font-bold mb-6">Files Review</h2>
-
             <div class="bg-white shadow rounded-lg overflow-hidden">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">

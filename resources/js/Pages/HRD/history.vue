@@ -86,10 +86,8 @@ const formatActionType = (type) => {
 
 <template>
     <Head :title="title" />
-    <Sidebar>
+    <Sidebar :title="title">
         <div class="p-6 pt-3 flex-1">
-            <h1 class="text-2xl font-semibold mb-4">History</h1>
-
             <!-- Filter Controls -->
             <div class="flex gap-4 mb-6">
                 <!-- Search HRD Name -->
