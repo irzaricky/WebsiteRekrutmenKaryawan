@@ -8,7 +8,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <header class="bg-gray-300 h-[70px] shadow-sm relative">
+    <header class="bg-[#8D99AE] h-[70px] shadow-sm relative">
         <div class="h-full px-6 flex items-center justify-between">
             <!-- Left side - Title -->
             <div>

@@ -31,7 +31,7 @@ const img = [{ id: "1", href: "/assets/images/for.png", link: "/" }];
         <!-- Sidebar -->
         <div
             :class="[
-                'bg-gray-800 min-h-screen p-7 pt-4 relative transition-all   top-0',
+                'bg-[#2B2D42] min-h-screen p-7 pt-4 relative transition-all top-0',
                 {
                     'w-64 duration-700': !isCollapsed,
                     'w-28 duration-700': isCollapsed,
@@ -82,7 +82,7 @@ const img = [{ id: "1", href: "/assets/images/for.png", link: "/" }];
         </div>
 
         <!-- Main Content Area -->
-        <div class="flex-1">
+        <div class="flex-1 bg-[#EDF2F4]">
             <!-- Header with title -->
             <DashboardHeader :user="user" :title="title" />
 

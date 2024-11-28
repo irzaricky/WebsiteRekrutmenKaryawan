@@ -22,7 +22,7 @@ const getStatusBadgeClass = (status) => {
 
 <template>
     <Sidebar :title="title">
-        <div class="p-6">
+        <div class="p-4">
             <div class="bg-white shadow rounded-lg overflow-hidden">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">

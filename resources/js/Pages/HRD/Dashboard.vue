@@ -56,7 +56,7 @@ const testScoresData = {
 <template>
     <Head :title="title" />
     <Sidebar :title="title">
-        <div class="p-6">
+        <div class="p-4">
             <!-- Statistics Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div class="bg-white rounded-lg shadow p-6">

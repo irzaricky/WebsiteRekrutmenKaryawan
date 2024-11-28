@@ -87,7 +87,7 @@ const formatActionType = (type) => {
 <template>
     <Head :title="title" />
     <Sidebar :title="title">
-        <div class="p-6 pt-3 flex-1">
+        <div class="p-4 pt-3 flex-1">
             <!-- Filter Controls -->
             <div class="flex gap-4 mb-6">
                 <!-- Search HRD Name -->
