@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Head } from "@inertiajs/vue3";
 import Sidebar from "../../components/Dashboard/Sidebar.vue";
 import { Head, useForm, Link } from "@inertiajs/vue3"; // Add Link import
 const props = defineProps({
