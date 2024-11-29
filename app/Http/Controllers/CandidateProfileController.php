@@ -18,7 +18,7 @@ class CandidateProfileController extends Controller
         $user = Auth::user();
         $candidateDetail = $user->candidateDetail;
 
-        return Inertia::render('Profile/showCandidate', [
+        return Inertia::render('Candidate/profile', [
             'title' => 'Profile',
             'user' => $user,
             'candidateDetail' => $candidateDetail
