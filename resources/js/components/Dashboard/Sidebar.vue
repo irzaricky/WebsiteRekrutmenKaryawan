@@ -5,11 +5,11 @@ import { Link, usePage } from "@inertiajs/vue3";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
 const props = defineProps({
-    title: String, // Add title prop
+    title: String
 });
 
 const isCollapsed = ref(false);
-const user = usePage().props.auth.user; // Get logged in user data
+const user = usePage().props.auth.user; 
 
 function toggleSidebar() {
     isCollapsed.value = !isCollapsed.value;
