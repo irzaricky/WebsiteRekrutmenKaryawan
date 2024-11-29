@@ -1,14 +1,80 @@
 <script setup>
 import Sidebar from "../../components/Dashboard/Sidebar.vue";
-import { Head, useForm, Link } from "@inertiajs/vue3"; // Add Link import
+import { Head, useForm, Link } from "@inertiajs/vue3";
 import axios from "axios";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 
 const props = defineProps({
     title: String,
     candidateDetail: Object,
     errors: Object,
 });
+
+const form = useForm({
+    photo: null,
+    cv: null,
+    certificate: null,
+});
+
+// Add refs for file names and preview URLs
+const photoName = ref("");
+const cvName = ref("");
+const certificateName = ref("");
+
+// Computed properties for file URLs
+const photoUrl = computed(() => {
+    if (props.candidateDetail?.photo_path) {
+        return route("candidate.file", {
+            type: "photo",
+            filename: props.candidateDetail.photo_path.split("/").pop(),
+        });
+    }
+    return null;
+});
+
+const cvUrl = computed(() => {
+    if (props.candidateDetail?.cv_path) {
+        return route("candidate.file", {
+            type: "cv",
+            filename: props.candidateDetail.cv_path.split("/").pop(),
+        });
+    }
+    return null;
+});
+
+const certificateUrl = computed(() => {
+    if (props.candidateDetail?.certificate_path) {
+        return route("candidate.file", {
+            type: "certificate",
+            filename: props.candidateDetail.certificate_path.split("/").pop(),
+        });
+    }
+    return null;
+});
+
+// File handler functions
+const handlePhotoUpload = (event) => {
+    const file = event.target.files[0];
+    form.photo = file;
+    photoName.value = file ? file.name : "";
+};
+
+const handleCVUpload = (event) => {
+    const file = event.target.files[0];
+    form.cv = file;
+    cvName.value = file ? file.name : "";
+};
+
+const handleCertificateUpload = (event) => {
+    const file = event.target.files[0];
+    form.certificate = file;
+    certificateName.value = file ? file.name : "";
+};
+
+// Modify getFilename to handle null/undefined paths
+const getFilename = (path) => {
+    return path ? path.split("/").pop() : "";
+};
 
 // Add computed property to check if all files are accepted
 const allFilesAccepted = computed(() => {
@@ -19,12 +85,6 @@ const allFilesAccepted = computed(() => {
     );
 });
 
-const form = useForm({
-    photo: null,
-    cv: null,
-    certificate: null,
-});
-
 const submit = () => {
     form.post(route("candidate.files.update"), {
         preserveScroll: true,
@@ -32,10 +92,6 @@ const submit = () => {
             form.reset("photo", "cv", "certificate");
         },
     });
-};
-
-const getFilename = (path) => {
-    return path.split("/").pop();
 };
 
 const removeFile = async (type) => {
@@ -114,37 +170,31 @@ const removeFile = async (type) => {
                                 class="block text-sm font-medium text-gray-700"
                                 >Foto</label
                             >
-                            <div
-                                v-if="candidateDetail?.photo_path"
-                                class="mt-2"
-                            >
+                            <div v-if="photoUrl" class="mt-2 mb-2">
                                 <a
-                                    :href="
-                                        route('candidate.file', {
-                                            type: 'photo',
-                                            filename: getFilename(
-                                                candidateDetail.photo_path
-                                            ),
-                                        })
-                                    "
+                                    :href="photoUrl"
                                     target="_blank"
                                     class="text-blue-600 hover:text-blue-800"
                                 >
-                                    Lihat Foto
+                                    <img
+                                        :src="photoUrl"
+                                        alt="Preview"
+                                        class="w-32 h-32 object-cover rounded-md"
+                                    />
+                                    <span class="text-sm"
+                                        >View uploaded photo</span
+                                    >
                                 </a>
-                                <button
-                                    @click="removeFile('photo')"
-                                    class="text-red-600 text-sm ml-2 hover:text-red-800"
-                                >
-                                    Hapus Foto
-                                </button>
                             </div>
                             <input
                                 type="file"
-                                @input="form.photo = $event.target.files[0]"
+                                @input="handlePhotoUpload"
                                 accept="image/*"
                                 class="mt-1 block w-full"
                             />
+                            <span v-if="photoName" class="text-sm text-gray-600"
+                                >Selected: {{ photoName }}</span
+                            >
                         </div>
 
                         <!-- CV Upload -->
@@ -153,34 +203,33 @@ const removeFile = async (type) => {
                                 class="block text-sm font-medium text-gray-700"
                                 >CV (PDF)</label
                             >
-                            <div v-if="candidateDetail?.cv_path" class="mt-2">
+                            <div v-if="cvUrl" class="mt-2 mb-2">
                                 <a
-                                    :href="
-                                        route('candidate.file', {
-                                            type: 'cv',
-                                            filename: getFilename(
-                                                candidateDetail.cv_path
-                                            ),
-                                        })
-                                    "
+                                    :href="cvUrl"
                                     target="_blank"
                                     class="text-blue-600 hover:text-blue-800"
                                 >
-                                    Lihat CV
+                                    <svg
+                                        class="w-8 h-8 inline-block mr-2"
+                                        fill="currentColor"
+                                        viewBox="0 0 20 20"
+                                    >
+                                        <path
+                                            d="M4 18h12a2 2 0 002-2V6a2 2 0 00-2-2h-5.586l-2-2H4a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                        />
+                                    </svg>
+                                    <span>View uploaded CV</span>
                                 </a>
-                                <button
-                                    @click="removeFile('cv')"
-                                    class="text-red-600 text-sm ml-2 hover:text-red-800"
-                                >
-                                    Hapus CV
-                                </button>
                             </div>
                             <input
                                 type="file"
-                                @input="form.cv = $event.target.files[0]"
+                                @input="handleCVUpload"
                                 accept=".pdf"
                                 class="mt-1 block w-full"
                             />
+                            <span v-if="cvName" class="text-sm text-gray-600"
+                                >Selected: {{ cvName }}</span
+                            >
                         </div>
 
                         <!-- Certificate Upload -->
@@ -189,39 +238,35 @@ const removeFile = async (type) => {
                                 class="block text-sm font-medium text-gray-700"
                                 >Ijazah (PDF)</label
                             >
-                            <div
-                                v-if="candidateDetail?.certificate_path"
-                                class="mt-2"
-                            >
+                            <div v-if="certificateUrl" class="mt-2 mb-2">
                                 <a
-                                    :href="
-                                        route('candidate.file', {
-                                            type: 'certificate',
-                                            filename: getFilename(
-                                                candidateDetail.certificate_path
-                                            ),
-                                        })
-                                    "
+                                    :href="certificateUrl"
                                     target="_blank"
                                     class="text-blue-600 hover:text-blue-800"
                                 >
-                                    Lihat Ijazah
+                                    <svg
+                                        class="w-8 h-8 inline-block mr-2"
+                                        fill="currentColor"
+                                        viewBox="0 0 20 20"
+                                    >
+                                        <path
+                                            d="M4 18h12a2 2 0 002-2V6a2 2 0 00-2-2h-5.586l-2-2H4a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                        />
+                                    </svg>
+                                    <span>View uploaded certificate</span>
                                 </a>
-                                <button
-                                    @click="removeFile('certificate')"
-                                    class="text-red-600 text-sm ml-2 hover:text-red-800"
-                                >
-                                    Hapus Ijazah
-                                </button>
                             </div>
                             <input
                                 type="file"
-                                @input="
-                                    form.certificate = $event.target.files[0]
-                                "
+                                @input="handleCertificateUpload"
                                 accept=".pdf"
                                 class="mt-1 block w-full"
                             />
+                            <span
+                                v-if="certificateName"
+                                class="text-sm text-gray-600"
+                                >Selected: {{ certificateName }}</span
+                            >
                         </div>
                     </div>
 

@@ -22,7 +22,8 @@ class CandidateUploadController extends Controller
         $user = Auth::user();
         return Inertia::render('Candidate/candidate_upload', [
             'title' => 'Upload Document',
-            'candidateDetail' => $user->candidateDetail
+            'candidateDetail' => $user->candidateDetail,
+            'errors' => session('errors', null)
         ]);
     }
 
@@ -315,9 +316,19 @@ class CandidateUploadController extends Controller
     public function fileStatus()
     {
         $user = Auth::user();
+        // Load candidateDetail with all file-related fields
+        $candidateDetail = $user->candidateDetail()->select([
+            'photo_path',
+            'photo_status',
+            'cv_path',
+            'cv_status',
+            'certificate_path',
+            'certificate_status'
+        ])->first();
+
         return Inertia::render('Candidate/FileSubmissionStatus', [
             'title' => 'File Status',
-            'candidateDetail' => $user->candidateDetail
+            'candidateDetail' => $candidateDetail
         ]);
     }
 }
