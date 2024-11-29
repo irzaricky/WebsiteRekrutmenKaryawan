@@ -20,10 +20,17 @@ class CandidateUploadController extends Controller
     public function index()
     {
         $user = Auth::user();
+        $candidateDetail = $user->candidateDetail;
+
+        // Redirect if profile not complete
+        if (!$candidateDetail || !$candidateDetail->nik) {
+            return redirect()->route('candidate.profile')
+                ->with('message', 'Please complete your profile before uploading documents.');
+        }
+
         return Inertia::render('Candidate/candidate_upload', [
             'title' => 'Upload Document',
-            'candidateDetail' => $user->candidateDetail,
-            'errors' => session('errors', null)
+            'candidateDetail' => $candidateDetail
         ]);
     }
 
@@ -316,19 +323,11 @@ class CandidateUploadController extends Controller
     public function fileStatus()
     {
         $user = Auth::user();
-        // Load candidateDetail with all file-related fields
-        $candidateDetail = $user->candidateDetail()->select([
-            'photo_path',
-            'photo_status',
-            'cv_path',
-            'cv_status',
-            'certificate_path',
-            'certificate_status'
-        ])->first();
+        $candidateDetail = $user->candidateDetail;
 
         return Inertia::render('Candidate/FileSubmissionStatus', [
             'title' => 'File Status',
-            'candidateDetail' => $candidateDetail
+            'candidateDetail' => $candidateDetail,
         ]);
     }
 }

@@ -1,8 +1,8 @@
 <script setup>
-import { useForm } from "@inertiajs/vue3";
 import Sidebar from "../../components/Dashboard/Sidebar.vue";
-import { Link } from "@inertiajs/vue3";
-import { computed } from "vue";
+import { Head, useForm, Link } from "@inertiajs/vue3";
+import axios from "axios";
+import { computed, ref } from "vue";
 
 const props = defineProps({
     title: String,
@@ -63,6 +63,16 @@ const allFilesAccepted = computed(() => {
         props.candidateDetail?.certificate_status === "accepted"
     );
 });
+
+// Check if profile exists
+const hasProfile = computed(() => {
+    return !!props.candidateDetail?.nik; // Check for required profile field
+});
+
+// Add computed property to disable upload
+const canUpload = computed(() => {
+    return hasProfile.value;
+});
 </script>
 
 <template>
@@ -78,20 +88,44 @@ const allFilesAccepted = computed(() => {
                     >
                         Back
                     </Link>
-                    <Link
-                        v-if="!allFilesAccepted"
-                        :href="route('candidate.upload')"
-                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-                    >
-                        Upload Document
-                    </Link>
                 </div>
+            </div>
+
+            <!-- Profile Required Warning -->
+            <div
+                v-if="!hasProfile"
+                class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-6"
+            >
+                <p class="font-bold">Profile Data Required</p>
+                <p>
+                    Please complete your profile information before uploading
+                    documents.
+                </p>
+                <Link
+                    :href="route('candidate.profile')"
+                    class="mt-2 inline-block bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+                >
+                    Complete Profile
+                </Link>
+            </div>
+
+            <!-- Upload Document Button -->
+            <div v-else-if="!allFilesAccepted" class="mb-6">
+                <Link
+                    :href="route('candidate.upload')"
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+                >
+                    Upload Document
+                </Link>
             </div>
 
             <!-- Rest of existing template code -->
             <div class="space-y-6">
                 <!-- Photo Status -->
-                <div class="bg-white p-6 rounded-lg shadow">
+                <div
+                    class="bg-white p-6 rounded-lg shadow"
+                    :class="{ 'opacity-50': !hasProfile }"
+                >
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold">Foto</h3>
                         <span
@@ -113,12 +147,14 @@ const allFilesAccepted = computed(() => {
                     </p>
                     <div v-if="props.candidateDetail?.photo_path" class="mt-4">
                         <a
-                            :href="route('candidate.file', {
-                                type: 'photo',
-                                filename: props.candidateDetail.photo_path
-                                    .split('/')
-                                    .pop(),
-                            })"
+                            :href="
+                                route('candidate.file', {
+                                    type: 'photo',
+                                    filename: props.candidateDetail.photo_path
+                                        .split('/')
+                                        .pop(),
+                                })
+                            "
                             target="_blank"
                             class="text-blue-600 hover:text-blue-800"
                         >
@@ -128,7 +164,10 @@ const allFilesAccepted = computed(() => {
                 </div>
 
                 <!-- CV Status -->
-                <div class="bg-white p-6 rounded-lg shadow">
+                <div
+                    class="bg-white p-6 rounded-lg shadow"
+                    :class="{ 'opacity-50': !hasProfile }"
+                >
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold">CV</h3>
                         <span
@@ -162,7 +201,10 @@ const allFilesAccepted = computed(() => {
                 </div>
 
                 <!-- Certificate Status -->
-                <div class="bg-white p-6 rounded-lg shadow">
+                <div
+                    class="bg-white p-6 rounded-lg shadow"
+                    :class="{ 'opacity-50': !hasProfile }"
+                >
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold">Ijazah</h3>
                         <span
