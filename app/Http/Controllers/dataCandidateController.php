@@ -17,13 +17,28 @@ class dataCandidateController extends Controller // Ubah ke huruf kapital
     public function getUser(Request $request)
     {
         $search = $request->input('search');
+        $emptyScores = $request->boolean('empty_scores');
 
-        $candidates = User::where('role', 'Candidate')
-            ->with(['testResults.test']) // Include test results and test names
-            ->when($search, function ($query, $search) {
-                return $query->where('name', 'LIKE', "%{$search}%");
-            })
-            ->paginate(6);
+        $query = User::where('role', 'Candidate')
+            ->with(['testResults.test']);
+
+        // Apply search filter first
+        if ($search) {
+            $query->where('name', 'LIKE', "%{$search}%");
+        }
+
+        // Then apply empty scores filter
+        if ($emptyScores) {
+            $query->where(function ($q) {
+                $q->whereDoesntHave('testResults')
+                    ->orWhereHas('testResults', function ($query) {
+                        $query->whereNull('score')
+                            ->orWhere('score', '');
+                    });
+            });
+        }
+
+        $candidates = $query->paginate(6);
 
         return Inertia::render('HRD/data-candidate', [
             'title' => "Data Candidate",

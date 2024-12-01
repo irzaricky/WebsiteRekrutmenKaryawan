@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Sidebar from "../../components/Dashboard/Sidebar.vue";
 import { Head, Link } from "@inertiajs/vue3";
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed, onMounted } from "vue";
 import { router } from "@inertiajs/vue3";
 import debounce from "lodash/debounce";
 
@@ -13,19 +13,49 @@ const props = defineProps({
     candidates: Object,
 });
 
-const handleSearch = debounce((value) => {
-    router.get(
-        route("dashboard.data-candidate"),
-        { search: value },
-        {
-            preserveState: true,
-            preserveScroll: true,
+const filters = ref({
+    emptyScores: false,
+});
+
+// Tambahkan fungsi untuk membersihkan parameter URL yang kosong
+const cleanParams = (params) => {
+    const cleanedParams = {};
+    Object.keys(params).forEach((key) => {
+        if (
+            params[key] !== null &&
+            params[key] !== undefined &&
+            params[key] !== ""
+        ) {
+            cleanedParams[key] = params[key];
         }
-    );
+    });
+    return cleanedParams;
+};
+
+// Modifikasi handleFiltersChange
+const handleFiltersChange = debounce(() => {
+    const params = cleanParams({
+        search: searchQuery.value,
+        empty_scores: filters.value.emptyScores,
+    });
+
+    router.get(route("dashboard.data-candidate"), params, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
 }, 300);
 
-watch(searchQuery, (value) => {
-    handleSearch(value);
+// Combine both watchers into one to ensure synchronized updates
+watch([() => filters.value.emptyScores, searchQuery], () => {
+    handleFiltersChange();
+});
+
+// Initialize from URL params on mount
+onMounted(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    filters.value.emptyScores = urlParams.get("empty_scores") === "true";
+    searchQuery.value = urlParams.get("search") || "";
 });
 
 // Add test name constants
@@ -72,6 +102,19 @@ const getTestScore = (candidate: any, testName: string) => {
                         </svg>
                     </span>
                 </div>
+            </div>
+
+            <div class="mb-4 flex items-center">
+                <input
+                    type="checkbox"
+                    id="emptyScores"
+                    v-model="filters.emptyScores"
+                    @change="handleFiltersChange"
+                    class="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                />
+                <label for="emptyScores" class="ml-2 text-sm text-gray-600">
+                    Show only candidates with empty scores
+                </label>
             </div>
 
             <!-- Candidates Table -->
@@ -166,8 +209,10 @@ const getTestScore = (candidate: any, testName: string) => {
             <div class="border-t border-gray-200 pt-4 mt-4">
                 <div class="flex items-center justify-between">
                     <p class="text-sm text-gray-500">
-                        Showing {{ candidates.from }} to {{ candidates.to }} of
-                        {{ candidates.total }} results
+                        {{ candidates.total 
+                            ? `Showing ${candidates.from} to ${candidates.to} of ${candidates.total} results`
+                            : 'No results found' 
+                        }}
                     </p>
                     <div class="flex gap-2">
                         <Link
