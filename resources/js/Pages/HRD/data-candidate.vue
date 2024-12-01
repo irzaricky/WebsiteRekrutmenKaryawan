@@ -34,9 +34,13 @@ const cleanParams = (params) => {
 
 // Modifikasi handleFiltersChange
 const handleFiltersChange = debounce(() => {
+    const currentQuery = new URLSearchParams(window.location.search);
+    const currentPage = currentQuery.get("page");
+
     const params = cleanParams({
         search: searchQuery.value,
         empty_scores: filters.value.emptyScores,
+        page: currentPage, // Preserve current page
     });
 
     router.get(route("dashboard.data-candidate"), params, {
@@ -72,14 +76,26 @@ const getTestScore = (candidate: any, testName: string) => {
             ?.score || "-"
     );
 };
+
+// Update pagination links to preserve filter state
+const getPaginationUrl = (url) => {
+    if (!url) return null;
+    const urlObj = new URL(url);
+    urlObj.searchParams.set("empty_scores", filters.value.emptyScores);
+    if (searchQuery.value) {
+        urlObj.searchParams.set("search", searchQuery.value);
+    }
+    return urlObj.toString();
+};
 </script>
 
 <template>
     <Head :title="title" />
     <Sidebar :title="title">
-        <div class="bg-white p-6 rounded-lg shadow-sm">
-            <!-- Search Header -->
-            <div class="mb-6">
+        <div class="p-4">
+            <!-- Search and Filter Section -->
+            <div class="mb-4 flex items-center justify-between">
+                <!-- Search Input -->
                 <div class="relative w-64">
                     <input
                         v-model="searchQuery"
@@ -102,23 +118,23 @@ const getTestScore = (candidate: any, testName: string) => {
                         </svg>
                     </span>
                 </div>
+
+                <!-- Filter Checkbox -->
+                <div class="flex items-center">
+                    <input
+                        type="checkbox"
+                        id="emptyScores"
+                        v-model="filters.emptyScores"
+                        class="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                    />
+                    <label for="emptyScores" class="ml-2 text-sm text-gray-600">
+                        Show only candidates with empty scores
+                    </label>
+                </div>
             </div>
 
-            <div class="mb-4 flex items-center">
-                <input
-                    type="checkbox"
-                    id="emptyScores"
-                    v-model="filters.emptyScores"
-                    @change="handleFiltersChange"
-                    class="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                />
-                <label for="emptyScores" class="ml-2 text-sm text-gray-600">
-                    Show only candidates with empty scores
-                </label>
-            </div>
-
-            <!-- Candidates Table -->
-            <div class="overflow-x-auto">
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <!-- Table Section -->
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
@@ -141,6 +157,8 @@ const getTestScore = (candidate: any, testName: string) => {
                             </th>
                         </tr>
                     </thead>
+
+                    <!-- Rest of your existing table body code -->
                     <tbody class="bg-white divide-y divide-gray-200">
                         <tr
                             v-for="candidate in candidates.data"
@@ -203,35 +221,35 @@ const getTestScore = (candidate: any, testName: string) => {
                         </tr>
                     </tbody>
                 </table>
-            </div>
 
-            <!-- Pagination Footer -->
-            <div class="border-t border-gray-200 pt-4 mt-4">
-                <div class="flex items-center justify-between">
-                    <p class="text-sm text-gray-500">
-                        {{ candidates.total 
-                            ? `Showing ${candidates.from} to ${candidates.to} of ${candidates.total} results`
-                            : 'No results found' 
-                        }}
-                    </p>
-                    <div class="flex gap-2">
-                        <Link
-                            v-for="(url, label) in {
-                                prev_page_url: 'Previous',
-                                next_page_url: 'Next',
-                            }"
-                            :key="label"
-                            :href="candidates[label]"
-                            :class="[
-                                'px-4 py-2 text-sm rounded-md transition-colors duration-150',
-                                candidates[label]
-                                    ? 'bg-blue-500 text-white hover:bg-blue-600'
-                                    : 'bg-gray-200 text-gray-500 cursor-not-allowed',
-                            ]"
-                            :disabled="!candidates[label]"
-                        >
-                            {{ url }}
-                        </Link>
+                <!-- Pagination Section -->
+                <div class="px-6 py-4 border-t border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-gray-500">
+                            Showing {{ candidates.from }} to
+                            {{ candidates.to }} of
+                            {{ candidates.total }} results
+                        </div>
+
+                        <div class="flex gap-2">
+                            <Link
+                                v-for="(url, label) in {
+                                    prev_page_url: 'Previous',
+                                    next_page_url: 'Next',
+                                }"
+                                :key="label"
+                                :href="getPaginationUrl(candidates[label])"
+                                :class="[
+                                    'px-4 py-2 text-sm rounded-md transition-colors duration-150',
+                                    candidates[label]
+                                        ? 'bg-blue-500 text-white hover:bg-blue-600'
+                                        : 'bg-gray-200 text-gray-500 cursor-not-allowed',
+                                ]"
+                                :disabled="!candidates[label]"
+                            >
+                                {{ url }}
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -1,6 +1,8 @@
 <script setup>
 import { Head } from "@inertiajs/vue3";
-import { ref } from "vue";
+import { ref, watch, onMounted } from "vue";
+import { router } from "@inertiajs/vue3";
+import debounce from "lodash/debounce";
 import Sidebar from "../../components/Dashboard/Sidebar.vue";
 import { Link } from "@inertiajs/vue3";
 
@@ -8,6 +10,75 @@ import { Link } from "@inertiajs/vue3";
 defineProps({
     title: String,
     candidates: Object,
+});
+
+// Add search query state
+const searchQuery = ref("");
+
+// Filters state
+const filters = ref({
+    notUploaded: false,
+});
+
+// Clean URL parameters
+const cleanParams = (params) => {
+    const cleanedParams = {};
+    Object.keys(params).forEach((key) => {
+        if (
+            params[key] !== null &&
+            params[key] !== undefined &&
+            params[key] !== ""
+        ) {
+            cleanedParams[key] = params[key];
+        }
+    });
+    return cleanedParams;
+};
+
+// Add getPaginationUrl helper
+const getPaginationUrl = (url) => {
+    if (!url) return null;
+    const urlObj = new URL(url);
+
+    // Preserve filter state
+    if (filters.value.notUploaded) {
+        urlObj.searchParams.set("not_uploaded", "true");
+    }
+    if (searchQuery.value) {
+        urlObj.searchParams.set("search", searchQuery.value);
+    }
+
+    return urlObj.toString();
+};
+
+// Handle filter changes with debounce
+const handleFiltersChange = debounce(() => {
+    const currentQuery = new URLSearchParams(window.location.search);
+    const currentPage = currentQuery.get("page");
+
+    const params = cleanParams({
+        search: searchQuery.value,
+        not_uploaded: filters.value.notUploaded,
+        page: currentPage, // Preserve current page
+    });
+
+    router.get(route("dashboard.pending-files"), params, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
+}, 300);
+
+// Watch for changes in both search and filters
+watch([() => filters.value.notUploaded, searchQuery], () => {
+    handleFiltersChange();
+});
+
+// Initialize from URL params on mount
+onMounted(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    filters.value.notUploaded = urlParams.get("not_uploaded") === "true";
+    searchQuery.value = urlParams.get("search") || "";
 });
 
 // Style Constants
@@ -35,6 +106,46 @@ const getStatusBadgeClass = (status) => {
     <Head :title="title" />
     <Sidebar :title="title">
         <div class="p-4">
+            <!-- Search and Filter Section -->
+            <div class="mb-4 flex items-center justify-between">
+                <!-- Search Input -->
+                <div class="relative w-64">
+                    <input
+                        v-model="searchQuery"
+                        type="text"
+                        placeholder="Search candidate name..."
+                        class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <span class="absolute right-3 top-1.5 text-gray-400">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                        >
+                            <path
+                                fill-rule="evenodd"
+                                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                    </span>
+                </div>
+
+                <!-- Filter Checkbox -->
+                <div class="flex items-center">
+                    <input
+                        type="checkbox"
+                        id="notUploaded"
+                        v-model="filters.notUploaded"
+                        class="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                    />
+                    <label for="notUploaded" class="ml-2 text-sm text-gray-600">
+                        Show only candidates with no files uploaded
+                    </label>
+                </div>
+            </div>
+
             <div class="bg-white shadow rounded-lg overflow-hidden">
                 <!-- Table Section -->
                 <table class="min-w-full divide-y divide-gray-200">
@@ -128,7 +239,7 @@ const getStatusBadgeClass = (status) => {
                                     next_page_url: 'Next',
                                 }"
                                 :key="label"
-                                :href="candidates[label]"
+                                :href="getPaginationUrl(candidates[label])"
                                 :class="[
                                     PAGINATION_BUTTON_BASE,
                                     candidates[label]
