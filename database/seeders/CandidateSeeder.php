@@ -8,6 +8,7 @@ use App\Models\TestsList;
 use App\Models\TestResult;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Models\CandidateDetail;
 
 class CandidateSeeder extends Seeder
 {
@@ -153,9 +154,9 @@ class CandidateSeeder extends Seeder
             foreach ($candidates as $candidate) {
                 $user = User::create([
                     'name' => $candidate['name'],
-                    'role' => 'Candidate', // Asumsikan ada kolom role
-                    'email' => strtolower(str_replace(' ', '.', $candidate['name'])) . '@example.com', // Email unik
-                    'password' => bcrypt('password123'), // Kata sandi default (gunakan bcrypt untuk hashing)
+                    'role' => 'Candidate',
+                    'email' => strtolower(str_replace(' ', '.', $candidate['name'])) . '@example.com',
+                    'password' => bcrypt('password123'),
                 ]);
 
                 // Menyimpan skor setiap tes ke dalam tabel test_results
@@ -175,6 +176,10 @@ class CandidateSeeder extends Seeder
                         'score' => $candidate[$testName],
                     ]);
                 }
+
+                CandidateDetail::factory()
+                    ->for($user)
+                    ->create();
             }
 
             DB::commit();
