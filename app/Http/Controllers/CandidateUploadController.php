@@ -64,32 +64,24 @@ class CandidateUploadController extends Controller
             $messages = [];
 
             // Handle file uploads
-            if ($request->hasFile('photo')) {
-                try {
-                    $this->handleFileUpload($request, 'photo', 'candidate-photos', $user);
-                    $messages[] = 'Photo uploaded successfully.';
-                } catch (\Exception $e) {
-                    $messages[] = 'Failed to upload photo: ' . $e->getMessage();
+            foreach (['photo', 'cv', 'certificate'] as $field) {
+                if ($request->hasFile($field)) {
+                    try {
+                        $this->handleFileUpload(
+                            $request,
+                            $field,
+                            "candidate-{$field}s",
+                            $user
+                        );
+                        $messages[] = ucfirst($field) . ' uploaded successfully.';
+                    } catch (\Exception $e) {
+                        $messages[] = "Failed to upload {$field}: " . $e->getMessage();
+                    }
                 }
             }
 
-            if ($request->hasFile('cv')) {
-                try {
-                    $this->handleFileUpload($request, 'cv', 'candidate-cvs', $user);
-                    $messages[] = 'CV uploaded successfully.';
-                } catch (\Exception $e) {
-                    $messages[] = 'Failed to upload CV: ' . $e->getMessage();
-                }
-            }
-
-            if ($request->hasFile('certificate')) {
-                try {
-                    $this->handleFileUpload($request, 'certificate', 'candidate-certificates', $user);
-                    $messages[] = 'Certificate uploaded successfully.';
-                } catch (\Exception $e) {
-                    $messages[] = 'Failed to upload certificate: ' . $e->getMessage();
-                }
-            }
+            // Refresh user data to ensure we have latest changes
+            $user->refresh();
 
             return redirect()->back()->with([
                 'message' => implode(' ', $messages),
@@ -157,10 +149,22 @@ class CandidateUploadController extends Controller
         // Store new file
         $filePath = $file->store($path);
 
-        // Update or create candidate detail
+        // Status field name
+        $fieldStatus = $field . '_status';
+
+        // Update or create candidate detail with both path and status
+        $updateData = [
+            $fieldPath => $filePath,
+        ];
+
+        // Only set status to pending if it's a new upload or status is null
+        if (!$existingDetail || !$existingDetail->$fieldStatus) {
+            $updateData[$fieldStatus] = 'pending';
+        }
+
         CandidateDetail::updateOrCreate(
             ['user_id' => $user->id],
-            [$fieldPath => $filePath]
+            $updateData
         );
     }
 
@@ -323,11 +327,17 @@ class CandidateUploadController extends Controller
     public function fileStatus()
     {
         $user = Auth::user();
-        $candidateDetail = $user->candidateDetail;
+
+        // Get fresh data by first resolving the relationship
+        $candidateDetail = $user->candidateDetail()->first();
+
+        if ($candidateDetail) {
+            $candidateDetail = $candidateDetail->fresh();
+        }
 
         return Inertia::render('Candidate/FileSubmissionStatus', [
             'title' => 'File Status',
-            'candidateDetail' => $candidateDetail,
+            'candidateDetail' => $candidateDetail
         ]);
     }
 }

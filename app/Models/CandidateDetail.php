@@ -21,7 +21,10 @@ class CandidateDetail extends Model
         'education_level',
         'major',
         'institution',
-        'graduation_year'
+        'graduation_year',
+        'photo_status',
+        'cv_status',
+        'certificate_status'
     ];
 
     protected $casts = [
