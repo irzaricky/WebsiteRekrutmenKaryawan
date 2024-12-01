@@ -83,9 +83,7 @@ const formatDate = (date) => {
                     </div>
                     <div>
                         <p class="text-sm font-semibold">Full Name:</p>
-                        <p>
-                            {{ candidateDetails.candidate_detail?.full_name }}
-                        </p>
+                        <p>{{ candidateDetails.name }}</p>
                     </div>
                     <div>
                         <p class="text-sm font-semibold">Address:</p>

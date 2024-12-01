@@ -244,7 +244,6 @@ class CandidateDetailFactory extends Factory
         return [
             'user_id' => User::factory(),
             'nik' => $nik,
-            'full_name' => $this->faker->name(),
             'address' => $this->faker->address(),
             'birth_date' => $birthDate,
             'education_level' => $this->faker->randomElement(['SMA', 'D3', 'S1', 'S2', 'S3']),
@@ -264,9 +263,6 @@ class CandidateDetailFactory extends Factory
                 'Universitas Airlangga'
             ]),
             'graduation_year' => $this->faker->numberBetween(2015, 2023),
-            'photo_status' => $this->faker->randomElement(['pending', 'accepted', 'rejected', null]),
-            'cv_status' => $this->faker->randomElement(['pending', 'accepted', 'rejected', null]),
-            'certificate_status' => $this->faker->randomElement(['pending', 'accepted', 'rejected', null])
         ];
     }
 }

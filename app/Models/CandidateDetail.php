@@ -12,7 +12,6 @@ class CandidateDetail extends Model
     protected $fillable = [
         'user_id',
         'nik',
-        'full_name',
         'address',
         'birth_date',
         'photo_path',

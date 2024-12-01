@@ -24,7 +24,6 @@ const formatDate = (dateString) => {
 
 const form = useForm({
     nik: props.candidateDetail?.nik || "",
-    full_name: props.user?.name || "",
     birth_date: formatDate(props.candidateDetail?.birth_date) || "",
     address: props.candidateDetail?.address || "",
     education_level: props.candidateDetail?.education_level || "",
@@ -140,7 +139,7 @@ const submit = () => {
                                 >
                                 <input
                                     type="text"
-                                    v-model="form.full_name"
+                                    v-model="props.user.name"
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                                     disabled
                                 />

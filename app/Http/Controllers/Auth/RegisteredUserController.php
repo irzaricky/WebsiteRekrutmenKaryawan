@@ -69,7 +69,6 @@ class RegisteredUserController extends Controller
             CandidateDetail::create([
                 'user_id' => $user->id,
                 'nik' => $request->nik,
-                'full_name' => $request->name,
             ]);
         }
 

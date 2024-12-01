@@ -38,7 +38,6 @@ class CandidateProfileController extends Controller
                     'unique:candidate_details,nik,' . Auth::id() . ',user_id',
                     new ValidNIK
                 ],
-                'full_name' => 'required|string|max:255',
                 'birth_date' => 'required|date',
                 'address' => 'required|string',
                 'education_level' => 'required|in:SMA,D3,S1,S2,S3',
