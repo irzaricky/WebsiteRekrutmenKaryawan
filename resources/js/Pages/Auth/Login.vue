@@ -36,7 +36,11 @@ const submit = () => {
 
 <template>
     <Head :title="title" />
-    <div class="relative isolate bg-white px-6 py-24 sm:py-32 lg:px-8">
+    <!-- Add min-h-screen and flex classes to main container -->
+    <div
+        class="relative isolate min-h-screen flex items-center bg-white px-6 py-12 sm:py-16 lg:px-8"
+    >
+        <!-- Keep gradient background -->
         <div
             class="absolute inset-x-0 -top-3 -z-10 transform-gpu overflow-hidden px-36 blur-3xl"
             aria-hidden="true"
@@ -65,9 +69,11 @@ const submit = () => {
                 "
             />
         </div>
+        <!-- Modify login container -->
         <div
-            class="mx-auto mt-24 mb-24 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg"
+            class="w-full mx-auto overflow-hidden bg-white px-6 py-8 shadow-md sm:max-w-md sm:rounded-lg"
         >
+            <!-- Rest of the form content remains the same -->
             <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
                 {{ status }}
             </div>
