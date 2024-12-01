@@ -85,6 +85,19 @@ const allFilesAccepted = computed(() => {
     );
 });
 
+// Add computed properties to check each file status
+const canUploadPhoto = computed(() => {
+    return props.candidateDetail?.photo_status !== "accepted";
+});
+
+const canUploadCV = computed(() => {
+    return props.candidateDetail?.cv_status !== "accepted";
+});
+
+const canUploadCertificate = computed(() => {
+    return props.candidateDetail?.certificate_status !== "accepted";
+});
+
 const submit = () => {
     form.post(route("candidate.files.update"), {
         preserveScroll: true,
@@ -211,11 +224,15 @@ const removeFile = async (type) => {
                                 class="w-full flex flex-col items-center gap-2"
                             >
                                 <div v-if="photoUrl" class="mb-4">
-                                    <img
-                                        :src="photoUrl"
-                                        alt="Preview"
-                                        class="w-32 h-32 object-cover rounded-lg shadow mx-auto"
-                                    />
+                                    <svg
+                                        class="w-8 h-8 mx-auto text-blue-600"
+                                        fill="currentColor"
+                                        viewBox="0 0 20 20"
+                                    >
+                                        <path
+                                            d="M4 18h12a2 2 0 002-2V6a2 2 0 00-2-2h-5.586l-2-2H4a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                        />
+                                    </svg>
                                     <a
                                         :href="photoUrl"
                                         target="_blank"
@@ -232,6 +249,7 @@ const removeFile = async (type) => {
                                         type="file"
                                         @input="handlePhotoUpload"
                                         accept="image/*"
+                                        :disabled="!canUploadPhoto"
                                         class="hidden"
                                     />
                                 </label>
@@ -239,6 +257,17 @@ const removeFile = async (type) => {
                                     photoName || "No file chosen"
                                 }}</span>
                             </div>
+                            <button
+                                @click="removeFile('photo')"
+                                :disabled="!canUploadPhoto"
+                                class="text-red-600 text-sm ml-2 hover:text-red-800"
+                                :class="{
+                                    'opacity-50 cursor-not-allowed':
+                                        !canUploadPhoto,
+                                }"
+                            >
+                                Delete Photo
+                            </button>
                         </div>
 
                         <!-- CV Upload -->
@@ -276,6 +305,7 @@ const removeFile = async (type) => {
                                         type="file"
                                         @input="handleCVUpload"
                                         accept=".pdf"
+                                        :disabled="!canUploadCV"
                                         class="hidden"
                                     />
                                 </label>
@@ -283,6 +313,17 @@ const removeFile = async (type) => {
                                     cvName || "No file chosen"
                                 }}</span>
                             </div>
+                            <button
+                                @click="removeFile('cv')"
+                                :disabled="!canUploadCV"
+                                class="text-red-600 text-sm ml-2 hover:text-red-800"
+                                :class="{
+                                    'opacity-50 cursor-not-allowed':
+                                        !canUploadCV,
+                                }"
+                            >
+                                Delete CV
+                            </button>
                         </div>
 
                         <!-- Certificate Upload -->
@@ -320,6 +361,7 @@ const removeFile = async (type) => {
                                         type="file"
                                         @input="handleCertificateUpload"
                                         accept=".pdf"
+                                        :disabled="!canUploadCertificate"
                                         class="hidden"
                                     />
                                 </label>
@@ -327,6 +369,17 @@ const removeFile = async (type) => {
                                     certificateName || "No file chosen"
                                 }}</span>
                             </div>
+                            <button
+                                @click="removeFile('certificate')"
+                                :disabled="!canUploadCertificate"
+                                class="text-red-600 text-sm ml-2 hover:text-red-800"
+                                :class="{
+                                    'opacity-50 cursor-not-allowed':
+                                        !canUploadCertificate,
+                                }"
+                            >
+                                Delete Certificate
+                            </button>
                         </div>
                     </div>
 

@@ -37,6 +37,22 @@ class CandidateUploadController extends Controller
     public function store_files(Request $request)
     {
         try {
+            $user = Auth::user();
+            $candidateDetail = $user->candidateDetail;
+
+            // Check each file if it's already accepted
+            foreach (['photo', 'cv', 'certificate'] as $field) {
+                if ($request->hasFile($field)) {
+                    $statusField = $field . '_status';
+                    if ($candidateDetail && $candidateDetail->$statusField === 'accepted') {
+                        return redirect()->back()->with([
+                            'message' => ucfirst($field) . ' has been accepted and cannot be modified.',
+                            'type' => 'error'
+                        ]);
+                    }
+                }
+            }
+
             // Validate at least one file is uploaded
             if (!$request->hasAny(['photo', 'cv', 'certificate'])) {
                 return redirect()->back()->with([
@@ -60,7 +76,6 @@ class CandidateUploadController extends Controller
                 'certificate' => 'nullable|mimes:pdf|max:' . $this->maxFileSize,
             ]);
 
-            $user = Auth::user();
             $messages = [];
 
             // Handle file uploads
@@ -231,14 +246,21 @@ class CandidateUploadController extends Controller
             return response()->json(['message' => 'File not found'], 404);
         }
 
+        // Check if file is accepted
+        $statusField = $request->type . '_status';
+        if ($candidateDetail->$statusField === 'accepted') {
+            return response()->json([
+                'message' => 'This file has been accepted and cannot be deleted'
+            ], 403);
+        }
+
         $field = $request->type . '_path';
         $path = $candidateDetail->$field;
 
         if ($path && Storage::exists($path)) {
-            // Menghapus file dari storage server
             Storage::delete($path);
-            // Menghapus path file dari database
             $candidateDetail->$field = null;
+            $candidateDetail->$statusField = null; // Reset status when file is deleted
             $candidateDetail->save();
         }
 
