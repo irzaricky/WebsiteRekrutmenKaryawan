@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\TestResult;
 use App\Models\TestsList;
+use App\Models\CandidateDetail;
+use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,6 +16,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Rules\ValidNIK;
 
 class RegisteredUserController extends Controller
 {
@@ -39,6 +42,7 @@ class RegisteredUserController extends Controller
             'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'role' => 'required|string|in:Candidate,HRD',
+            'nik' => ['required', 'string', 'size:16', 'unique:candidate_details', new ValidNIK],
         ]);
 
         $user = User::create([
@@ -60,11 +64,18 @@ class RegisteredUserController extends Controller
                     'score' => 0
                 ]);
             }
+
+            // Create candidate details record
+            CandidateDetail::create([
+                'user_id' => $user->id,
+                'nik' => $request->nik,
+                'full_name' => $request->name,
+            ]);
         }
 
         event(new Registered($user));
         Auth::login($user);
 
-        return redirect(route('home', absolute: false));
+        return redirect(RouteServiceProvider::HOME);
     }
 }

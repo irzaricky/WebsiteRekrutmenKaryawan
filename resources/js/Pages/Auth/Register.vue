@@ -11,8 +11,9 @@ const form = useForm({
     email: "",
     password: "",
     password_confirmation: "",
-    role: "",
+    role: "Candidate",
     status: "active",
+    nik: "",
 });
 
 const img = [{ id: "1", href: "./assets/images/for.png", link: "/" }];
@@ -32,7 +33,7 @@ const submit = () => {
 
 <template>
     <Head :title="title" />
-    <div class="relative isolate bg-white px-6 py-24 sm:py-32 lg:px-8">
+    <div class="relative isolate bg-white py-4">
         <div
             class="absolute inset-x-0 -top-3 -z-10 transform-gpu overflow-hidden px-36 blur-3xl"
             aria-hidden="true"
@@ -85,6 +86,11 @@ const submit = () => {
                         id="name"
                         type="text"
                         class="mt-1 block w-full"
+                        style="
+                            padding-top: 0.375rem;
+                            padding-bottom: 0.375rem;
+                            line-height: 1.25;
+                        "
                         v-model="form.name"
                         required
                         autofocus
@@ -101,6 +107,11 @@ const submit = () => {
                         id="email"
                         type="email"
                         class="mt-1 block w-full"
+                        style="
+                            padding-top: 0.375rem;
+                            padding-bottom: 0.375rem;
+                            line-height: 1.25;
+                        "
                         v-model="form.email"
                         required
                         autocomplete="username"
@@ -110,25 +121,21 @@ const submit = () => {
                 </div>
 
                 <div class="mt-4">
-                    <InputLabel for="role" value="Role" />
-
-                    <div class="mt-1 flex space-x-4">
-                        <label class="flex items-center">
-                            <input
-                                type="radio"
-                                name="role"
-                                value="Candidate"
-                                v-model="form.role"
-                                class="text-indigo-600 focus:ring-indigo-500"
-                                required
-                            />
-                            <span class="ml-2 text-sm text-gray-700"
-                                >Candidate</span
-                            >
-                        </label>
-                    </div>
-
-                    <InputError class="mt-2" :message="form.errors.role" />
+                    <InputLabel for="nik" value="NIK" />
+                    <TextInput
+                        id="nik"
+                        type="text"
+                        class="mt-1 block w-full"
+                        style="
+                            padding-top: 0.375rem;
+                            padding-bottom: 0.375rem;
+                            line-height: 1.25;
+                        "
+                        v-model="form.nik"
+                        maxlength="16"
+                        required
+                    />
+                    <InputError class="mt-2" :message="form.errors.nik" />
                 </div>
 
                 <div class="mt-4">
@@ -138,6 +145,11 @@ const submit = () => {
                         id="password"
                         type="password"
                         class="mt-1 block w-full"
+                        style="
+                            padding-top: 0.375rem;
+                            padding-bottom: 0.375rem;
+                            line-height: 1.25;
+                        "
                         v-model="form.password"
                         required
                         autocomplete="new-password"
@@ -156,6 +168,11 @@ const submit = () => {
                         id="password_confirmation"
                         type="password"
                         class="mt-1 block w-full"
+                        style="
+                            padding-top: 0.375rem;
+                            padding-bottom: 0.375rem;
+                            line-height: 1.25;
+                        "
                         v-model="form.password_confirmation"
                         required
                         autocomplete="new-password"

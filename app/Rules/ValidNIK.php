@@ -50,7 +50,7 @@ class ValidNIK implements Rule
     {
         // Length check
         if (strlen($value) !== 16) {
-            $this->message = 'NIK harus 16 digit.';
+            $this->message = 'NIK harus tepat 16 digit angka.';
             return false;
         }
 
@@ -65,19 +65,19 @@ class ValidNIK implements Rule
 
         // Validate province code
         if (!in_array(intval($provinsi), $this->validProvinsiCodes)) {
-            $this->message = 'Kode provinsi tidak valid.';
+            $this->message = "NIK tidak valid: 2 digit pertama ($provinsi) bukan kode provinsi yang valid.";
             return false;
         }
 
         // Validate city code
         if (!is_numeric($kota) || intval($kota) < 1 || intval($kota) > 99) {
-            $this->message = 'Kode kota tidak valid.';
+            $this->message = "NIK tidak valid: 2 digit kedua ($kota) bukan kode kota yang valid.";
             return false;
         }
 
         // Validate district code
         if (!is_numeric($kecamatan) || intval($kecamatan) < 1 || intval($kecamatan) > 99) {
-            $this->message = 'Kode kecamatan tidak valid.';
+            $this->message = "NIK tidak valid: 2 digit ketiga ($kecamatan) bukan kode kecamatan yang valid.";
             return false;
         }
 
@@ -96,18 +96,18 @@ class ValidNIK implements Rule
 
         // Basic date component validation
         if ($tanggalInt < 1 || $tanggalInt > 31) {
-            $this->message = 'Tanggal lahir tidak valid.';
+            $this->message = "NIK tidak valid: digit ke-7 dan 8 ($tanggal) bukan tanggal yang valid.";
             return false;
         }
 
         if ($bulanInt < 1 || $bulanInt > 12) {
-            $this->message = 'Bulan lahir tidak valid.';
+            $this->message = "NIK tidak valid: digit ke-9 dan 10 ($bulan) bukan bulan yang valid.";
             return false;
         }
 
         // Validate sequence number
         if (!is_numeric($urutan) || intval($urutan) < 1) {
-            $this->message = 'Nomor urut tidak valid.';
+            $this->message = "NIK tidak valid: 4 digit terakhir ($urutan) bukan nomor urut yang valid.";
             return false;
         }
 
@@ -115,11 +115,11 @@ class ValidNIK implements Rule
         try {
             $date = Carbon::createFromDate($tahunInt, $bulanInt, $tanggalInt);
             if ($date->isFuture()) {
-                $this->message = 'Tanggal lahir tidak boleh di masa depan.';
+                $this->message = "NIK tidak valid: tanggal lahir ($tanggalInt-$bulanInt-$tahunInt) tidak boleh di masa depan.";
                 return false;
             }
         } catch (\Exception $e) {
-            $this->message = 'Tanggal lahir tidak valid.';
+            $this->message = "NIK tidak valid: kombinasi tanggal ($tanggalInt-$bulanInt-$tahunInt) tidak valid.";
             return false;
         }
 
