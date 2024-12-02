@@ -2,8 +2,10 @@
 import Sidebar from "../../components/Dashboard/Sidebar.vue";
 import { Head, useForm, Link } from "@inertiajs/vue3";
 import axios from "axios";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
+import { useNotificationStore } from "@/stores/notificationStore";
 
+const notificationStore = useNotificationStore();
 const props = defineProps({
     title: String,
     candidateDetail: Object,
@@ -16,99 +18,101 @@ const form = useForm({
     certificate: null,
 });
 
-// Add refs for file names and preview URLs
 const photoName = ref("");
 const cvName = ref("");
 const certificateName = ref("");
 
-// Computed properties for file URLs
-const photoUrl = computed(() => {
-    if (props.candidateDetail?.photo_path) {
-        return route("candidate.file", {
-            type: "photo",
-            filename: props.candidateDetail.photo_path.split("/").pop(),
-        });
-    }
-    return null;
-});
-
-const cvUrl = computed(() => {
-    if (props.candidateDetail?.cv_path) {
-        return route("candidate.file", {
-            type: "cv",
-            filename: props.candidateDetail.cv_path.split("/").pop(),
-        });
-    }
-    return null;
-});
-
-const certificateUrl = computed(() => {
-    if (props.candidateDetail?.certificate_path) {
-        return route("candidate.file", {
-            type: "certificate",
-            filename: props.candidateDetail.certificate_path.split("/").pop(),
-        });
-    }
-    return null;
-});
-
-// File handler functions
-const handlePhotoUpload = (event) => {
-    const file = event.target.files[0];
-    form.photo = file;
-    photoName.value = file ? file.name : "";
-};
-
-const handleCVUpload = (event) => {
-    const file = event.target.files[0];
-    form.cv = file;
-    cvName.value = file ? file.name : "";
-};
-
-const handleCertificateUpload = (event) => {
-    const file = event.target.files[0];
-    form.certificate = file;
-    certificateName.value = file ? file.name : "";
-};
-
-// Modify getFilename to handle null/undefined paths
-const getFilename = (path) => {
-    return path ? path.split("/").pop() : "";
-};
-
-// Add computed property to check if all files are accepted
-const allFilesAccepted = computed(() => {
+// Add computed properties for each file type
+const canUploadPhoto = computed(() => {
     return (
-        props.candidateDetail?.photo_status === "accepted" &&
-        props.candidateDetail?.cv_status === "accepted" &&
-        props.candidateDetail?.certificate_status === "accepted"
+        !props.candidateDetail?.photo_path ||
+        props.candidateDetail?.photo_status === "rejected"
     );
 });
 
-// Add computed properties to check each file status
-const canUploadPhoto = computed(() => {
-    return props.candidateDetail?.photo_status !== "accepted";
-});
-
 const canUploadCV = computed(() => {
-    return props.candidateDetail?.cv_status !== "accepted";
+    return (
+        !props.candidateDetail?.cv_path ||
+        props.candidateDetail?.cv_status === "rejected"
+    );
 });
 
 const canUploadCertificate = computed(() => {
-    return props.candidateDetail?.certificate_status !== "accepted";
+    return (
+        !props.candidateDetail?.certificate_path ||
+        props.candidateDetail?.certificate_status === "rejected"
+    );
 });
 
-const submit = () => {
-    form.post(route("candidate.files.update"), {
-        preserveScroll: true,
-        onSuccess: () => {
-            form.reset("photo", "cv", "certificate");
-        },
-    });
+// Handle file selection
+const handleFileSelect = (event, type) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Check if upload is allowed for this file type
+    const canUpload = {
+        photo: canUploadPhoto.value,
+        cv: canUploadCV.value,
+        certificate: canUploadCertificate.value,
+    }[type];
+
+    if (!canUpload) {
+        notificationStore.addNotification({
+            type: "error",
+            message:
+                "File tidak dapat diupload. File hanya bisa diupload jika belum ada atau status rejected.",
+        });
+        event.target.value = ""; // Reset input
+        return;
+    }
+
+    form[type] = file;
+    // Update file name ref based on type
+    switch (type) {
+        case "photo":
+            photoName.value = file.name;
+            break;
+        case "cv":
+            cvName.value = file.name;
+            break;
+        case "certificate":
+            certificateName.value = file.name;
+            break;
+    }
 };
 
+// Handle file upload
+const handleUpload = async () => {
+    try {
+        await form.post(route("candidate.files.update"), {
+            onSuccess: () => {
+                notificationStore.addNotification({
+                    type: "success",
+                    message: "File berhasil diupload",
+                });
+                // Reset form and file names
+                form.reset();
+                photoName.value = "";
+                cvName.value = "";
+                certificateName.value = "";
+            },
+            onError: (errors) => {
+                notificationStore.addNotification({
+                    type: "error",
+                    message: "Gagal mengupload file. Silakan coba lagi.",
+                });
+            },
+        });
+    } catch (error) {
+        notificationStore.addNotification({
+            type: "error",
+            message: "Terjadi kesalahan sistem. Silakan coba lagi nanti.",
+        });
+    }
+};
+
+// Handle file removal
 const removeFile = async (type) => {
-    // Show confirmation dialog with file type specific message
     const fileTypes = {
         photo: "Foto",
         cv: "CV",
@@ -119,17 +123,39 @@ const removeFile = async (type) => {
         `Anda yakin ingin menghapus ${fileTypes[type]} ini?`
     );
 
-    if (!confirmed) {
-        return; // Exit if not confirmed
-    }
+    if (!confirmed) return;
 
     try {
         await axios.delete(route("candidate.file.delete"), { data: { type } });
+        notificationStore.addNotification({
+            type: "success",
+            message: `${fileTypes[type]} berhasil dihapus`,
+        });
         window.location.reload();
     } catch (error) {
         console.error("Error removing file:", error);
+        notificationStore.addNotification({
+            type: "error",
+            message: `Gagal menghapus ${fileTypes[type]}`,
+        });
     }
 };
+
+// Watch for validation errors
+watch(
+    () => props.errors,
+    (newErrors) => {
+        if (newErrors && Object.keys(newErrors).length > 0) {
+            Object.values(newErrors).forEach((error) => {
+                notificationStore.addNotification({
+                    type: "error",
+                    message: error,
+                });
+            });
+        }
+    },
+    { deep: true }
+);
 </script>
 
 <template>
@@ -205,7 +231,7 @@ const removeFile = async (type) => {
 
             <!-- Form -->
             <form
-                @submit.prevent="submit"
+                @submit.prevent="handleUpload"
                 class="bg-white rounded-xl shadow-lg"
                 enctype="multipart/form-data"
             >
@@ -218,8 +244,24 @@ const removeFile = async (type) => {
                         <div class="text-center flex flex-col items-center">
                             <label
                                 class="block text-sm font-medium text-gray-700 mb-4"
-                                >Foto</label
-                            >
+                                >Foto
+                                <span
+                                    v-if="props.candidateDetail?.photo_status"
+                                    :class="{
+                                        'text-red-600':
+                                            props.candidateDetail
+                                                .photo_status === 'rejected',
+                                        'text-green-600':
+                                            props.candidateDetail
+                                                .photo_status === 'accepted',
+                                        'text-yellow-600':
+                                            props.candidateDetail
+                                                .photo_status === 'pending',
+                                    }"
+                                >
+                                    ({{ props.candidateDetail.photo_status }})
+                                </span>
+                            </label>
                             <div
                                 class="w-full flex flex-col items-center gap-2"
                             >
@@ -247,7 +289,10 @@ const removeFile = async (type) => {
                                     Choose File
                                     <input
                                         type="file"
-                                        @input="handlePhotoUpload"
+                                        @input="
+                                            (event) =>
+                                                handleFileSelect(event, 'photo')
+                                        "
                                         accept="image/*"
                                         :disabled="!canUploadPhoto"
                                         class="hidden"
@@ -274,8 +319,24 @@ const removeFile = async (type) => {
                         <div class="text-center flex flex-col items-center">
                             <label
                                 class="block text-sm font-medium text-gray-700 mb-4"
-                                >CV (PDF)</label
-                            >
+                                >CV (PDF)
+                                <span
+                                    v-if="props.candidateDetail?.cv_status"
+                                    :class="{
+                                        'text-red-600':
+                                            props.candidateDetail.cv_status ===
+                                            'rejected',
+                                        'text-green-600':
+                                            props.candidateDetail.cv_status ===
+                                            'accepted',
+                                        'text-yellow-600':
+                                            props.candidateDetail.cv_status ===
+                                            'pending',
+                                    }"
+                                >
+                                    ({{ props.candidateDetail.cv_status }})
+                                </span>
+                            </label>
                             <div
                                 class="w-full flex flex-col items-center gap-2"
                             >
@@ -303,7 +364,10 @@ const removeFile = async (type) => {
                                     Choose File
                                     <input
                                         type="file"
-                                        @input="handleCVUpload"
+                                        @input="
+                                            (event) =>
+                                                handleFileSelect(event, 'cv')
+                                        "
                                         accept=".pdf"
                                         :disabled="!canUploadCV"
                                         class="hidden"
@@ -330,8 +394,33 @@ const removeFile = async (type) => {
                         <div class="text-center flex flex-col items-center">
                             <label
                                 class="block text-sm font-medium text-gray-700 mb-4"
-                                >Ijazah (PDF)</label
-                            >
+                                >Ijazah (PDF)
+                                <span
+                                    v-if="
+                                        props.candidateDetail
+                                            ?.certificate_status
+                                    "
+                                    :class="{
+                                        'text-red-600':
+                                            props.candidateDetail
+                                                .certificate_status ===
+                                            'rejected',
+                                        'text-green-600':
+                                            props.candidateDetail
+                                                .certificate_status ===
+                                            'accepted',
+                                        'text-yellow-600':
+                                            props.candidateDetail
+                                                .certificate_status ===
+                                            'pending',
+                                    }"
+                                >
+                                    ({{
+                                        props.candidateDetail
+                                            .certificate_status
+                                    }})
+                                </span>
+                            </label>
                             <div
                                 class="w-full flex flex-col items-center gap-2"
                             >
@@ -359,7 +448,13 @@ const removeFile = async (type) => {
                                     Choose File
                                     <input
                                         type="file"
-                                        @input="handleCertificateUpload"
+                                        @input="
+                                            (event) =>
+                                                handleFileSelect(
+                                                    event,
+                                                    'certificate'
+                                                )
+                                        "
                                         accept=".pdf"
                                         :disabled="!canUploadCertificate"
                                         class="hidden"
