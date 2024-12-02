@@ -11,15 +11,15 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('nik', 16)->unique();
-            $table->text('address');
-            $table->date('birth_date');
+            $table->text('address')->nullable();
+            $table->date('birth_date')->nullable();
             $table->string('photo_path')->nullable();
             $table->string('cv_path')->nullable();
             $table->string('certificate_path')->nullable();
-            $table->enum('education_level', ['SMA', 'D3', 'S1', 'S2', 'S3']);
-            $table->string('major');
-            $table->string('institution');
-            $table->year('graduation_year');
+            $table->enum('education_level', ['SMA', 'D3', 'S1', 'S2', 'S3'])->nullable();
+            $table->string('major')->nullable();
+            $table->string('institution')->nullable();
+            $table->year('graduation_year')->nullable();
             $table->timestamps();
         });
     }
