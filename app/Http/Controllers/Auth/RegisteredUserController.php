@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Models\TestResult;
 use App\Models\TestsList;
 use App\Models\CandidateDetail;
-use App\Providers\RouteServiceProvider;
+use Illuminate\Foundation\Support\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
