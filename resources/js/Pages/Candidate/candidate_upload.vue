@@ -3,9 +3,7 @@ import Sidebar from "../../components/Dashboard/Sidebar.vue";
 import { Head, useForm, Link } from "@inertiajs/vue3";
 import axios from "axios";
 import { computed, ref, watch } from "vue";
-import { useNotificationStore } from "@/stores/notificationStore";
 
-const notificationStore = useNotificationStore();
 const props = defineProps({
     title: String,
     candidateDetail: Object,
@@ -86,29 +84,14 @@ const handleUpload = async () => {
     try {
         await form.post(route("candidate.files.update"), {
             onSuccess: () => {
-                notificationStore.addNotification({
-                    type: "success",
-                    message: "File berhasil diupload",
-                });
-                // Reset form and file names
                 form.reset();
                 photoName.value = "";
                 cvName.value = "";
                 certificateName.value = "";
             },
-            onError: (errors) => {
-                notificationStore.addNotification({
-                    type: "error",
-                    message: "Gagal mengupload file. Silakan coba lagi.",
-                });
-            },
+            onError: (errors) => {},
         });
-    } catch (error) {
-        notificationStore.addNotification({
-            type: "error",
-            message: "Terjadi kesalahan sistem. Silakan coba lagi nanti.",
-        });
-    }
+    } catch (error) {}
 };
 
 // Handle file removal
@@ -127,35 +110,11 @@ const removeFile = async (type) => {
 
     try {
         await axios.delete(route("candidate.file.delete"), { data: { type } });
-        notificationStore.addNotification({
-            type: "success",
-            message: `${fileTypes[type]} berhasil dihapus`,
-        });
         window.location.reload();
     } catch (error) {
         console.error("Error removing file:", error);
-        notificationStore.addNotification({
-            type: "error",
-            message: `Gagal menghapus ${fileTypes[type]}`,
-        });
     }
 };
-
-// Watch for validation errors
-watch(
-    () => props.errors,
-    (newErrors) => {
-        if (newErrors && Object.keys(newErrors).length > 0) {
-            Object.values(newErrors).forEach((error) => {
-                notificationStore.addNotification({
-                    type: "error",
-                    message: error,
-                });
-            });
-        }
-    },
-    { deep: true }
-);
 </script>
 
 <template>
