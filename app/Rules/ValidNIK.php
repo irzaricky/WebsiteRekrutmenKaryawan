@@ -11,27 +11,27 @@ class ValidNIK implements Rule
         11,
         12,
         13,
-        16,
         14,
-        21,
         15,
+        16,
         17,
         18,
         19,
+        21,
         31,
-        36,
-        31,
+        32,
         33,
         34,
         35,
+        36,
         51,
+        52,
+        53,
         61,
         62,
         63,
         64,
         65,
-        52,
-        53,
         71,
         72,
         73,
@@ -41,7 +41,182 @@ class ValidNIK implements Rule
         81,
         82,
         91,
-        92
+        92,
+        93,
+        94,
+        95,
+        96
+    ];
+
+    private $validKabupatenCodes = [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79
+    ];
+
+    private $validKecamatanCodes = [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        39,
+        40,
+        41,
+        42,
+        40,
+        41,
+        42,
+        41,
+        42,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55
     ];
 
     private $message;
@@ -50,7 +225,7 @@ class ValidNIK implements Rule
     {
         // Length check
         if (strlen($value) !== 16) {
-            $this->message = 'NIK harus 16 digit.';
+            $this->message = 'NIK harus tepat 16 digit angka.';
             return false;
         }
 
@@ -65,19 +240,19 @@ class ValidNIK implements Rule
 
         // Validate province code
         if (!in_array(intval($provinsi), $this->validProvinsiCodes)) {
-            $this->message = 'Kode provinsi tidak valid.';
+            $this->message = "NIK tidak valid: 2 digit pertama ($provinsi) bukan kode provinsi yang valid.";
             return false;
         }
 
         // Validate city code
-        if (!is_numeric($kota) || intval($kota) < 1 || intval($kota) > 99) {
-            $this->message = 'Kode kota tidak valid.';
+        if (!in_array(intval($kota), $this->validKabupatenCodes)) {
+            $this->message = "NIK tidak valid: 2 digit kedua ($kota) bukan kode kota yang valid.";
             return false;
         }
 
         // Validate district code
-        if (!is_numeric($kecamatan) || intval($kecamatan) < 1 || intval($kecamatan) > 99) {
-            $this->message = 'Kode kecamatan tidak valid.';
+        if (!in_array(intval($kecamatan), $this->validKecamatanCodes)) {
+            $this->message = "NIK tidak valid: 2 digit ketiga ($kecamatan) bukan kode kecamatan yang valid.";
             return false;
         }
 
@@ -96,18 +271,18 @@ class ValidNIK implements Rule
 
         // Basic date component validation
         if ($tanggalInt < 1 || $tanggalInt > 31) {
-            $this->message = 'Tanggal lahir tidak valid.';
+            $this->message = "NIK tidak valid: digit ke-7 dan 8 ($tanggal) bukan tanggal yang valid.";
             return false;
         }
 
         if ($bulanInt < 1 || $bulanInt > 12) {
-            $this->message = 'Bulan lahir tidak valid.';
+            $this->message = "NIK tidak valid: digit ke-9 dan 10 ($bulan) bukan bulan yang valid.";
             return false;
         }
 
         // Validate sequence number
         if (!is_numeric($urutan) || intval($urutan) < 1) {
-            $this->message = 'Nomor urut tidak valid.';
+            $this->message = "NIK tidak valid: 4 digit terakhir ($urutan) bukan nomor urut yang valid.";
             return false;
         }
 
@@ -115,11 +290,11 @@ class ValidNIK implements Rule
         try {
             $date = Carbon::createFromDate($tahunInt, $bulanInt, $tanggalInt);
             if ($date->isFuture()) {
-                $this->message = 'Tanggal lahir tidak boleh di masa depan.';
+                $this->message = "NIK tidak valid: tanggal lahir ($tanggalInt-$bulanInt-$tahunInt) tidak boleh di masa depan.";
                 return false;
             }
         } catch (\Exception $e) {
-            $this->message = 'Tanggal lahir tidak valid.';
+            $this->message = "NIK tidak valid: kombinasi tanggal ($tanggalInt-$bulanInt-$tahunInt) tidak valid.";
             return false;
         }
 

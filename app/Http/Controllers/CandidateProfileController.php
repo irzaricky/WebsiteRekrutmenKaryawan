@@ -18,7 +18,7 @@ class CandidateProfileController extends Controller
         $user = Auth::user();
         $candidateDetail = $user->candidateDetail;
 
-        return Inertia::render('Profile/showCandidate', [
+        return Inertia::render('Candidate/profile', [
             'title' => 'Profile',
             'user' => $user,
             'candidateDetail' => $candidateDetail
@@ -38,8 +38,7 @@ class CandidateProfileController extends Controller
                     'unique:candidate_details,nik,' . Auth::id() . ',user_id',
                     new ValidNIK
                 ],
-                'full_name' => 'required|string|max:255',
-                'birth_date' => 'required|date', // Simplified date validation
+                'birth_date' => 'required|date',
                 'address' => 'required|string',
                 'education_level' => 'required|in:SMA,D3,S1,S2,S3',
                 'major' => 'required|string',
@@ -56,7 +55,7 @@ class CandidateProfileController extends Controller
             }
 
             // Update or create candidate details
-            $candidateDetail = CandidateDetail::updateOrCreate(
+            CandidateDetail::updateOrCreate(
                 ['user_id' => $user->id],
                 $data
             );

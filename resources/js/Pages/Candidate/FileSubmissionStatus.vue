@@ -1,8 +1,9 @@
 <script setup>
-import { useForm } from "@inertiajs/vue3";
-import Sidebar from "../../components/Dashboard/Sidebar.vue";
-import { Link } from "@inertiajs/vue3";
-import { computed } from "vue";
+import BaseHeader from "@/components/BaseHeader.vue";
+import BaseFooter from "@/components/BaseFooter.vue";
+import { Head, useForm, Link } from "@inertiajs/vue3";
+import axios from "axios";
+import { computed, ref } from "vue";
 
 const props = defineProps({
     title: String,
@@ -63,40 +64,102 @@ const allFilesAccepted = computed(() => {
         props.candidateDetail?.certificate_status === "accepted"
     );
 });
+
+// Check if profile exists
+const hasProfile = computed(() => {
+    return !!props.candidateDetail?.nik; // Check for required profile field
+});
+
+// Add computed property to disable upload
+const canUpload = computed(() => {
+    return hasProfile.value;
+});
 </script>
 
 <template>
-    <div>
-        <div class="container mx-auto p-6">
-            <!-- Header with both buttons -->
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-2xl font-bold">Document Status</h1>
-                <div class="flex gap-4">
-                    <Link
-                        :href="route('home')"
-                        class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
-                    >
-                        Back
-                    </Link>
-                    <Link
-                        v-if="!allFilesAccepted"
-                        :href="route('candidate.upload')"
-                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-                    >
-                        Upload Document
-                    </Link>
-                </div>
+    <Head :title="title" />
+
+    <main class="min-h-screen py-12 lg:py-16">
+        <!-- Gradient background -->
+        <div
+            class="absolute inset-x-0 top-0 -z-10 transform-gpu overflow-hidden px-36 blur-3xl"
+            aria-hidden="true"
+        >
+            <div
+                class="mx-auto aspect-[1155/678] w-[72.1875rem] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30"
+                style="
+                    clip-path: polygon(
+                        74.1% 44.1%,
+                        100% 61.6%,
+                        97.5% 26.9%,
+                        85.5% 0.1%,
+                        80.7% 2%,
+                        72.5% 32.5%,
+                        60.2% 62.4%,
+                        52.4% 68.1%,
+                        47.5% 58.3%,
+                        45.2% 34.5%,
+                        27.5% 76.7%,
+                        0.1% 64.9%,
+                        17.9% 100%,
+                        27.6% 76.8%,
+                        76.1% 97.7%,
+                        74.1% 44.1%
+                    );
+                "
+            />
+        </div>
+
+        <div class="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <!-- Header -->
+            <div class="mb-10">
+                <h1 class="text-3xl font-bold tracking-tight text-gray-900">
+                    Document Status
+                </h1>
             </div>
 
-            <!-- Rest of existing template code -->
+            <!-- Profile Required Warning -->
+            <div
+                v-if="!hasProfile"
+                class="mb-8 bg-yellow-100 border border-yellow-400 text-yellow-700 px-6 py-4 rounded-lg"
+            >
+                <p class="font-bold">Profile Data Required</p>
+                <p class="mt-1">
+                    Please complete your profile information before uploading
+                    documents.
+                </p>
+                <Link
+                    :href="route('candidate.profile')"
+                    class="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors duration-150 ease-in-out"
+                >
+                    Complete Profile
+                </Link>
+            </div>
+
+            <!-- Upload Document Button -->
+            <div v-else-if="!allFilesAccepted" class="mb-8">
+                <Link
+                    :href="route('candidate.upload')"
+                    class="inline-block bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors duration-150 ease-in-out"
+                >
+                    Upload Document
+                </Link>
+            </div>
+
+            <!-- Document Status Cards -->
             <div class="space-y-6">
                 <!-- Photo Status -->
-                <div class="bg-white p-6 rounded-lg shadow">
+                <div
+                    class="bg-white p-8 rounded-xl shadow-lg"
+                    :class="{ 'opacity-50': !hasProfile }"
+                >
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold">Foto</h3>
+                        <h3 class="text-xl font-semibold text-gray-900">
+                            Foto
+                        </h3>
                         <span
                             :class="[
-                                'px-3 py-1 rounded-full text-sm border',
+                                'px-4 py-1.5 rounded-full text-sm font-medium border',
                                 getStatusBadgeClass(
                                     candidateDetail?.photo_status
                                 ),
@@ -113,14 +176,16 @@ const allFilesAccepted = computed(() => {
                     </p>
                     <div v-if="props.candidateDetail?.photo_path" class="mt-4">
                         <a
-                            :href="route('candidate.file', {
-                                type: 'photo',
-                                filename: props.candidateDetail.photo_path
-                                    .split('/')
-                                    .pop(),
-                            })"
+                            :href="
+                                route('candidate.file', {
+                                    type: 'photo',
+                                    filename: props.candidateDetail.photo_path
+                                        .split('/')
+                                        .pop(),
+                                })
+                            "
                             target="_blank"
-                            class="text-blue-600 hover:text-blue-800"
+                            class="text-blue-600 hover:text-blue-800 font-medium"
                         >
                             View Photo
                         </a>
@@ -128,12 +193,15 @@ const allFilesAccepted = computed(() => {
                 </div>
 
                 <!-- CV Status -->
-                <div class="bg-white p-6 rounded-lg shadow">
+                <div
+                    class="bg-white p-8 rounded-xl shadow-lg"
+                    :class="{ 'opacity-50': !hasProfile }"
+                >
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold">CV</h3>
+                        <h3 class="text-xl font-semibold text-gray-900">CV</h3>
                         <span
                             :class="[
-                                'px-3 py-1 rounded-full text-sm border',
+                                'px-4 py-1.5 rounded-full text-sm font-medium border',
                                 getStatusBadgeClass(candidateDetail?.cv_status),
                             ]"
                         >
@@ -154,7 +222,7 @@ const allFilesAccepted = computed(() => {
                                 })
                             "
                             target="_blank"
-                            class="text-blue-600 hover:text-blue-800"
+                            class="text-blue-600 hover:text-blue-800 font-medium"
                         >
                             View CV
                         </a>
@@ -162,12 +230,17 @@ const allFilesAccepted = computed(() => {
                 </div>
 
                 <!-- Certificate Status -->
-                <div class="bg-white p-6 rounded-lg shadow">
+                <div
+                    class="bg-white p-8 rounded-xl shadow-lg"
+                    :class="{ 'opacity-50': !hasProfile }"
+                >
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold">Ijazah</h3>
+                        <h3 class="text-xl font-semibold text-gray-900">
+                            Ijazah
+                        </h3>
                         <span
                             :class="[
-                                'px-3 py-1 rounded-full text-sm border',
+                                'px-4 py-1.5 rounded-full text-sm font-medium border',
                                 getStatusBadgeClass(
                                     candidateDetail?.certificate_status
                                 ),
@@ -197,13 +270,23 @@ const allFilesAccepted = computed(() => {
                                 })
                             "
                             target="_blank"
-                            class="text-blue-600 hover:text-blue-800"
+                            class="text-blue-600 hover:text-blue-800 font-medium"
                         >
                             View Certificate
                         </a>
                     </div>
                 </div>
             </div>
+
+            <!-- Back Button -->
+            <div class="mt-8 flex justify-end">
+                <Link
+                    :href="route('home')"
+                    class="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors duration-150 ease-in-out"
+                >
+                    Back
+                </Link>
+            </div>
         </div>
-    </div>
+    </main>
 </template>

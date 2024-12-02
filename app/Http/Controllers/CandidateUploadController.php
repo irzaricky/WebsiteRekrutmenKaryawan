@@ -20,15 +20,39 @@ class CandidateUploadController extends Controller
     public function index()
     {
         $user = Auth::user();
+        $candidateDetail = $user->candidateDetail;
+
+        // Redirect if profile not complete
+        if (!$candidateDetail || !$candidateDetail->nik) {
+            return redirect()->route('candidate.profile')
+                ->with('message', 'Please complete your profile before uploading documents.');
+        }
+
         return Inertia::render('Candidate/candidate_upload', [
             'title' => 'Upload Document',
-            'candidateDetail' => $user->candidateDetail
+            'candidateDetail' => $candidateDetail
         ]);
     }
 
     public function store_files(Request $request)
     {
         try {
+            $user = Auth::user();
+            $candidateDetail = $user->candidateDetail;
+
+            // Check each file if it's already accepted
+            foreach (['photo', 'cv', 'certificate'] as $field) {
+                if ($request->hasFile($field)) {
+                    $statusField = $field . '_status';
+                    if ($candidateDetail && $candidateDetail->$statusField === 'accepted') {
+                        return redirect()->back()->with([
+                            'message' => ucfirst($field) . ' has been accepted and cannot be modified.',
+                            'type' => 'error'
+                        ]);
+                    }
+                }
+            }
+
             // Validate at least one file is uploaded
             if (!$request->hasAny(['photo', 'cv', 'certificate'])) {
                 return redirect()->back()->with([
@@ -52,36 +76,27 @@ class CandidateUploadController extends Controller
                 'certificate' => 'nullable|mimes:pdf|max:' . $this->maxFileSize,
             ]);
 
-            $user = Auth::user();
             $messages = [];
 
             // Handle file uploads
-            if ($request->hasFile('photo')) {
-                try {
-                    $this->handleFileUpload($request, 'photo', 'candidate-photos', $user);
-                    $messages[] = 'Photo uploaded successfully.';
-                } catch (\Exception $e) {
-                    $messages[] = 'Failed to upload photo: ' . $e->getMessage();
+            foreach (['photo', 'cv', 'certificate'] as $field) {
+                if ($request->hasFile($field)) {
+                    try {
+                        $this->handleFileUpload(
+                            $request,
+                            $field,
+                            "candidate-{$field}s",
+                            $user
+                        );
+                        $messages[] = ucfirst($field) . ' uploaded successfully.';
+                    } catch (\Exception $e) {
+                        $messages[] = "Failed to upload {$field}: " . $e->getMessage();
+                    }
                 }
             }
 
-            if ($request->hasFile('cv')) {
-                try {
-                    $this->handleFileUpload($request, 'cv', 'candidate-cvs', $user);
-                    $messages[] = 'CV uploaded successfully.';
-                } catch (\Exception $e) {
-                    $messages[] = 'Failed to upload CV: ' . $e->getMessage();
-                }
-            }
-
-            if ($request->hasFile('certificate')) {
-                try {
-                    $this->handleFileUpload($request, 'certificate', 'candidate-certificates', $user);
-                    $messages[] = 'Certificate uploaded successfully.';
-                } catch (\Exception $e) {
-                    $messages[] = 'Failed to upload certificate: ' . $e->getMessage();
-                }
-            }
+            // Refresh user data to ensure we have latest changes
+            $user->refresh();
 
             return redirect()->back()->with([
                 'message' => implode(' ', $messages),
@@ -109,7 +124,6 @@ class CandidateUploadController extends Controller
                     'unique:candidate_details,nik,' . Auth::id() . ',user_id',
                     new ValidNIK
                 ],
-                'full_name' => 'required|string|max:255',
                 'birth_date' => 'required|date',
                 'address' => 'required|string',
                 'education_level' => 'required|in:SMA,D3,S1,S2,S3',
@@ -149,10 +163,22 @@ class CandidateUploadController extends Controller
         // Store new file
         $filePath = $file->store($path);
 
-        // Update or create candidate detail
+        // Status field name
+        $fieldStatus = $field . '_status';
+
+        // Update or create candidate detail with both path and status
+        $updateData = [
+            $fieldPath => $filePath,
+        ];
+
+        // Only set status to pending if it's a new upload or status is null
+        if (!$existingDetail || !$existingDetail->$fieldStatus) {
+            $updateData[$fieldStatus] = 'pending';
+        }
+
         CandidateDetail::updateOrCreate(
             ['user_id' => $user->id],
-            [$fieldPath => $filePath]
+            $updateData
         );
     }
 
@@ -219,14 +245,21 @@ class CandidateUploadController extends Controller
             return response()->json(['message' => 'File not found'], 404);
         }
 
+        // Check if file is accepted
+        $statusField = $request->type . '_status';
+        if ($candidateDetail->$statusField === 'accepted') {
+            return response()->json([
+                'message' => 'This file has been accepted and cannot be deleted'
+            ], 403);
+        }
+
         $field = $request->type . '_path';
         $path = $candidateDetail->$field;
 
         if ($path && Storage::exists($path)) {
-            // Menghapus file dari storage server
             Storage::delete($path);
-            // Menghapus path file dari database
             $candidateDetail->$field = null;
+            $candidateDetail->$statusField = null; // Reset status when file is deleted
             $candidateDetail->save();
         }
 
@@ -315,9 +348,17 @@ class CandidateUploadController extends Controller
     public function fileStatus()
     {
         $user = Auth::user();
+
+        // Get fresh data by first resolving the relationship
+        $candidateDetail = $user->candidateDetail()->first();
+
+        if ($candidateDetail) {
+            $candidateDetail = $candidateDetail->fresh();
+        }
+
         return Inertia::render('Candidate/FileSubmissionStatus', [
             'title' => 'File Status',
-            'candidateDetail' => $user->candidateDetail
+            'candidateDetail' => $candidateDetail
         ]);
     }
 }

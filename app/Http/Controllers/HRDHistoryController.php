@@ -31,7 +31,7 @@ class HRDHistoryController extends Controller
             });
         }
 
-        $actions = $query->paginate(10);
+        $actions = $query->paginate(8);
 
         return Inertia::render('HRD/history', [
             'title' => 'History',

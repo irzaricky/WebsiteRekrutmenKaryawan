@@ -1,13 +1,16 @@
 <script setup>
+import DashboardHeader from "./Header.vue";
 import { ref } from "vue";
-import { Link } from "@inertiajs/vue3"; // Import Link from Inertia
-
+import { Link, usePage } from "@inertiajs/vue3";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
-// State to track if the sidebar is collapsed or expanded
-const isCollapsed = ref(false);
+const props = defineProps({
+    title: String
+});
 
-// Function to toggle the sidebar state
+const isCollapsed = ref(false);
+const user = usePage().props.auth.user; 
+
 function toggleSidebar() {
     isCollapsed.value = !isCollapsed.value;
 }
@@ -24,13 +27,13 @@ const img = [{ id: "1", href: "/assets/images/for.png", link: "/" }];
 </script>
 
 <template>
-    <div class="flex">
+    <div class="flex min-h-screen">
         <!-- Sidebar -->
         <div
             :class="[
-                'bg-gray-800 h-screen p-7 pt-4 relative transition-all',
+                'bg-[#2B2D42] min-h-screen p-7 pt-4 relative transition-all top-0',
                 {
-                    'w-72 duration-700': !isCollapsed,
+                    'w-64 duration-700': !isCollapsed,
                     'w-28 duration-700': isCollapsed,
                 },
             ]"
@@ -43,17 +46,22 @@ const img = [{ id: "1", href: "/assets/images/for.png", link: "/" }];
             ></i>
 
             <!-- Sidebar Content -->
-            <Link
-                :href="img[0].link"
-                class="p-1.5 btn avatar bg-white duration-500"
-                style="height: 4rem"
-            >
-                <img
-                    :src="img[0].href"
-                    class="h-16 w-auto avatar"
-                    alt="Recruiter Logo"
-                />
-            </Link>
+            <div class="flex items-center gap-6">
+                <Link
+                    :href="img[0].link"
+                    class="p-1.5 btn avatar bg-white duration-500"
+                    style="height: 4rem"
+                >
+                    <img
+                        :src="img[0].href"
+                        class="h-16 w-auto avatar"
+                        alt="Recruiter Logo"
+                    />
+                </Link>
+                <div v-if="!isCollapsed">
+                    <span class="text-white font-bold text-2xl">Recruiter</span>
+                </div>
+            </div>
 
             <div v-if="!isCollapsed">
                 <ul class="text-white mt-6">
@@ -73,9 +81,15 @@ const img = [{ id: "1", href: "/assets/images/for.png", link: "/" }];
             </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="p-6 pt-3 flex-1">
-            <slot />
+        <!-- Main Content Area -->
+        <div class="flex-1 bg-[#EDF2F4]">
+            <!-- Header with title -->
+            <DashboardHeader :user="user" :title="title" />
+
+            <!-- Page Content -->
+            <div class="p-6 pt-3">
+                <slot />
+            </div>
         </div>
     </div>
 </template>

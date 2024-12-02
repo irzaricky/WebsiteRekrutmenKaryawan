@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\TestsList;
 
-class TestSeeder extends Seeder
+class ListTestSeeder extends Seeder
 {
     /**
      * Run the database seeds.

@@ -34,11 +34,7 @@ const submitForm = () => {
 </script>
 <template>
     <Head :title="title" />
-    <Sidebar>
-        <div class="mb-4">
-            <h2 class="text-lg font-light">Edit Candidate Data</h2>
-        </div>
-
+    <Sidebar :title="title">
         <form
             @submit.prevent="submitForm"
             class="w-full max-w mx-auto my-20 bg-gray-200 p-16 rounded-[50px]"

@@ -11,19 +11,33 @@ use Inertia\Inertia;
 
 class CandidateRankingController extends Controller
 {
+    private function getTestScore($candidate, $testId)
+    {
+        return $candidate->testResults->where('test_id', $testId)->first()?->score ?? 0;
+    }
+
+    // Add helper method to check for zero scores
+    private function hasZeroScores($candidate)
+    {
+        return $this->getTestScore($candidate, 1) === 0 ||
+            $this->getTestScore($candidate, 2) === 0 ||
+            $this->getTestScore($candidate, 3) === 0 ||
+            $this->getTestScore($candidate, 4) === 0;
+    }
+
     private function calculateRankingData()
     {
         // Step 1: Mengambil semua data hasil test dari candidate
         $candidates = User::where('role', 'Candidate')->with('testResults')->get();
 
-        // Step 2: Decision Matrix
+        // Step 2: Decision Matrix with null handling
         $decisionMatrix = [];
         foreach ($candidates as $candidate) {
             $decisionMatrix[$candidate->id] = [
-                'TIU' => pow($candidate->testResults->where('test_id', 1)->first()->score, 2),
-                'TWK' => pow($candidate->testResults->where('test_id', 2)->first()->score, 2),
-                'TKB' => pow($candidate->testResults->where('test_id', 3)->first()->score, 2),
-                'TW' => pow($candidate->testResults->where('test_id', 4)->first()->score, 2),
+                'TIU' => pow($this->getTestScore($candidate, 1), 2),
+                'TWK' => pow($this->getTestScore($candidate, 2), 2),
+                'TKB' => pow($this->getTestScore($candidate, 3), 2),
+                'TW' => pow($this->getTestScore($candidate, 4), 2),
             ];
         }
 
@@ -38,10 +52,10 @@ class CandidateRankingController extends Controller
         $normalizedMatrix = [];
         foreach ($candidates as $candidate) {
             $normalizedMatrix[$candidate->id] = [
-                'TIU' => ($candidate->testResults->where('test_id', 1)->first()->score) / $decisionMatrixTotal['TIU'],
-                'TWK' => ($candidate->testResults->where('test_id', 2)->first()->score) / $decisionMatrixTotal['TWK'],
-                'TKB' => ($candidate->testResults->where('test_id', 3)->first()->score) / $decisionMatrixTotal['TKB'],
-                'TW' => ($candidate->testResults->where('test_id', 4)->first()->score) / $decisionMatrixTotal['TW'],
+                'TIU' => $this->getTestScore($candidate, 1) / $decisionMatrixTotal['TIU'],
+                'TWK' => $this->getTestScore($candidate, 2) / $decisionMatrixTotal['TWK'],
+                'TKB' => $this->getTestScore($candidate, 3) / $decisionMatrixTotal['TKB'],
+                'TW' => $this->getTestScore($candidate, 4) / $decisionMatrixTotal['TW'],
             ];
         }
 
@@ -111,10 +125,10 @@ class CandidateRankingController extends Controller
             return [
                 'id' => $candidate->id,
                 'name' => $candidate->name,
-                'tiu_score' => $candidate->testResults->where('test_id', 1)->first()?->score,
-                'twk_score' => $candidate->testResults->where('test_id', 2)->first()?->score,
-                'tkb_score' => $candidate->testResults->where('test_id', 3)->first()?->score,
-                'tw_score' => $candidate->testResults->where('test_id', 4)->first()?->score,
+                'tiu_score' => $this->getTestScore($candidate, 1),
+                'twk_score' => $this->getTestScore($candidate, 2),
+                'tkb_score' => $this->getTestScore($candidate, 3),
+                'tw_score' => $this->getTestScore($candidate, 4),
                 'final_score' => $finalScore,
             ];
         })->sortByDesc('final_score')->values();
@@ -123,12 +137,18 @@ class CandidateRankingController extends Controller
     public function calculateRanking()
     {
         $rankingData = $this->calculateRankingData()->map(function ($candidate, $index) {
-            $candidate['is_accepted'] = $index < 20;
+            // Mark as not accepted if any score is 0, otherwise check ranking position
+            $candidate['is_accepted'] = !($candidate['tiu_score'] === 0 ||
+                $candidate['twk_score'] === 0 ||
+                $candidate['tkb_score'] === 0 ||
+                $candidate['tw_score'] === 0) &&
+                $index < 20;
             return $candidate;
         });
 
         //Meneruskan data ke view
         return Inertia::render('HRD/candidate_ranking', [
+            'title' => 'Candidate Rankings',
             'candidates' => $rankingData
         ]);
     }
@@ -137,19 +157,24 @@ class CandidateRankingController extends Controller
     {
         $candidates = User::where('role', 'Candidate')->with('testResults')->get();
 
-        // Hitung rata-rata skor per test
+        // Update average calculations to use helper method
         $averageScores = [
-            'TIU' => round($candidates->avg(fn($c) => $c->testResults->where('test_id', 1)->first()?->score ?? 0), 2),
-            'TWK' => round($candidates->avg(fn($c) => $c->testResults->where('test_id', 2)->first()?->score ?? 0), 2),
-            'TKB' => round($candidates->avg(fn($c) => $c->testResults->where('test_id', 3)->first()?->score ?? 0), 2),
-            'TW' => round($candidates->avg(fn($c) => $c->testResults->where('test_id', 4)->first()?->score ?? 0), 2)
+            'TIU' => round($candidates->avg(fn($c) => $this->getTestScore($c, 1)), 2),
+            'TWK' => round($candidates->avg(fn($c) => $this->getTestScore($c, 2)), 2),
+            'TKB' => round($candidates->avg(fn($c) => $this->getTestScore($c, 3)), 2),
+            'TW' => round($candidates->avg(fn($c) => $this->getTestScore($c, 4)), 2)
         ];
 
         // Calculate rankings first
         $rankings = $this->calculateRankingData();
 
-        // Get accepted candidates (top 20)
-        $acceptedCandidates = $rankings->take(20);
+        // Filter out candidates with zero scores before taking top 20
+        $acceptedCandidates = $rankings->filter(function ($candidate) {
+            return !($candidate['tiu_score'] === 0 ||
+                $candidate['twk_score'] === 0 ||
+                $candidate['tkb_score'] === 0 ||
+                $candidate['tw_score'] === 0);
+        })->take(20);
 
         return [
             'title' => 'Dashboard',

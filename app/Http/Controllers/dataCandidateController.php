@@ -17,16 +17,32 @@ class dataCandidateController extends Controller // Ubah ke huruf kapital
     public function getUser(Request $request)
     {
         $search = $request->input('search');
+        $emptyScores = $request->boolean('empty_scores');
 
-        $candidates = User::where('role', 'Candidate')
-            ->when($search, function ($query, $search) {
-                return $query->where('name', 'LIKE', "%{$search}%");
-            })
-            ->paginate(10);
+        $query = User::where('role', 'Candidate')
+            ->with(['testResults.test']);
+
+        // Apply search filter first
+        if ($search) {
+            $query->where('name', 'LIKE', "%{$search}%");
+        }
+
+        // Then apply empty scores filter
+        if ($emptyScores) {
+            $query->where(function ($q) {
+                $q->whereDoesntHave('testResults')
+                    ->orWhereHas('testResults', function ($query) {
+                        $query->whereNull('score')
+                            ->orWhere('score', '');
+                    });
+            });
+        }
+
+        $candidates = $query->paginate(6);
 
         return Inertia::render('HRD/data-candidate', [
             'title' => "Data Candidate",
-            'candidates' => $candidates, // Mengirim data kandidat ke komponen
+            'candidates' => $candidates,
         ]);
     }
 
@@ -150,10 +166,26 @@ class dataCandidateController extends Controller // Ubah ke huruf kapital
 
     public function getPendingFiles(Request $request)
     {
-        // Get all candidates, not just pending ones
-        $candidates = User::where('role', 'Candidate')
-            ->with('candidateDetail') // Load all candidate details
-            ->paginate(8);
+        $query = User::where('role', 'Candidate')
+            ->with('candidateDetail');
+
+        // Add search filter
+        if ($search = $request->input('search')) {
+            $query->where('name', 'LIKE', "%{$search}%");
+        }
+
+        // Apply not uploaded filter
+        if ($request->boolean('not_uploaded')) {
+            $query->where(function ($q) {
+                $q->whereHas('candidateDetail', function ($q) {
+                    $q->whereNull('photo_path')
+                        ->whereNull('cv_path')
+                        ->whereNull('certificate_path');
+                })->orWhereDoesntHave('candidateDetail');
+            });
+        }
+
+        $candidates = $query->paginate(8);
 
         return Inertia::render('HRD/pending-files', [
             'title' => "Files Review",

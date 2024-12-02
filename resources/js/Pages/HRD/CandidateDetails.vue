@@ -59,7 +59,7 @@ const formatDate = (date) => {
 
 <template>
     <Head :title="title" />
-    <Sidebar>
+    <Sidebar :title="title">
         <!-- Add success/error messages -->
         <div
             v-if="message"
@@ -75,10 +75,6 @@ const formatDate = (date) => {
         </div>
 
         <div class="p-4">
-            <div class="flex justify-between items-center mb-2">
-                <h1 class="text-2xl font-semibold">Candidate Details</h1>
-            </div>
-
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="space-y-4">
                     <div>
@@ -87,9 +83,7 @@ const formatDate = (date) => {
                     </div>
                     <div>
                         <p class="text-sm font-semibold">Full Name:</p>
-                        <p>
-                            {{ candidateDetails.candidate_detail?.full_name }}
-                        </p>
+                        <p>{{ candidateDetails.name }}</p>
                     </div>
                     <div>
                         <p class="text-sm font-semibold">Address:</p>

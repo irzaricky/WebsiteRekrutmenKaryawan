@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Sidebar from "../../components/Dashboard/Sidebar.vue";
-import { Head } from "@inertiajs/vue3";
-import { ref, watch } from "vue";
+import { Head, Link } from "@inertiajs/vue3";
+import { ref, watch, onMounted } from "vue";
 import { router } from "@inertiajs/vue3";
 import debounce from "lodash/debounce";
 
@@ -10,13 +10,8 @@ const selectedTimeFilter = ref("all");
 const selectedActionType = ref("all");
 
 const props = defineProps({
-    title: {
-        type: String,
-    },
-    actions: {
-        type: Object,
-        required: true,
-    },
+    title: String,
+    actions: Object, // Paginated data
 });
 
 const timeFilters = [
@@ -42,6 +37,7 @@ const handleSearch = debounce((value) => {
             search: value,
             time_filter: selectedTimeFilter.value,
             action_type: selectedActionType.value,
+            page: 1, // Reset to first page on search
         },
         {
             preserveState: true,
@@ -50,26 +46,45 @@ const handleSearch = debounce((value) => {
     );
 }, 300);
 
-// Watch for changes
+// Modified handleFiltersChange with proper state preservation
+const handleFiltersChange = debounce(() => {
+    const currentQuery = new URLSearchParams(window.location.search);
+    const currentPage = currentQuery.get("page");
+
+    const params = {
+        search: searchQuery.value || undefined,
+        time_filter:
+            selectedTimeFilter.value !== "all"
+                ? selectedTimeFilter.value
+                : undefined,
+        action_type:
+            selectedActionType.value !== "all"
+                ? selectedActionType.value
+                : undefined,
+        page: currentPage, // Preserve current page
+    };
+
+    // Clean undefined values
+    Object.keys(params).forEach(
+        (key) => params[key] === undefined && delete params[key]
+    );
+
+    router.get(route("dashboard.history"), params, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
+}, 300);
+
 watch(
     [searchQuery, selectedTimeFilter, selectedActionType],
-    ([searchValue, timeValue, actionValue]) => {
-        router.get(
-            route("dashboard.history"),
-            {
-                search: searchValue,
-                time_filter: timeValue,
-                action_type: actionValue,
-            },
-            {
-                preserveState: true,
-                preserveScroll: true,
-            }
-        );
-    }
+    () => {
+        handleFiltersChange();
+    },
+    { deep: true }
 );
 
-// Format the action type for display
+// Format action type for display
 const formatActionType = (type) => {
     switch (type) {
         case "create":
@@ -82,14 +97,43 @@ const formatActionType = (type) => {
             return type;
     }
 };
+
+// Style constants
+const PAGINATION_BUTTON_BASE =
+    "px-4 py-2 text-sm rounded-md transition-colors duration-150";
+
+// Modified getPaginationUrl to preserve active filters
+const getPaginationUrl = (url) => {
+    if (!url) return null;
+    const urlObj = new URL(url);
+
+    // Only add params if they're not default values
+    if (selectedTimeFilter.value !== "all") {
+        urlObj.searchParams.set("time_filter", selectedTimeFilter.value);
+    }
+    if (selectedActionType.value !== "all") {
+        urlObj.searchParams.set("action_type", selectedActionType.value);
+    }
+    if (searchQuery.value) {
+        urlObj.searchParams.set("search", searchQuery.value);
+    }
+
+    return urlObj.toString();
+};
+
+// Initialize from URL params on mount
+onMounted(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    searchQuery.value = urlParams.get("search") || "";
+    selectedTimeFilter.value = urlParams.get("time_filter") || "all";
+    selectedActionType.value = urlParams.get("action_type") || "all";
+});
 </script>
 
 <template>
     <Head :title="title" />
-    <Sidebar>
-        <div class="p-6 pt-3 flex-1">
-            <h1 class="text-2xl font-semibold mb-4">History</h1>
-
+    <Sidebar :title="title">
+        <div class="p-4 pt-3 flex-1">
             <!-- Filter Controls -->
             <div class="flex gap-4 mb-6">
                 <!-- Search HRD Name -->
@@ -131,55 +175,95 @@ const formatActionType = (type) => {
                 </select>
             </div>
 
-            <!-- Table -->
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                        >
-                            HRD
-                        </th>
-                        <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                        >
-                            Action Type
-                        </th>
-                        <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                        >
-                            Details
-                        </th>
-                        <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                        >
-                            Timestamp
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    <tr v-for="action in actions.data" :key="action.id">
-                        <td
-                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                        >
-                            {{ action.hrd.name }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            {{ formatActionType(action.action_type) }}
-                        </td>
-                        <td
-                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                        >
-                            {{ action.details }}
-                        </td>
-                        <td
-                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                        >
-                            {{ new Date(action.created_at).toLocaleString() }}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <!-- Table Section -->
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            >
+                                HRD
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            >
+                                Action Type
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            >
+                                Details
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            >
+                                Timestamp
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr v-for="action in actions.data" :key="action.id">
+                            <td
+                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                            >
+                                {{ action.hrd.name }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {{ formatActionType(action.action_type) }}
+                            </td>
+                            <td
+                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                            >
+                                {{ action.details }}
+                            </td>
+                            <td
+                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                            >
+                                {{
+                                    new Date(action.created_at).toLocaleString()
+                                }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Pagination Section -->
+                <div class="px-6 py-4 border-t border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <!-- Results Counter -->
+                        <div class="text-sm text-gray-500">
+                            Showing {{ actions.from }} to {{ actions.to }} of
+                            {{ actions.total }} results
+                        </div>
+
+                        <!-- Pagination Controls -->
+                        <div class="flex gap-2">
+                            <Link
+                                v-for="(url, label) in {
+                                    prev_page_url: 'Previous',
+                                    next_page_url: 'Next',
+                                }"
+                                :key="label"
+                                :href="getPaginationUrl(actions[label])"
+                                :class="[
+                                    PAGINATION_BUTTON_BASE,
+                                    actions[label]
+                                        ? 'bg-blue-500 text-white hover:bg-blue-600'
+                                        : 'bg-gray-200 text-gray-500 cursor-not-allowed',
+                                ]"
+                                :disabled="!actions[label]"
+                            >
+                                {{
+                                    label === "prev_page_url"
+                                        ? "Previous"
+                                        : "Next"
+                                }}
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </Sidebar>
 </template>

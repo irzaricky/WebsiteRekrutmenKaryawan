@@ -1,8 +1,10 @@
 <script setup>
+import { Head } from "@inertiajs/vue3";
 import Sidebar from "../../components/Dashboard/Sidebar.vue";
 import { defineProps, ref, computed } from "vue";
 
 const props = defineProps({
+    title: String,
     candidates: {
         type: Array,
         required: true,
@@ -20,9 +22,10 @@ const filteredCandidates = computed(() => {
 </script>
 
 <template>
-    <Sidebar>
-        <div class="container mx-auto p-4">
-            <h1 class="text-2xl font-bold mb-4">Candidate Rankings</h1>
+    <Head :title="title" />
+    <Sidebar :title="title">
+        <div class="container mx-auto px-4">
+            <h1 class="text-2xl font-bold mb-4"></h1>
 
             <!-- Filter Input -->
             <div class="mb-4 flex justify-between">
