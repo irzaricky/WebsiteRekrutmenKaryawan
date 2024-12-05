@@ -23,13 +23,11 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('candidate_details', function (Blueprint $table) {
+            // Drop only the columns we added in up()
             $table->dropColumn([
-                'photo_confirmed',
-                'photo_confirmed_at',
-                'cv_confirmed',
-                'cv_confirmed_at',
-                'certificate_confirmed',
-                'certificate_confirmed_at'
+                'photo_status',
+                'cv_status',
+                'certificate_status'
             ]);
         });
     }

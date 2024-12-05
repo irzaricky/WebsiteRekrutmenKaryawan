@@ -15,23 +15,103 @@ class DataCandidateControllerTest extends TestCase
 
     protected $user;
     protected $test;
+    protected $candidate;
 
     protected function setUp(): void
     {
         parent::setUp();
-
-        // Buat user dengan role 'Candidate' untuk keperluan test
-        $this->user = User::factory()->create([
-            'role' => 'HRD',
-        ]);
-
-        // Buat sebuah test untuk keperluan test
+        $this->user = User::factory()->create(['role' => 'HRD']);
         $this->test = TestsList::factory()->create();
+        $this->candidate = User::factory()->create(['role' => 'Candidate']);
     }
 
-    /**
-     * Test untuk membaca data Test Result
-     */
+    // Test unauthorized access
+    public function test_non_hrd_tidak_dapat_mengakses_data_candidate()
+    {
+        $user = User::factory()->create(['role' => 'Candidate']);
+        $response = $this->actingAs($user)
+            ->from('/')
+            ->get(route('dashboard.data-candidate'));
+
+        $response->assertRedirect('/'); // Should redirect to home
+    }
+
+    // Test search functionality
+    public function test_hrd_dapat_mencari_candidate_berdasarkan_nama()
+    {
+        $candidate1 = User::factory()->create([
+            'name' => 'John Doe',
+            'role' => 'Candidate'
+        ]);
+        $candidate2 = User::factory()->create([
+            'name' => 'Jane Smith',
+            'role' => 'Candidate'
+        ]);
+
+        $response = $this->actingAs($this->user)
+            ->get(route('dashboard.data-candidate', ['search' => 'John']));
+
+        $response->assertOk()
+            ->assertInertia(
+                fn($page) => $page
+                    ->has('candidates.data', 1)
+                    ->where('candidates.data.0.name', 'John Doe')
+            );
+    }
+
+    // Test empty scores filter
+    public function test_hrd_dapat_memfilter_candidate_dengan_nilai_kosong()
+    {
+        $testResult = TestResult::factory()->create([
+            'user_id' => $this->candidate->id,
+            'test_id' => $this->test->id,
+            'score' => 0
+        ]);
+
+        $response = $this->actingAs($this->user)
+            ->get(route('dashboard.data-candidate', ['empty_scores' => true]));
+
+        $response->assertOk()
+            ->assertInertia(
+                fn($page) => $page
+                    ->has('candidates.data', 1)
+                    ->where('candidates.data.0.id', $this->candidate->id)
+            );
+    }
+
+    // Test pagination
+    public function test_data_candidate_terpaginasi_dengan_benar()
+    {
+        $candidates = User::factory()->count(10)->create(['role' => 'Candidate']);
+
+        $response = $this->actingAs($this->user)
+            ->get(route('dashboard.data-candidate'));
+
+        $response->assertOk()
+            ->assertInertia(
+                fn($page) => $page
+                    ->has('candidates.data', 6) // Default pagination is 6
+                    ->has('candidates.links')
+            );
+    }
+
+    // Test validation rules for score updates
+    public function test_hrd_tidak_dapat_mengupdate_score_dengan_nilai_negatif()
+    {
+        $testResult = TestResult::factory()->create();
+
+        $response = $this->actingAs($this->user)
+            ->put(route('dashboard.data-candidate-put', $testResult->user_id), [
+                'test_results' => [
+                    $this->test->id => -10
+                ]
+            ]);
+
+        $response->assertSessionHasErrors(['test_results.*']);
+    }
+
+
+    //Test untuk membaca data Test Result
     public function test_hrd_dapat_membaca_data_hasil_test_candidate()
     {
         // Buat beberapa TestResult untuk kandidat
@@ -49,9 +129,8 @@ class DataCandidateControllerTest extends TestCase
         // $response->assertViewHas(key: 'candidates');
     }
 
-    /**
-     * Test untuk memperbarui nilai Test Result kandidat
-     */
+    //Test untuk memperbarui nilai Test Result kandidat
+
     public function test_hrd_dapat_mengupdate_data_hasil_tes_candidate()
     {
         $testResult = TestResult::factory()->create([
@@ -124,31 +203,4 @@ class DataCandidateControllerTest extends TestCase
             'score' => 50,  // Pastikan nilai tidak berubah
         ]);
     }
-
-    /**
-     * Test untuk menghapus data Test Result
-     */
-    // public function test_can_delete_candidate_test_result()
-    // {
-    //     $testResult = TestResult::factory()->create([
-    //         'user_id' => $this->user->id,
-    //         'test_id' => $this->test->id,
-    //         'score' => 75,
-    //     ]);
-
-    //     // Pastikan data ada di database sebelum penghapusan
-    //     $this->assertDatabaseHas('test_results', [
-    //         'user_id' => $this->user->id,
-    //         'test_id' => $this->test->id,
-    //     ]);
-
-    //     // Hapus Test Result
-    //     $testResult->delete();
-
-    //     // Pastikan data sudah terhapus
-    //     $this->assertDatabaseMissing('test_results', [
-    //         'user_id' => $this->user->id,
-    //         'test_id' => $this->test->id,
-    //     ]);
-    // }
 }

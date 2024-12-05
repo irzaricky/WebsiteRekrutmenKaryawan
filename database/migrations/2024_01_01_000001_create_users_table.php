@@ -17,8 +17,8 @@ return new class extends Migration {
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('role', ['Candidate', 'HRD'])->default('Candidate');
-            ;  // Tambahan kolom role
-            $table->enum('status', ['active', 'inactive'])->default('active');  // Tambahan kolom status
+            ;
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->rememberToken();
             $table->timestamps();
         });

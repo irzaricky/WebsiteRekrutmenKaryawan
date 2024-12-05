@@ -6,6 +6,7 @@ import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
 import Checkbox from "@/components/Checkbox.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
+import ReCaptcha from "@/Components/ReCaptcha.vue";
 
 defineProps({
     canResetPassword: {
@@ -25,11 +26,23 @@ const form = useForm({
     email: "",
     password: "",
     remember: false,
+    recaptcha: "", // Add recaptcha token
 });
+
+const handleRecaptchaVerify = (token) => {
+    form.recaptcha = token;
+};
+
+const handleRecaptchaExpire = () => {
+    form.recaptcha = "";
+};
 
 const submit = () => {
     form.post(route("login"), {
-        onFinish: () => form.reset("password"),
+        onFinish: () => {
+            form.reset("password");
+            window.grecaptcha?.reset();
+        },
     });
 };
 </script>
@@ -129,6 +142,15 @@ const submit = () => {
                     >
                         Belum register?
                     </Link>
+                </div>
+
+                <div class="mt-4">
+                    <ReCaptcha
+                        site-key="6LcrhJMqAAAAAPczKz8OfJ3RUdAO9x8jxhL5qI-T"
+                        @verify="handleRecaptchaVerify"
+                        @expire="handleRecaptchaExpire"
+                    />
+                    <InputError class="mt-2" :message="form.errors.recaptcha" />
                 </div>
 
                 <div class="mt-4 flex items-center justify-end">
