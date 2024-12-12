@@ -1,8 +1,7 @@
 <script setup>
 import Sidebar from "../../components/Dashboard/Sidebar.vue";
 import { Head, useForm, Link } from "@inertiajs/vue3";
-import axios from "axios";
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 
 const props = defineProps({
     title: String,
@@ -10,114 +9,116 @@ const props = defineProps({
     errors: Object,
 });
 
+// Helper to get required ijazah based on education level
+const getRequiredIjazah = (level) => {
+    switch (level) {
+        case "SMA":
+            return ["ijazah_smp", "ijazah_sma"];
+        case "D3":
+            return ["ijazah_smp", "ijazah_sma", "ijazah_d3"];
+        case "S1":
+            return ["ijazah_smp", "ijazah_sma", "ijazah_s1"];
+        case "S2":
+            return ["ijazah_smp", "ijazah_sma", "ijazah_s1", "ijazah_s2"];
+        case "S3":
+            return [
+                "ijazah_smp",
+                "ijazah_sma",
+                "ijazah_s1",
+                "ijazah_s2",
+                "ijazah_s3",
+            ];
+        default:
+            return [];
+    }
+};
+
+// Initialize form with all possible fields
 const form = useForm({
+    // Base documents
     photo: null,
     cv: null,
-    certificate: null,
+    // Dynamically add ijazah fields
+    ...(props.candidateDetail?.education_level
+        ? getRequiredIjazah(props.candidateDetail.education_level).reduce(
+              (acc, field) => ({ ...acc, [field]: null }),
+              {}
+          )
+        : {}),
 });
 
-const photoName = ref("");
-const cvName = ref("");
-const certificateName = ref("");
+// Basic documents (Photo and CV) - unchanged
+const baseDocs = computed(() => ({
+    photo: { label: "Foto", type: "image" },
+    cv: { label: "CV", type: "pdf" },
+}));
 
-// Add computed properties for each file type
-const canUploadPhoto = computed(() => {
-    return (
-        !props.candidateDetail?.photo_path ||
-        props.candidateDetail?.photo_status === "rejected"
+// Required ijazah - modified to use proper field names
+const ijazahDocs = computed(() => {
+    const level = props.candidateDetail?.education_level;
+    if (!level) return {};
+
+    return getRequiredIjazah(level).reduce(
+        (acc, field) => ({
+            ...acc,
+            [field]: {
+                label: `Ijazah ${field.split("_")[1].toUpperCase()}`,
+                type: "pdf",
+            },
+        }),
+        {}
     );
 });
 
-const canUploadCV = computed(() => {
-    return (
-        !props.candidateDetail?.cv_path ||
-        props.candidateDetail?.cv_status === "rejected"
-    );
-});
-
-const canUploadCertificate = computed(() => {
-    return (
-        !props.candidateDetail?.certificate_path ||
-        props.candidateDetail?.certificate_status === "rejected"
-    );
-});
-
-// Handle file selection
 const handleFileSelect = (event, type) => {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Check if upload is allowed for this file type
-    const canUpload = {
-        photo: canUploadPhoto.value,
-        cv: canUploadCV.value,
-        certificate: canUploadCertificate.value,
-    }[type];
-
-    if (!canUpload) {
-        notificationStore.addNotification({
-            type: "error",
-            message:
-                "File tidak dapat diupload. File hanya bisa diupload jika belum ada atau status rejected.",
-        });
-        event.target.value = ""; // Reset input
+    // Check if file already accepted
+    const status = props.candidateDetail?.[`${type}_status`];
+    if (status === "accepted") {
+        event.target.value = "";
         return;
     }
 
+    // Set file in form
     form[type] = file;
-    // Update file name ref based on type
-    switch (type) {
-        case "photo":
-            photoName.value = file.name;
-            break;
-        case "cv":
-            cvName.value = file.name;
-            break;
-        case "certificate":
-            certificateName.value = file.name;
-            break;
-    }
 };
 
-// Handle file upload
-const handleUpload = async () => {
-    try {
-        await form.post(route("candidate.files.update"), {
-            onSuccess: () => {
-                form.reset();
-                photoName.value = "";
-                cvName.value = "";
-                certificateName.value = "";
-            },
-            onError: (errors) => {},
-        });
-    } catch (error) {}
-};
+const handleUpload = () => {
+    // Create FormData object
+    const formData = new FormData();
 
-// Handle file removal
-const removeFile = async (type) => {
-    const fileTypes = {
-        photo: "Foto",
-        cv: "CV",
-        certificate: "Ijazah",
-    };
+    // Append base documents
+    if (form.photo) formData.append("photo", form.photo);
+    if (form.cv) formData.append("cv", form.cv);
 
-    const confirmed = window.confirm(
-        `Anda yakin ingin menghapus ${fileTypes[type]} ini?`
-    );
+    // Append ijazah documents
+    Object.entries(ijazahDocs.value).forEach(([type, _]) => {
+        if (form[type]) {
+            formData.append(type, form[type]);
+        }
+    });
 
-    if (!confirmed) return;
-
-    try {
-        await axios.delete(route("candidate.file.delete"), { data: { type } });
-        window.location.reload();
-    } catch (error) {
-        console.error("Error removing file:", error);
-    }
+    form.post(route("candidate.files.update"), {
+        preserveScroll: true,
+        forceFormData: true,
+        onSuccess: () => {
+            form.reset();
+            document.querySelectorAll('input[type="file"]').forEach((input) => {
+                input.value = "";
+            });
+        },
+        onError: (errors) => {
+            console.error("Upload errors:", errors);
+        },
+    });
 };
 </script>
 
 <template>
+    <Head :title="title" />
+
     <main class="min-h-screen py-12 lg:py-16">
         <!-- Gradient background -->
         <div
@@ -195,245 +196,200 @@ const removeFile = async (type) => {
                 enctype="multipart/form-data"
             >
                 <div class="p-6 sm:p-8 space-y-10">
-                    <!-- Upload Fields -->
-                    <div
-                        class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6"
-                    >
-                        <!-- Photo Upload -->
-                        <div class="text-center flex flex-col items-center">
-                            <label
-                                class="block text-sm font-medium text-gray-700 mb-4"
-                                >Foto
-                                <span
-                                    v-if="props.candidateDetail?.photo_status"
-                                    :class="{
-                                        'text-red-600':
-                                            props.candidateDetail
-                                                .photo_status === 'rejected',
-                                        'text-green-600':
-                                            props.candidateDetail
-                                                .photo_status === 'accepted',
-                                        'text-yellow-600':
-                                            props.candidateDetail
-                                                .photo_status === 'pending',
-                                    }"
-                                >
-                                    ({{ props.candidateDetail.photo_status }})
-                                </span>
-                            </label>
+                    <!-- Base Documents (Photo and CV) -->
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-6">
+                            Basic Documents
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div
-                                class="w-full flex flex-col items-center gap-2"
+                                v-for="(doc, type) in baseDocs"
+                                :key="type"
+                                class="bg-white p-6 rounded-xl shadow-md"
                             >
-                                <div v-if="photoUrl" class="mb-4">
-                                    <svg
-                                        class="w-8 h-8 mx-auto text-blue-600"
-                                        fill="currentColor"
-                                        viewBox="0 0 20 20"
-                                    >
-                                        <path
-                                            d="M4 18h12a2 2 0 002-2V6a2 2 0 00-2-2h-5.586l-2-2H4a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                        />
-                                    </svg>
-                                    <a
-                                        :href="photoUrl"
-                                        target="_blank"
-                                        class="text-blue-600 hover:text-blue-800 mt-2 block"
-                                    >
-                                        View uploaded photo
-                                    </a>
-                                </div>
-                                <label
-                                    class="cursor-pointer bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold"
+                                <div
+                                    class="flex items-center justify-between mb-4"
                                 >
-                                    Choose File
+                                    <label
+                                        class="text-xl font-semibold text-gray-900"
+                                    >
+                                        {{ doc.label }}
+                                        <span
+                                            v-if="
+                                                props.candidateDetail?.[
+                                                    `${type}_status`
+                                                ]
+                                            "
+                                            :class="{
+                                                'text-red-600':
+                                                    props.candidateDetail[
+                                                        `${type}_status`
+                                                    ] === 'rejected',
+                                                'text-green-600':
+                                                    props.candidateDetail[
+                                                        `${type}_status`
+                                                    ] === 'accepted',
+                                                'text-yellow-600':
+                                                    props.candidateDetail[
+                                                        `${type}_status`
+                                                    ] === 'pending',
+                                            }"
+                                        >
+                                            ({{
+                                                props.candidateDetail[
+                                                    `${type}_status`
+                                                ]
+                                            }})
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div class="mt-4">
                                     <input
                                         type="file"
-                                        @input="
-                                            (event) =>
-                                                handleFileSelect(event, 'photo')
+                                        :accept="
+                                            doc.type === 'image'
+                                                ? '.jpg,.jpeg,.png'
+                                                : '.pdf'
                                         "
-                                        accept="image/*"
-                                        :disabled="!canUploadPhoto"
-                                        class="hidden"
+                                        @change="
+                                            (e) => handleFileSelect(e, type)
+                                        "
+                                        :name="type"
+                                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                                     />
-                                </label>
-                                <span class="text-sm text-gray-500">{{
-                                    photoName || "No file chosen"
-                                }}</span>
-                            </div>
-                            <button
-                                @click="removeFile('photo')"
-                                :disabled="!canUploadPhoto"
-                                class="text-red-600 text-sm ml-2 hover:text-red-800"
-                                :class="{
-                                    'opacity-50 cursor-not-allowed':
-                                        !canUploadPhoto,
-                                }"
-                            >
-                                Delete Photo
-                            </button>
-                        </div>
-
-                        <!-- CV Upload -->
-                        <div class="text-center flex flex-col items-center">
-                            <label
-                                class="block text-sm font-medium text-gray-700 mb-4"
-                                >CV (PDF)
-                                <span
-                                    v-if="props.candidateDetail?.cv_status"
-                                    :class="{
-                                        'text-red-600':
-                                            props.candidateDetail.cv_status ===
-                                            'rejected',
-                                        'text-green-600':
-                                            props.candidateDetail.cv_status ===
-                                            'accepted',
-                                        'text-yellow-600':
-                                            props.candidateDetail.cv_status ===
-                                            'pending',
-                                    }"
-                                >
-                                    ({{ props.candidateDetail.cv_status }})
-                                </span>
-                            </label>
-                            <div
-                                class="w-full flex flex-col items-center gap-2"
-                            >
-                                <div v-if="cvUrl" class="mb-4">
-                                    <svg
-                                        class="w-8 h-8 mx-auto text-blue-600"
-                                        fill="currentColor"
-                                        viewBox="0 0 20 20"
-                                    >
-                                        <path
-                                            d="M4 18h12a2 2 0 002-2V6a2 2 0 00-2-2h-5.586l-2-2H4a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                        />
-                                    </svg>
-                                    <a
-                                        :href="cvUrl"
-                                        target="_blank"
-                                        class="text-blue-600 hover:text-blue-800 mt-2 block"
-                                    >
-                                        View uploaded CV
-                                    </a>
                                 </div>
-                                <label
-                                    class="cursor-pointer bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold"
-                                >
-                                    Choose File
-                                    <input
-                                        type="file"
-                                        @input="
-                                            (event) =>
-                                                handleFileSelect(event, 'cv')
-                                        "
-                                        accept=".pdf"
-                                        :disabled="!canUploadCV"
-                                        class="hidden"
-                                    />
-                                </label>
-                                <span class="text-sm text-gray-500">{{
-                                    cvName || "No file chosen"
-                                }}</span>
-                            </div>
-                            <button
-                                @click="removeFile('cv')"
-                                :disabled="!canUploadCV"
-                                class="text-red-600 text-sm ml-2 hover:text-red-800"
-                                :class="{
-                                    'opacity-50 cursor-not-allowed':
-                                        !canUploadCV,
-                                }"
-                            >
-                                Delete CV
-                            </button>
-                        </div>
 
-                        <!-- Certificate Upload -->
-                        <div class="text-center flex flex-col items-center">
-                            <label
-                                class="block text-sm font-medium text-gray-700 mb-4"
-                                >Ijazah (PDF)
-                                <span
+                                <div
                                     v-if="
-                                        props.candidateDetail
-                                            ?.certificate_status
+                                        props.candidateDetail?.[`${type}_path`]
                                     "
-                                    :class="{
-                                        'text-red-600':
-                                            props.candidateDetail
-                                                .certificate_status ===
-                                            'rejected',
-                                        'text-green-600':
-                                            props.candidateDetail
-                                                .certificate_status ===
-                                            'accepted',
-                                        'text-yellow-600':
-                                            props.candidateDetail
-                                                .certificate_status ===
-                                            'pending',
-                                    }"
+                                    class="mt-4"
                                 >
-                                    ({{
-                                        props.candidateDetail
-                                            .certificate_status
-                                    }})
-                                </span>
-                            </label>
-                            <div
-                                class="w-full flex flex-col items-center gap-2"
-                            >
-                                <div v-if="certificateUrl" class="mb-4">
-                                    <svg
-                                        class="w-8 h-8 mx-auto text-blue-600"
-                                        fill="currentColor"
-                                        viewBox="0 0 20 20"
-                                    >
-                                        <path
-                                            d="M4 18h12a2 2 0 002-2V6a2 2 0 00-2-2h-5.586l-2-2H4a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                        />
-                                    </svg>
                                     <a
-                                        :href="certificateUrl"
+                                        :href="
+                                            route('candidate.file', {
+                                                type: type,
+                                                filename: props.candidateDetail[
+                                                    `${type}_path`
+                                                ]
+                                                    .split('/')
+                                                    .pop(),
+                                            })
+                                        "
                                         target="_blank"
-                                        class="text-blue-600 hover:text-blue-800 mt-2 block"
+                                        class="text-blue-600 hover:text-blue-800 font-medium"
                                     >
-                                        View uploaded certificate
+                                        View {{ doc.label }}
                                     </a>
                                 </div>
-                                <label
-                                    class="cursor-pointer bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold"
-                                >
-                                    Choose File
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ijazah Documents -->
+                    <div v-if="Object.keys(ijazahDocs).length > 0" class="mt-8">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-6">
+                            Ijazah Documents
+                        </h3>
+                        <div class="grid grid-cols-3 gap-6">
+                            <div
+                                v-for="(doc, type) in ijazahDocs"
+                                :key="type"
+                                class="bg-white p-6 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-200"
+                            >
+                                <div class="flex flex-col space-y-4">
+                                    <div
+                                        class="flex items-center justify-between"
+                                    >
+                                        <label
+                                            class="text-lg font-medium text-gray-900"
+                                        >
+                                            {{ doc.label }}
+                                        </label>
+                                        <span
+                                            v-if="
+                                                props.candidateDetail?.[
+                                                    `${type}_status`
+                                                ]
+                                            "
+                                            :class="{
+                                                'px-2 py-1 rounded-full text-xs font-medium': true,
+                                                'bg-red-100 text-red-600':
+                                                    props.candidateDetail[
+                                                        `${type}_status`
+                                                    ] === 'rejected',
+                                                'bg-green-100 text-green-600':
+                                                    props.candidateDetail[
+                                                        `${type}_status`
+                                                    ] === 'accepted',
+                                                'bg-yellow-100 text-yellow-600':
+                                                    props.candidateDetail[
+                                                        `${type}_status`
+                                                    ] === 'pending',
+                                            }"
+                                        >
+                                            {{
+                                                props.candidateDetail[
+                                                    `${type}_status`
+                                                ]
+                                            }}
+                                        </span>
+                                    </div>
+
                                     <input
                                         type="file"
-                                        @input="
-                                            (event) =>
-                                                handleFileSelect(
-                                                    event,
-                                                    'certificate'
-                                                )
-                                        "
                                         accept=".pdf"
-                                        :disabled="!canUploadCertificate"
-                                        class="hidden"
+                                        @change="
+                                            (e) => handleFileSelect(e, type)
+                                        "
+                                        :name="type"
+                                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                                     />
-                                </label>
-                                <span class="text-sm text-gray-500">{{
-                                    certificateName || "No file chosen"
-                                }}</span>
+
+                                    <div
+                                        v-if="
+                                            props.candidateDetail?.[
+                                                `${type}_path`
+                                            ]
+                                        "
+                                        class="flex items-center space-x-2"
+                                    >
+                                        <a
+                                            :href="
+                                                route('candidate.file', {
+                                                    type: type,
+                                                    filename:
+                                                        props.candidateDetail[
+                                                            `${type}_path`
+                                                        ]
+                                                            .split('/')
+                                                            .pop(),
+                                                })
+                                            "
+                                            target="_blank"
+                                            class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
+                                        >
+                                            <span class="mr-2"
+                                                >View {{ doc.label }}</span
+                                            >
+                                            <svg
+                                                class="w-4 h-4"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                                />
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
-                            <button
-                                @click="removeFile('certificate')"
-                                :disabled="!canUploadCertificate"
-                                class="text-red-600 text-sm ml-2 hover:text-red-800"
-                                :class="{
-                                    'opacity-50 cursor-not-allowed':
-                                        !canUploadCertificate,
-                                }"
-                            >
-                                Delete Certificate
-                            </button>
                         </div>
                     </div>
 

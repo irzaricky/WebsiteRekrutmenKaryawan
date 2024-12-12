@@ -132,7 +132,7 @@ class dataCandidateController extends Controller // Ubah ke huruf kapital
     {
         $request->validate([
             'candidate_id' => 'required|exists:users,id',
-            'file_type' => 'required|in:photo,cv,certificate',
+            'file_type' => 'required|in:photo,cv,ijazah_smp,ijazah_sma,ijazah_d3,ijazah_s1,ijazah_s2,ijazah_s3',
             'status' => 'required|in:pending,accepted,rejected'
         ]);
 
@@ -147,21 +147,21 @@ class dataCandidateController extends Controller // Ubah ke huruf kapital
         $candidateDetail->$field = $request->status;
         $candidateDetail->save();
 
-        $candidate = User::find($request->candidate_id);
+        // Create history record
         $historyController = new HRDHistoryController();
         $historyController->SimpanAksi(
             Auth::id(),
             $request->candidate_id,
             null,
             null,
-            $candidate->name,
+            $candidateDetail->user->name,
             'update_file_status',
             $oldStatus,
             $request->status,
             $request->file_type
         );
 
-        return response()->json(['message' => 'File status updated successfully']);
+        return back()->with('message', 'File status updated successfully');
     }
 
     public function getPendingFiles(Request $request)
@@ -177,11 +177,49 @@ class dataCandidateController extends Controller // Ubah ke huruf kapital
         // Apply not uploaded filter
         if ($request->boolean('not_uploaded')) {
             $query->where(function ($q) {
-                $q->whereHas('candidateDetail', function ($q) {
-                    $q->whereNull('photo_path')
-                        ->whereNull('cv_path')
-                        ->whereNull('certificate_path');
-                })->orWhereDoesntHave('candidateDetail');
+                $q->whereDoesntHave('candidateDetail')
+                    ->orWhereHas('candidateDetail', function ($q) {
+                        $q->where(function ($subq) {
+                            // Base documents check
+                            $subq->whereNull('photo_path')
+                                ->orWhereNull('cv_path');
+
+                            // Education level specific checks
+                            $subq->orWhere(function ($edu) {
+                                $edu->where('education_level', 'SMA')->where(function ($q) {
+                                    $q->whereNull('ijazah_smp_path')
+                                        ->orWhereNull('ijazah_sma_path');
+                                });
+                            })->orWhere(function ($edu) {
+                                $edu->where('education_level', 'D3')->where(function ($q) {
+                                    $q->whereNull('ijazah_smp_path')
+                                        ->orWhereNull('ijazah_sma_path')
+                                        ->orWhereNull('ijazah_d3_path');
+                                });
+                            })->orWhere(function ($edu) {
+                                $edu->where('education_level', 'S1')->where(function ($q) {
+                                    $q->whereNull('ijazah_smp_path')
+                                        ->orWhereNull('ijazah_sma_path')
+                                        ->orWhereNull('ijazah_s1_path');
+                                });
+                            })->orWhere(function ($edu) {
+                                $edu->where('education_level', 'S2')->where(function ($q) {
+                                    $q->whereNull('ijazah_smp_path')
+                                        ->orWhereNull('ijazah_sma_path')
+                                        ->orWhereNull('ijazah_s1_path')
+                                        ->orWhereNull('ijazah_s2_path');
+                                });
+                            })->orWhere(function ($edu) {
+                                $edu->where('education_level', 'S3')->where(function ($q) {
+                                    $q->whereNull('ijazah_smp_path')
+                                        ->orWhereNull('ijazah_sma_path')
+                                        ->orWhereNull('ijazah_s1_path')
+                                        ->orWhereNull('ijazah_s2_path')
+                                        ->orWhereNull('ijazah_s3_path');
+                                });
+                            });
+                        });
+                    });
             });
         }
 

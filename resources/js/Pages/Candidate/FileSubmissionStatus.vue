@@ -36,15 +36,12 @@ const removeFile = async (type) => {
     }
 };
 
-const getStatusBadgeClass = (status) => {
-    return (
-        {
-            pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
-            accepted: "bg-green-100 text-green-800 border-green-200",
-            rejected: "bg-red-100 text-red-800 border-red-200",
-        }[status] || "bg-gray-100 text-gray-800 border-gray-200"
-    );
-};
+const getStatusBadgeClass = (status) => ({
+    "bg-yellow-100 border-yellow-200 text-yellow-800": status === "pending",
+    "bg-green-100 border-green-200 text-green-800": status === "accepted",
+    "bg-red-100 border-red-200 text-red-800": status === "rejected",
+    "bg-gray-100 border-gray-200 text-gray-800": !status,
+});
 
 const getStatusMessage = (status) => {
     return (
@@ -73,6 +70,29 @@ const hasProfile = computed(() => {
 // Add computed property to disable upload
 const canUpload = computed(() => {
     return hasProfile.value;
+});
+
+// Add new computed property
+const requiredIjazah = computed(() => {
+    switch (props.candidateDetail?.education_level) {
+        case "SMA":
+            return ["smp", "sma"];
+        case "D3":
+            return ["smp", "sma", "d3"];
+        case "S1":
+            return ["smp", "sma", "s1"];
+        case "S2":
+            return ["smp", "sma", "s1", "s2"];
+        case "S3":
+            return ["smp", "sma", "s1", "s2", "s3"];
+        default:
+            return [];
+    }
+});
+
+// Use same requiredDocs computed as candidate_upload.vue
+const requiredDocs = computed(() => {
+    // ... same implementation as above ...
 });
 </script>
 
@@ -229,25 +249,28 @@ const canUpload = computed(() => {
                     </div>
                 </div>
 
-                <!-- Certificate Status -->
+
+                <!-- Add this after other status cards -->
                 <div
+                    v-for="level in requiredIjazah"
+                    :key="level"
                     class="bg-white p-8 rounded-xl shadow-lg"
                     :class="{ 'opacity-50': !hasProfile }"
                 >
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-xl font-semibold text-gray-900">
-                            Ijazah
+                            Ijazah {{ level.toUpperCase() }}
                         </h3>
                         <span
                             :class="[
                                 'px-4 py-1.5 rounded-full text-sm font-medium border',
                                 getStatusBadgeClass(
-                                    candidateDetail?.certificate_status
+                                    candidateDetail?.[`ijazah_${level}_status`]
                                 ),
                             ]"
                         >
                             {{
-                                candidateDetail?.certificate_status ||
+                                candidateDetail?.[`ijazah_${level}_status`] ||
                                 "Not uploaded"
                             }}
                         </span>
@@ -255,16 +278,21 @@ const canUpload = computed(() => {
                     <p class="text-sm text-gray-600">
                         {{
                             getStatusMessage(
-                                candidateDetail?.certificate_status
+                                candidateDetail?.[`ijazah_${level}_status`]
                             )
                         }}
                     </p>
-                    <div v-if="candidateDetail?.certificate_path" class="mt-4">
+                    <div
+                        v-if="candidateDetail?.[`ijazah_${level}_path`]"
+                        class="mt-4"
+                    >
                         <a
                             :href="
                                 route('candidate.file', {
-                                    type: 'certificate',
-                                    filename: candidateDetail.certificate_path
+                                    type: `ijazah_${level}`,
+                                    filename: candidateDetail[
+                                        `ijazah_${level}_path`
+                                    ]
                                         .split('/')
                                         .pop(),
                                 })
@@ -272,7 +300,7 @@ const canUpload = computed(() => {
                             target="_blank"
                             class="text-blue-600 hover:text-blue-800 font-medium"
                         >
-                            View Certificate
+                            View Ijazah {{ level.toUpperCase() }}
                         </a>
                     </div>
                 </div>

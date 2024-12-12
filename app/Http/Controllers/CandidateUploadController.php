@@ -7,6 +7,8 @@ use App\Models\CandidateDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 use Carbon\Carbon;
 use Illuminate\Validation\Rule;
@@ -14,8 +16,9 @@ use App\Rules\ValidNIK;
 
 class CandidateUploadController extends Controller
 {
-    private $maxFileSize = 2048; // 2MB
+    private $maxFileSize = 2048;
     private $allowedImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    private $allowedDocTypes = ['application/pdf'];
 
     public function index()
     {
@@ -40,74 +43,117 @@ class CandidateUploadController extends Controller
             $user = Auth::user();
             $candidateDetail = $user->candidateDetail;
 
-            // Check each file if it's already accepted
-            foreach (['photo', 'cv', 'certificate'] as $field) {
-                if ($request->hasFile($field)) {
-                    $statusField = $field . '_status';
-                    if ($candidateDetail && $candidateDetail->$statusField === 'accepted') {
-                        return redirect()->back()->with([
-                            'message' => ucfirst($field) . ' has been accepted and cannot be modified.',
-                            'type' => 'error'
-                        ]);
-                    }
-                }
+            // Check profile completion first
+            if (!$candidateDetail || !$candidateDetail->nik) {
+                return redirect()->route('candidate.profile')
+                    ->with('message', 'Please complete your profile before uploading documents.');
             }
 
-            // Validate at least one file is uploaded
-            if (!$request->hasAny(['photo', 'cv', 'certificate'])) {
-                return redirect()->back()->with([
-                    'message' => 'Please upload at least one file.',
-                    'type' => 'warning'
-                ]);
-            }
-
-            $request->validate([
+            // Validate basic files
+            $validator = Validator::make($request->all(), [
                 'photo' => [
                     'nullable',
+                    'file',
                     'image',
                     'max:' . $this->maxFileSize,
                     function ($attribute, $value, $fail) {
                         if ($value && !in_array($value->getMimeType(), $this->allowedImageTypes)) {
-                            $fail('The photo must be a JPEG, PNG or JPG image.');
+                            $fail("Photo must be a JPEG, PNG or JPG image.");
                         }
                     },
                 ],
-                'cv' => 'nullable|mimes:pdf|max:' . $this->maxFileSize,
-                'certificate' => 'nullable|mimes:pdf|max:' . $this->maxFileSize,
+                'cv' => [
+                    'nullable',
+                    'file',
+                    'mimes:pdf',
+                    'max:' . $this->maxFileSize
+                ]
             ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
 
             $messages = [];
 
-            // Handle file uploads
-            foreach (['photo', 'cv', 'certificate'] as $field) {
-                if ($request->hasFile($field)) {
-                    try {
-                        $this->handleFileUpload(
-                            $request,
-                            $field,
-                            "candidate-{$field}s",
-                            $user
-                        );
-                        $messages[] = ucfirst($field) . ' uploaded successfully.';
-                    } catch (\Exception $e) {
-                        $messages[] = "Failed to upload {$field}: " . $e->getMessage();
+            // Handle basic files (photo, cv)
+            foreach (['photo', 'cv'] as $type) {
+                if ($request->hasFile($type)) {
+                    // Check if file already accepted
+                    $statusField = "{$type}_status";
+                    if ($candidateDetail->$statusField === 'accepted') {
+                        return redirect()->back()->with([
+                            'message' => ucfirst($type) . ' has been accepted and cannot be modified.',
+                            'type' => 'error'
+                        ]);
+                    }
+
+                    // Store and update file
+                    $path = Storage::putFile("/candidate-{$type}s", $request->file($type));
+                    if ($path) {
+                        // Delete old file if exists
+                        $pathField = "{$type}_path";
+                        if ($candidateDetail->$pathField) {
+                            Storage::delete($candidateDetail->$pathField);
+                        }
+
+                        // Update details
+                        $candidateDetail->$pathField = $path;
+                        $candidateDetail->$statusField = 'pending';
+                        $messages[] = ucfirst($type) . ' uploaded successfully.';
                     }
                 }
             }
 
-            // Refresh user data to ensure we have latest changes
-            $user->refresh();
+            // Handle ijazah files based on education level
+            if ($candidateDetail->education_level) {
+                $requiredIjazah = $this->getRequiredIjazah($candidateDetail->education_level);
+
+                foreach ($requiredIjazah as $ijazah) {
+                    $type = "ijazah_{$ijazah}";
+                    if ($request->hasFile($type)) {
+                        // Validate ijazah file
+                        $request->validate([
+                            $type => 'file|mimes:pdf|max:' . $this->maxFileSize
+                        ]);
+
+                        // Check if already accepted
+                        $statusField = "{$type}_status";
+                        if ($candidateDetail->$statusField === 'accepted') {
+                            continue;
+                        }
+
+                        // Store and update file
+                        $path = Storage::putFile("/ijazah/{$ijazah}", $request->file($type));
+                        if ($path) {
+                            // Delete old file if exists
+                            $pathField = "{$type}_path";
+                            if ($candidateDetail->$pathField) {
+                                Storage::delete($candidateDetail->$pathField);
+                            }
+
+                            // Update details
+                            $candidateDetail->$pathField = $path;
+                            $candidateDetail->$statusField = 'pending';
+                            $messages[] = "Ijazah " . strtoupper($ijazah) . " uploaded successfully.";
+                        }
+                    }
+                }
+            }
+
+            // Save all changes
+            $candidateDetail->save();
 
             return redirect()->back()->with([
-                'message' => implode(' ', $messages),
+                'message' => empty($messages) ? 'No files were uploaded.' : implode(', ', $messages),
                 'type' => empty($messages) ? 'warning' : 'success'
             ]);
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return redirect()->back()->withErrors($e->validator)->with([
-                'message' => 'Please check your file requirements.',
-                'type' => 'error'
-            ]);
+        } catch (\Exception $e) {
+            Log::error("File upload error: " . $e->getMessage());
+            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 
@@ -155,46 +201,48 @@ class CandidateUploadController extends Controller
         $existingDetail = $user->candidateDetail;
 
         // Delete old file if exists
-        $fieldPath = $field . '_path';
+        $fieldPath = "{$field}_path";
+        $statusField = "{$field}_status";
         if ($existingDetail && $existingDetail->$fieldPath) {
             Storage::delete($existingDetail->$fieldPath);
         }
 
-        // Store new file
-        $filePath = $file->store($path);
+        try {
+            // Store new file
+            $filePath = $file->store($path);
 
-        // Status field name
-        $fieldStatus = $field . '_status';
+            // Status field name
+            $fieldStatus = $field . '_status';
 
-        // Update or create candidate detail with both path and status
-        $updateData = [
-            $fieldPath => $filePath,
-        ];
+            // Update or create candidate detail with both path and status
+            $updateData = [
+                $fieldPath => $filePath,
+            ];
 
-        // Only set status to pending if it's a new upload or status is null
-        if (!$existingDetail || !$existingDetail->$fieldStatus) {
-            $updateData[$fieldStatus] = 'pending';
+            // Only set status to pending if it's a new upload or status is null
+            if (!$existingDetail || !$existingDetail->$fieldStatus) {
+                $updateData[$fieldStatus] = 'pending';
+            }
+
+            CandidateDetail::updateOrCreate(
+                ['user_id' => $user->id],
+                $updateData
+            );
+        } catch (\Exception $e) {
+            Log::error("File upload failed: {$e->getMessage()}");
+            throw $e;
         }
-
-        CandidateDetail::updateOrCreate(
-            ['user_id' => $user->id],
-            $updateData
-        );
     }
 
     public function getFile($type, $filename)
     {
-        // Get current logged in user
         $user = Auth::user();
-
-        // Get candidate ID from filename or request
         $candidateUserId = request()->query('candidate_id');
 
-        // If user is HRD, allow access with candidate_id
+        // For HRD, allow access with candidate_id 
         if ($user->role === 'HRD') {
             $candidateDetail = CandidateDetail::where('user_id', $candidateUserId)->first();
         } else {
-            // For candidates, only allow access to their own files
             $candidateDetail = $user->candidateDetail;
         }
 
@@ -202,40 +250,53 @@ class CandidateUploadController extends Controller
             abort(404);
         }
 
-        // Rest of the validation and file serving logic
-        $field = $type . '_path';
-        $expectedPath = $candidateDetail->$field;
+        // Get expected file path based on type
+        $fieldPath = match ($type) {
+            'photo' => $candidateDetail->photo_path,
+            'cv' => $candidateDetail->cv_path,
+            'ijazah_smp' => $candidateDetail->ijazah_smp_path,
+            'ijazah_sma' => $candidateDetail->ijazah_sma_path,
+            'ijazah_d3' => $candidateDetail->ijazah_d3_path,
+            'ijazah_s1' => $candidateDetail->ijazah_s1_path,
+            'ijazah_s2' => $candidateDetail->ijazah_s2_path,
+            'ijazah_s3' => $candidateDetail->ijazah_s3_path,
+            default => null
+        };
 
-        $path = "";
-        switch ($type) {
-            case 'photo':
-                $path = 'candidate-photos/' . $filename;
-                break;
-            case 'cv':
-                $path = 'candidate-cvs/' . $filename;
-                break;
-            case 'certificate':
-                $path = 'candidate-certificates/' . $filename;
-                break;
-            default:
-                abort(404);
-        }
-
-        if ($expectedPath !== $path) {
-            abort(403, 'Unauthorized access');
-        }
-
-        if (!Storage::exists($path)) {
+        if (!$fieldPath) {
             abort(404);
         }
 
-        return Storage::response($path);
+        $expectedPath = match ($type) {
+            'photo' => 'candidate-photos/' . $filename,
+            'cv' => 'candidate-cvs/' . $filename,
+            'ijazah_smp' => 'ijazah/smp/' . $filename,
+            'ijazah_sma' => 'ijazah/sma/' . $filename,
+            'ijazah_d3' => 'ijazah/d3/' . $filename,
+            'ijazah_s1' => 'ijazah/s1/' . $filename,
+            'ijazah_s2' => 'ijazah/s2/' . $filename,
+            'ijazah_s3' => 'ijazah/s3/' . $filename,
+            default => abort(404)
+        };
+
+        if ($expectedPath !== $fieldPath) {
+            abort(403, 'Unauthorized access');
+        }
+
+        if (!Storage::exists($fieldPath)) {
+            abort(404);
+        }
+
+        return Storage::response($fieldPath);
     }
 
     public function deleteFile(Request $request)
     {
         $request->validate([
-            'type' => 'required|in:photo,cv,certificate'
+            'type' => [
+                'required',
+                'in:photo,cv,ijazah_smp,ijazah_sma,ijazah_d3,ijazah_s1,ijazah_s2,ijazah_s3'
+            ]
         ]);
 
         $user = Auth::user();
@@ -253,13 +314,14 @@ class CandidateUploadController extends Controller
             ], 403);
         }
 
-        $field = $request->type . '_path';
-        $path = $candidateDetail->$field;
+        // Get file path field name
+        $pathField = $request->type . '_path';
+        $path = $candidateDetail->$pathField;
 
         if ($path && Storage::exists($path)) {
             Storage::delete($path);
-            $candidateDetail->$field = null;
-            $candidateDetail->$statusField = null; // Reset status when file is deleted
+            $candidateDetail->$pathField = null;
+            $candidateDetail->$statusField = null;
             $candidateDetail->save();
         }
 
@@ -292,58 +354,21 @@ class CandidateUploadController extends Controller
         // Create history record
         $historyController = new HRDHistoryController();
         $historyController->SimpanAksi(
-            Auth::id(), // HRD ID
-            $request->candidate_id, // Candidate ID
-            null, // Test Result ID
-            null, // Test Name
-            $candidate->name, // Candidate Name
-            $candidateDetail->$field ? 'confirm_file' : 'unconfirm_file', // Action Type
-            null, // Previous Score
-            null, // New Score
-            $request->file_type // File Type
-        );
-
-        return back()->with('message', 'File confirmation status updated');
-    }
-
-    public function updateFileStatus(Request $request)
-    {
-        $request->validate([
-            'candidate_id' => 'required|exists:users,id',
-            'file_type' => 'required|in:photo,cv,certificate',
-            'status' => 'required|in:pending,accepted,rejected'
-        ]);
-
-        $candidateDetail = CandidateDetail::where('user_id', $request->candidate_id)->first();
-
-        if (!$candidateDetail) {
-            return response()->json(['message' => 'Candidate detail not found'], 404);
-        }
-
-        $field = $request->file_type . '_status';
-        $oldStatus = $candidateDetail->$field;
-        $candidateDetail->$field = $request->status;
-        $candidateDetail->save();
-
-        // Get candidate name
-        $candidate = User::find($request->candidate_id);
-
-        // Create history record
-        $historyController = new HRDHistoryController();
-        $historyController->SimpanAksi(
             Auth::id(),
             $request->candidate_id,
             null,
             null,
             $candidate->name,
-            'update_file_status',
+            $candidateDetail->$field ? 'confirm_file' : 'unconfirm_file',
             null,
             null,
-            "{$request->file_type} ({$request->status})"
+            $request->file_type
         );
 
-        return back()->with('message', 'File status updated successfully');
+        return back()->with('message', 'File confirmation status updated');
     }
+
+
 
     public function fileStatus()
     {
@@ -360,5 +385,129 @@ class CandidateUploadController extends Controller
             'title' => 'File Status',
             'candidateDetail' => $candidateDetail
         ]);
+    }
+
+    public function store(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            $candidateDetail = $user->candidateDetail;
+
+            // Basic file validations
+            $baseValidations = [
+                'photo' => [
+                    'nullable',
+                    'file',
+                    'image',
+                    'max:' . $this->maxFileSize,
+                    function ($attribute, $value, $fail) {
+                        if ($value && !in_array($value->getMimeType(), $this->allowedImageTypes)) {
+                            $fail("Photo must be a JPEG, PNG or JPG image.");
+                        }
+                    },
+                ],
+                'cv' => [
+                    'nullable',
+                    'file',
+                    'mimes:pdf',
+                    'max:' . $this->maxFileSize
+                ]
+            ];
+
+            // Add ijazah validations based on education level
+            if ($candidateDetail->education_level) {
+                $requiredIjazah = $this->getRequiredIjazah($candidateDetail->education_level);
+                foreach ($requiredIjazah as $ijazah) {
+                    $baseValidations["ijazah_$ijazah"] = [
+                        'nullable',
+                        'file',
+                        'mimes:pdf',
+                        'max:' . $this->maxFileSize
+                    ];
+                }
+            }
+
+            $request->validate($baseValidations);
+
+            $messages = [];
+
+            // Handle basic files (photo, cv)
+            foreach (['photo', 'cv'] as $type) {
+                if ($request->hasFile($type)) {
+                    $path = $this->storeFile($request->file($type), $type);
+                    if ($path) {
+                        $this->updateFileStatus($candidateDetail, $type, $path);
+                        $messages[] = ucfirst($type) . " uploaded successfully.";
+                    }
+                }
+            }
+
+            // Handle ijazah files
+            if ($candidateDetail->education_level) {
+                foreach ($requiredIjazah as $ijazah) {
+                    if ($request->hasFile("ijazah_$ijazah")) {
+                        $path = $this->storeFile(
+                            $request->file("ijazah_$ijazah"),
+                            "ijazah/$ijazah"
+                        );
+                        if ($path) {
+                            $this->updateFileStatus($candidateDetail, "ijazah_$ijazah", $path);
+                            $messages[] = "Ijazah " . strtoupper($ijazah) . " uploaded successfully.";
+                        }
+                    }
+                }
+            }
+
+            return redirect()->back()->with([
+                'message' => implode(' ', $messages),
+                'type' => empty($messages) ? 'warning' : 'success'
+            ]);
+
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    private function storeFile($file, $type)
+    {
+        try {
+            return Storage::putFile("/$type", $file);
+        } catch (\Exception $e) {
+            Log::error("File upload failed: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    private function updateFileStatus($candidateDetail, $type, $path)
+    {
+        $pathField = "{$type}_path";
+        $statusField = "{$type}_status";
+
+        // Delete old file if exists
+        if ($candidateDetail->$pathField) {
+            Storage::delete($candidateDetail->$pathField);
+        }
+
+        $candidateDetail->$pathField = $path;
+        $candidateDetail->$statusField = 'pending';
+        $candidateDetail->save();
+    }
+
+    private function getRequiredIjazah($level)
+    {
+        return match ($level) {
+            'SMA' => ['smp', 'sma'],
+            'D3' => ['smp', 'sma', 'd3'],
+            'S1' => ['smp', 'sma', 's1'],
+            'S2' => ['smp', 'sma', 's1', 's2'],
+            'S3' => ['smp', 'sma', 's1', 's2', 's3'],
+            default => []
+        };
+    }
+
+    private function validateFileStatus($candidateDetail, $type)
+    {
+        $statusField = "{$type}_status";
+        return !$candidateDetail || $candidateDetail->$statusField !== 'accepted';
     }
 }

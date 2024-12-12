@@ -51,6 +51,30 @@ const getPaginationUrl = (url) => {
     return urlObj.toString();
 };
 
+// Add getRequiredIjazah helper
+const getRequiredIjazah = (level) => {
+    switch (level) {
+        case "SMA":
+            return ["ijazah_smp", "ijazah_sma"];
+        case "D3":
+            return ["ijazah_smp", "ijazah_sma", "ijazah_d3"];
+        case "S1":
+            return ["ijazah_smp", "ijazah_sma", "ijazah_s1"];
+        case "S2":
+            return ["ijazah_smp", "ijazah_sma", "ijazah_s1", "ijazah_s2"];
+        case "S3":
+            return [
+                "ijazah_smp",
+                "ijazah_sma",
+                "ijazah_s1",
+                "ijazah_s2",
+                "ijazah_s3",
+            ];
+        default:
+            return [];
+    }
+};
+
 // Handle filter changes with debounce
 const handleFiltersChange = debounce(() => {
     const currentQuery = new URLSearchParams(window.location.search);
@@ -157,7 +181,7 @@ const getStatusBadgeClass = (status) => {
                                     'Name',
                                     'Photo Status',
                                     'CV Status',
-                                    'Certificate Status',
+                                    'Ijazah Status',
                                     'Action',
                                 ]"
                                 :key="header"
@@ -179,28 +203,83 @@ const getStatusBadgeClass = (status) => {
                                 {{ candidate.name }}
                             </td>
 
-                            <!-- Status Cells -->
-                            <td
-                                v-for="type in ['photo', 'cv', 'certificate']"
-                                :key="type"
-                                :class="TABLE_CELL_CLASSES"
-                            >
+                            <!-- Photo Status -->
+                            <td :class="TABLE_CELL_CLASSES">
                                 <span
                                     :class="[
                                         STATUS_BADGE_BASE,
                                         getStatusBadgeClass(
-                                            candidate.candidate_detail?.[
-                                                `${type}_status`
-                                            ] || 'not uploaded'
+                                            candidate.candidate_detail
+                                                ?.photo_status || 'not uploaded'
                                         ),
                                     ]"
                                 >
                                     {{
-                                        candidate.candidate_detail?.[
-                                            `${type}_status`
-                                        ] || "Not uploaded"
+                                        candidate.candidate_detail
+                                            ?.photo_status || "Not uploaded"
                                     }}
                                 </span>
+                            </td>
+
+                            <!-- CV Status -->
+                            <td :class="TABLE_CELL_CLASSES">
+                                <span
+                                    :class="[
+                                        STATUS_BADGE_BASE,
+                                        getStatusBadgeClass(
+                                            candidate.candidate_detail
+                                                ?.cv_status || 'not uploaded'
+                                        ),
+                                    ]"
+                                >
+                                    {{
+                                        candidate.candidate_detail?.cv_status ||
+                                        "Not uploaded"
+                                    }}
+                                </span>
+                            </td>
+
+                            <!-- Ijazah Status -->
+                            <td :class="TABLE_CELL_CLASSES">
+                                <div class="space-y-1">
+                                    <template
+                                        v-if="
+                                            candidate.candidate_detail
+                                                ?.education_level
+                                        "
+                                    >
+                                        <span
+                                            v-for="ijazah in getRequiredIjazah(
+                                                candidate.candidate_detail
+                                                    .education_level
+                                            )"
+                                            :key="ijazah"
+                                            :class="[
+                                                STATUS_BADGE_BASE,
+                                                getStatusBadgeClass(
+                                                    candidate.candidate_detail[
+                                                        `${ijazah}_status`
+                                                    ] || 'not uploaded'
+                                                ),
+                                                'block',
+                                            ]"
+                                        >
+                                            {{
+                                                ijazah
+                                                    .split("_")[1]
+                                                    .toUpperCase()
+                                            }}:
+                                            {{
+                                                candidate.candidate_detail[
+                                                    `${ijazah}_status`
+                                                ] || "Not uploaded"
+                                            }}
+                                        </span>
+                                    </template>
+                                    <span v-else class="text-gray-500 text-sm">
+                                        No education level set
+                                    </span>
+                                </div>
                             </td>
 
                             <!-- Action -->

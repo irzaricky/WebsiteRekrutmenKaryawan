@@ -90,26 +90,10 @@ class DataCandidateControllerTest extends TestCase
         $response->assertOk()
             ->assertInertia(
                 fn($page) => $page
-                    ->has('candidates.data', 6) // Default pagination is 6
+                    ->has('candidates.data', 6)
                     ->has('candidates.links')
             );
     }
-
-    // Test validation rules for score updates
-    public function test_hrd_tidak_dapat_mengupdate_score_dengan_nilai_negatif()
-    {
-        $testResult = TestResult::factory()->create();
-
-        $response = $this->actingAs($this->user)
-            ->put(route('dashboard.data-candidate-put', $testResult->user_id), [
-                'test_results' => [
-                    $this->test->id => -10
-                ]
-            ]);
-
-        $response->assertSessionHasErrors(['test_results.*']);
-    }
-
 
     //Test untuk membaca data Test Result
     public function test_hrd_dapat_membaca_data_hasil_test_candidate()
@@ -130,7 +114,6 @@ class DataCandidateControllerTest extends TestCase
     }
 
     //Test untuk memperbarui nilai Test Result kandidat
-
     public function test_hrd_dapat_mengupdate_data_hasil_tes_candidate()
     {
         $testResult = TestResult::factory()->create([
@@ -156,6 +139,19 @@ class DataCandidateControllerTest extends TestCase
         ]);
 
 
+    }
+    public function test_hrd_tidak_dapat_mengupdate_score_dengan_nilai_negatif()
+    {
+        $testResult = TestResult::factory()->create();
+
+        $response = $this->actingAs($this->user)
+            ->put(route('dashboard.data-candidate-put', $testResult->user_id), [
+                'test_results' => [
+                    $this->test->id => -10
+                ]
+            ]);
+
+        $response->assertSessionHasErrors(['test_results.*']);
     }
 
     public function test_hrd_tidak_dapat_mengupdate_data_hasil_tes_candidate_yang_invalid()

@@ -30,7 +30,8 @@ class CandidateProfileController extends Controller
         try {
             $user = Auth::user();
 
-            $request->validate([
+            // Base validation
+            $baseValidation = [
                 'nik' => [
                     'required',
                     'string',
@@ -43,15 +44,54 @@ class CandidateProfileController extends Controller
                 'education_level' => 'required|in:SMA,D3,S1,S2,S3',
                 'major' => 'required|string',
                 'institution' => 'required|string',
-                'graduation_year' => 'required|integer|min:1900|max:' . date('Y')
+                'graduation_year' => 'required|integer|min:1900|max:' . date('Y'),
+            ];
+
+            // Get required ijazah based on education level
+            $requiredIjazah = $this->getRequiredIjazah($request->education_level);
+
+            // Add validation rules for required ijazah
+            foreach ($requiredIjazah as $ijazah) {
+                $fileField = "ijazah_{$ijazah}";
+                $existingFile = CandidateDetail::where('user_id', $user->id)
+                    ->whereNotNull("{$fileField}_path")
+                    ->exists();
+
+                if (!$existingFile) {
+                    $baseValidation[$fileField] = 'required|file|mimes:pdf|max:2048';
+                }
+            }
+
+            $request->validate($baseValidation);
+
+            // Prepare data for update
+            $data = $request->only([
+                'nik',
+                'birth_date',
+                'address',
+                'education_level',
+                'major',
+                'institution',
+                'graduation_year'
             ]);
 
-            // Get all request data except files
-            $data = $request->except(['cv', 'photo', 'certificate']);
-
-            // Format date only once
+            // Format date
             if ($request->birth_date) {
                 $data['birth_date'] = Carbon::parse($request->birth_date)->format('Y-m-d');
+            }
+
+            // Handle ijazah file uploads
+            foreach ($requiredIjazah as $ijazah) {
+                $fileField = "ijazah_{$ijazah}";
+                if ($request->hasFile($fileField)) {
+                    if ($user->candidateDetail?->{"{$fileField}_path"}) {
+                        Storage::delete($user->candidateDetail->{"{$fileField}_path"});
+                    }
+
+                    $path = $request->file($fileField)->store("ijazah/{$ijazah}", 'private');
+                    $data["{$fileField}_path"] = $path;
+                    $data["{$fileField}_status"] = 'pending';
+                }
             }
 
             // Update or create candidate details
@@ -60,10 +100,82 @@ class CandidateProfileController extends Controller
                 $data
             );
 
-            return redirect()->back()->with('success', 'Profile updated successfully');
+            return back()->with('success', 'Profile updated successfully');
 
         } catch (\Exception $e) {
-            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    private function getRequiredIjazah($educationLevel)
+    {
+        return match ($educationLevel) {
+            'SMA' => ['smp', 'sma'],
+            'D3' => ['smp', 'sma', 'd3'],
+            'S1' => ['smp', 'sma', 's1'],
+            'S2' => ['smp', 'sma', 's1', 's2'],
+            'S3' => ['smp', 'sma', 's1', 's2', 's3'],
+            default => []
+        };
+    }
+
+    public function store(Request $request)
+    {
+        try {
+            $user = Auth::user();
+
+            // Base validation
+            $request->validate([
+                'education_level' => 'required|in:SMA,D3,S1,S2,S3',
+                // ... other validations
+            ]);
+
+            // Get required documents based on education level
+            $requiredDocs = match ($request->education_level) {
+                'SMA' => ['smp', 'sma'],
+                'D3' => ['smp', 'sma', 'd3'],
+                'S1' => ['smp', 'sma', 's1'],
+                'S2' => ['smp', 'sma', 's1', 's2'],
+                'S3' => ['smp', 'sma', 's1', 's2', 's3'],
+                default => []
+            };
+
+            // Validate required files
+            $fileValidationRules = [];
+            foreach ($requiredDocs as $doc) {
+                if (
+                    !$request->hasFile("ijazah_files.$doc") &&
+                    !CandidateDetail::where('user_id', $user->id)
+                        ->whereNotNull("ijazah_{$doc}_path")
+                        ->exists()
+                ) {
+                    $fileValidationRules["ijazah_files.$doc"] = 'required|file|mimes:pdf,jpg,jpeg,png|max:2048';
+                }
+            }
+
+            $request->validate($fileValidationRules);
+
+            // Store files and update paths
+            $data = $request->except('ijazah_files');
+
+            foreach ($requiredDocs as $doc) {
+                if ($request->hasFile("ijazah_files.$doc")) {
+                    $path = $request->file("ijazah_files.$doc")->store('ijazah', 'private');
+                    $data["ijazah_{$doc}_path"] = $path;
+                    $data["ijazah_{$doc}_status"] = 'pending';
+                }
+            }
+
+            // Update candidate details
+            CandidateDetail::updateOrCreate(
+                ['user_id' => $user->id],
+                $data
+            );
+
+            return back()->with('success', 'Profile updated successfully');
+
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 }

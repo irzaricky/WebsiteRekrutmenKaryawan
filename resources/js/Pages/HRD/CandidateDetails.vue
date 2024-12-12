@@ -2,7 +2,7 @@
 import { Head, Link } from "@inertiajs/vue3";
 import Sidebar from "../../components/Dashboard/Sidebar.vue";
 import axios from "axios";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
 const props = defineProps({
     title: String,
@@ -14,13 +14,32 @@ const getFileUrl = (type, path) => {
     return route("candidate.file", {
         type: type,
         filename: filename,
-        candidate_id: props.candidateDetails.id, // Access candidateDetails through props
+        candidate_id: props.candidateDetails.id,
     });
 };
 
 // Add success/error message handling
 const message = ref("");
 const errorMessage = ref("");
+
+// Add computed property for required ijazah
+const requiredIjazah = computed(() => {
+    const level = props.candidateDetails?.candidate_detail?.education_level;
+    switch (level) {
+        case "SMA":
+            return ["smp", "sma"];
+        case "D3":
+            return ["smp", "sma", "d3"];
+        case "S1":
+            return ["smp", "sma", "s1"];
+        case "S2":
+            return ["smp", "sma", "s1", "s2"];
+        case "S3":
+            return ["smp", "sma", "s1", "s2", "s3"];
+        default:
+            return [];
+    }
+});
 
 const updateFileStatus = async (fileType, status) => {
     try {
@@ -242,6 +261,62 @@ const formatDate = (date) => {
                             <label class="text-sm text-gray-600"
                                 >Status Ijazah</label
                             >
+                        </div>
+                    </div>
+
+                    <!-- Ijazah Preview -->
+                    <div
+                        v-for="level in requiredIjazah"
+                        :key="level"
+                        class="mt-6"
+                    >
+                        <p class="text-sm font-semibold">
+                            Ijazah {{ level.toUpperCase() }}:
+                        </p>
+                        <div
+                            v-if="
+                                candidateDetails.candidate_detail?.[
+                                    `ijazah_${level}_path`
+                                ]
+                            "
+                        >
+                            <a
+                                :href="
+                                    getFileUrl(
+                                        `ijazah_${level}`,
+                                        candidateDetails.candidate_detail[
+                                            `ijazah_${level}_path`
+                                        ]
+                                    )
+                                "
+                                target="_blank"
+                                class="text-blue-600 hover:text-blue-800 mt-2 inline-block"
+                            >
+                                View Ijazah {{ level.toUpperCase() }}
+                            </a>
+                            <div class="flex items-center gap-2 mt-2">
+                                <select
+                                    :value="
+                                        candidateDetails.candidate_detail[
+                                            `ijazah_${level}_status`
+                                        ]
+                                    "
+                                    @change="
+                                        updateFileStatus(
+                                            `ijazah_${level}`,
+                                            $event.target.value
+                                        )
+                                    "
+                                    class="rounded border-gray-300"
+                                >
+                                    <option value="pending">Pending</option>
+                                    <option value="accepted">Diterima</option>
+                                    <option value="rejected">Ditolak</option>
+                                </select>
+                                <label class="text-sm text-gray-600">
+                                    Status Ijazah {{ level.toUpperCase() }}
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
