@@ -15,7 +15,6 @@ return new class extends Migration {
             $table->date('birth_date')->nullable();
             $table->string('photo_path')->nullable();
             $table->string('cv_path')->nullable();
-            $table->string('certificate_path')->nullable();
             $table->enum('education_level', ['SMA', 'D3', 'S1', 'S2', 'S3'])->nullable();
             $table->string('major')->nullable();
             $table->string('institution')->nullable();

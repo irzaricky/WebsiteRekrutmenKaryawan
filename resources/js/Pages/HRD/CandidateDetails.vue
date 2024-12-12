@@ -220,50 +220,6 @@ const formatDate = (date) => {
                         </div>
                     </div>
 
-                    <!-- Certificate Preview -->
-                    <div
-                        v-if="
-                            candidateDetails.candidate_detail?.certificate_path
-                        "
-                    >
-                        <p class="text-sm font-semibold">Certificate:</p>
-                        <a
-                            :href="
-                                getFileUrl(
-                                    'certificate',
-                                    candidateDetails.candidate_detail
-                                        .certificate_path
-                                )
-                            "
-                            target="_blank"
-                            class="text-blue-600 hover:text-blue-800 mt-2 inline-block"
-                        >
-                            View Certificate
-                        </a>
-                        <div class="flex items-center gap-2 mt-2">
-                            <select
-                                :value="
-                                    candidateDetails.candidate_detail
-                                        ?.certificate_status
-                                "
-                                @change="
-                                    updateFileStatus(
-                                        'certificate',
-                                        $event.target.value
-                                    )
-                                "
-                                class="rounded border-gray-300"
-                            >
-                                <option value="pending">Pending</option>
-                                <option value="accepted">Diterima</option>
-                                <option value="rejected">Ditolak</option>
-                            </select>
-                            <label class="text-sm text-gray-600"
-                                >Status Ijazah</label
-                            >
-                        </div>
-                    </div>
-
                     <!-- Ijazah Preview -->
                     <div
                         v-for="level in requiredIjazah"

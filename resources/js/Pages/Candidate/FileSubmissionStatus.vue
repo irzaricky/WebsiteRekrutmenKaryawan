@@ -1,6 +1,4 @@
 <script setup>
-import BaseHeader from "@/components/BaseHeader.vue";
-import BaseFooter from "@/components/BaseFooter.vue";
 import { Head, useForm, Link } from "@inertiajs/vue3";
 import axios from "axios";
 import { computed, ref } from "vue";
@@ -13,14 +11,13 @@ const props = defineProps({
 const form = useForm({
     photo: null,
     cv: null,
-    certificate: null,
 });
 
 const submit = () => {
     form.post(route("candidate.files.update"), {
         preserveScroll: true,
         onSuccess: () => {
-            form.reset("photo", "cv", "certificate");
+            form.reset("photo", "cv");
         },
     });
 };
@@ -57,8 +54,7 @@ const getStatusMessage = (status) => {
 const allFilesAccepted = computed(() => {
     return (
         props.candidateDetail?.photo_status === "accepted" &&
-        props.candidateDetail?.cv_status === "accepted" &&
-        props.candidateDetail?.certificate_status === "accepted"
+        props.candidateDetail?.cv_status === "accepted"
     );
 });
 
@@ -248,7 +244,6 @@ const requiredDocs = computed(() => {
                         </a>
                     </div>
                 </div>
-
 
                 <!-- Add this after other status cards -->
                 <div

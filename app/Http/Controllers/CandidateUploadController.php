@@ -332,7 +332,7 @@ class CandidateUploadController extends Controller
     {
         $request->validate([
             'candidate_id' => 'required|exists:users,id',
-            'file_type' => 'required|in:photo,cv,certificate'
+            'file_type' => 'required|in:photo,cv,ijazah_smp,ijazah_sma,ijazah_d3,ijazah_s1,ijazah_s2,ijazah_s3'
         ]);
 
         $candidateDetail = CandidateDetail::where('user_id', $request->candidate_id)->first();
@@ -341,7 +341,7 @@ class CandidateUploadController extends Controller
             return response()->json(['message' => 'Candidate detail not found'], 404);
         }
 
-        $field = $request->file_type . '_confirmed';
+        $field = $request->file_type . '_confirmed';    
         $currentValue = $candidateDetail->$field;
 
         // Toggle confirmation status

@@ -70,19 +70,37 @@ const ijazahDocs = computed(() => {
     );
 });
 
+// Add status check helpers
+const isFileAccepted = (type) => {
+    return props.candidateDetail?.[`${type}_status`] === "accepted";
+};
+
+const isFilePending = (type) => {
+    return props.candidateDetail?.[`${type}_status`] === "pending";
+};
+
+// Modify handleFileSelect to check status
 const handleFileSelect = (event, type) => {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Check if file already accepted
-    const status = props.candidateDetail?.[`${type}_status`];
-    if (status === "accepted") {
+    // Prevent upload if file is accepted or pending
+    if (isFileAccepted(type) || isFilePending(type)) {
         event.target.value = "";
         return;
     }
 
-    // Set file in form
     form[type] = file;
+};
+
+// Add computed property for input state
+const getInputState = (type) => {
+    if (isFileAccepted(type)) {
+        return "accepted";
+    } else if (isFilePending(type)) {
+        return "pending";
+    }
+    return "editable";
 };
 
 const handleUpload = () => {
@@ -256,8 +274,34 @@ const handleUpload = () => {
                                             (e) => handleFileSelect(e, type)
                                         "
                                         :name="type"
-                                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                        :disabled="
+                                            isFileAccepted(type) ||
+                                            isFilePending(type)
+                                        "
+                                        :class="[
+                                            'block w-full text-sm text-gray-500',
+                                            'file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0',
+                                            'file:text-sm file:font-semibold',
+                                            isFileAccepted(type) ||
+                                            isFilePending(type)
+                                                ? 'cursor-not-allowed opacity-60'
+                                                : 'file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100',
+                                        ]"
                                     />
+                                    <p
+                                        v-if="isFileAccepted(type)"
+                                        class="mt-1 text-sm text-green-600"
+                                    >
+                                        This file has been accepted and cannot
+                                        be changed
+                                    </p>
+                                    <p
+                                        v-if="isFilePending(type)"
+                                        class="mt-1 text-sm text-yellow-600"
+                                    >
+                                        This file is pending review and cannot
+                                        be changed
+                                    </p>
                                 </div>
 
                                 <div
@@ -344,8 +388,36 @@ const handleUpload = () => {
                                             (e) => handleFileSelect(e, type)
                                         "
                                         :name="type"
-                                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                        :disabled="
+                                            isFileAccepted(type) ||
+                                            isFilePending(type)
+                                        "
+                                        :class="[
+                                            'block w-full text-sm text-gray-500',
+                                            'file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0',
+                                            'file:text-sm file:font-semibold',
+                                            isFileAccepted(type) ||
+                                            isFilePending(type)
+                                                ? 'cursor-not-allowed opacity-60'
+                                                : 'file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100',
+                                        ]"
                                     />
+
+                                    <!-- Status messages -->
+                                    <p
+                                        v-if="isFileAccepted(type)"
+                                        class="text-sm text-green-600"
+                                    >
+                                        This file has been accepted and cannot
+                                        be changed
+                                    </p>
+                                    <p
+                                        v-if="isFilePending(type)"
+                                        class="text-sm text-yellow-600"
+                                    >
+                                        This file is pending review and cannot
+                                        be changed
+                                    </p>
 
                                     <div
                                         v-if="

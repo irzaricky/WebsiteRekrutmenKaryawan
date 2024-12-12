@@ -38,7 +38,6 @@ return new class extends Migration {
             $table->dropColumn([
                 'photo_status',
                 'cv_status',
-                'certificate_status'
             ]);
             $table->dropColumn([
                 'ijazah_smp_path',
