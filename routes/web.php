@@ -9,6 +9,7 @@ use App\Http\Controllers\CandidateUploadController;
 use App\Http\Controllers\CandidateProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HRDHistoryController;
+use App\Http\Controllers\HRDProfileController;
 use Inertia\Inertia;
 
 
@@ -64,6 +65,9 @@ Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {
         return Inertia::render('HRD/Dashboard', $controller->getDashboardAnalytics());
     })->middleware(['auth'])->name('dashboard');
     ;
+
+    Route::get('/hrd/profile', [HRDProfileController::class, 'index'])->name('hrd.profile');
+    Route::post('/hrd/profile', [HRDProfileController::class, 'update'])->name('hrd.profile.update');
 
     //menampilkan data kandidat
     Route::get('/dashboard/data-candidate', [DataCandidateController::class, 'getUser'])->name('dashboard.data-candidate');
