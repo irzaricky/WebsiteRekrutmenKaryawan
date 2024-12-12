@@ -123,6 +123,26 @@ class CandidateProfileController extends Controller
     {
         try {
             $user = Auth::user();
+            $candidateDetail = $user->candidateDetail;
+
+            // Check if education fields can be modified
+            if ($candidateDetail) {
+                $hasFilesPendingOrAccepted = $this->hasFilesPendingOrAccepted($candidateDetail);
+
+                // If trying to change education details while files are pending/accepted
+                if (
+                    $hasFilesPendingOrAccepted && (
+                        $candidateDetail->education_level !== $request->education_level ||
+                        $candidateDetail->major !== $request->major ||
+                        $candidateDetail->institution !== $request->institution ||
+                        $candidateDetail->graduation_year != $request->graduation_year
+                    )
+                ) {
+                    return back()->withErrors([
+                        'education' => 'Education details cannot be modified while files are pending or accepted'
+                    ]);
+                }
+            }
 
             // Base validation
             $request->validate([
@@ -177,5 +197,38 @@ class CandidateProfileController extends Controller
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
+    }
+
+    private function hasUploadedEducationFiles($candidateDetail)
+    {
+        // Check for any education related file paths
+        $educationFiles = [
+            $candidateDetail->ijazah_smp_path,
+            $candidateDetail->ijazah_sma_path,
+            $candidateDetail->ijazah_d3_path,
+            $candidateDetail->ijazah_s1_path,
+            $candidateDetail->ijazah_s2_path,
+            $candidateDetail->ijazah_s3_path
+        ];
+
+        // Return true if any education files exist
+        return collect($educationFiles)->filter()->isNotEmpty();
+    }
+
+    private function hasFilesPendingOrAccepted($candidateDetail)
+    {
+        $requiredFiles = $this->getRequiredIjazah($candidateDetail->education_level);
+
+        foreach ($requiredFiles as $file) {
+            $statusField = "ijazah_{$file}_status";
+            if (
+                $candidateDetail->$statusField &&
+                in_array($candidateDetail->$statusField, ['pending', 'accepted'])
+            ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

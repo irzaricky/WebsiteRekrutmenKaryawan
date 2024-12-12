@@ -1,8 +1,6 @@
 <script setup>
-import BaseHeader from "@/components/BaseHeader.vue";
-import BaseFooter from "@/components/BaseFooter.vue";
 import { Head, useForm, Link } from "@inertiajs/vue3";
-import { onMounted } from "vue";
+import { onMounted, computed } from "vue";
 
 const props = defineProps({
     title: String,
@@ -16,15 +14,14 @@ const getFilename = (path) => {
     return path.split("/").pop();
 };
 
-const formatDate = (dateString) => {
+const formatDateForInput = (dateString) => {
     if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toISOString().split("T")[0];
+    return dateString.split("T")[0];
 };
 
 const form = useForm({
     nik: props.candidateDetail?.nik || "",
-    birth_date: formatDate(props.candidateDetail?.birth_date) || "",
+    birth_date: formatDateForInput(props.candidateDetail?.birth_date) || "",
     address: props.candidateDetail?.address || "",
     education_level: props.candidateDetail?.education_level || "",
     major: props.candidateDetail?.major || "",
@@ -38,6 +35,77 @@ const submit = () => {
         forceFormData: true,
     });
 };
+
+// Computed property to check for uploaded files
+const hasUploadedFiles = computed(() => {
+    if (!props.candidateDetail) return false;
+
+    const paths = [
+        "ijazah_smp_path",
+        "ijazah_sma_path",
+        "ijazah_d3_path",
+        "ijazah_s1_path",
+        "ijazah_s2_path",
+        "ijazah_s3_path",
+    ];
+
+    return paths.some((path) => props.candidateDetail[path]);
+});
+
+// Add getRequiredIjazah helper function
+const getRequiredIjazah = (level) => {
+    switch (level) {
+        case "SMA":
+            return ["ijazah_smp", "ijazah_sma"];
+        case "D3":
+            return ["ijazah_smp", "ijazah_sma", "ijazah_d3"];
+        case "S1":
+            return ["ijazah_smp", "ijazah_sma", "ijazah_s1"];
+        case "S2":
+            return ["ijazah_smp", "ijazah_sma", "ijazah_s1", "ijazah_s2"];
+        case "S3":
+            return [
+                "ijazah_smp",
+                "ijazah_sma",
+                "ijazah_s1",
+                "ijazah_s2",
+                "ijazah_s3",
+            ];
+        default:
+            return [];
+    }
+};
+
+// Add computed property to check each section's status
+const sectionLocked = computed(() => {
+    if (!props.candidateDetail) return false;
+
+    // Check if any file in current education level exists and is pending/accepted
+    const educationFiles = getRequiredIjazah(
+        props.candidateDetail.education_level
+    ).map((type) => ({
+        path: props.candidateDetail[`${type}_path`],
+        status: props.candidateDetail[`${type}_status`],
+    }));
+
+    return educationFiles.some(
+        (file) =>
+            file.path &&
+            (file.status === "pending" || file.status === "accepted")
+    );
+});
+
+// Add computed for section edit state
+const canEditEducation = computed(() => {
+    if (!props.candidateDetail) return true;
+
+    // Allow editing if no files uploaded or all files are rejected
+    const educationFiles = getRequiredIjazah(
+        props.candidateDetail.education_level
+    ).map((type) => props.candidateDetail[`${type}_status`]);
+
+    return educationFiles.every((status) => !status || status === "rejected");
+});
 </script>
 
 <template>
@@ -192,6 +260,7 @@ const submit = () => {
                                 >
                                 <select
                                     v-model="form.education_level"
+                                    :disabled="!canEditEducation"
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                                 >
                                     <option value="">Pilih Pendidikan</option>
@@ -201,6 +270,20 @@ const submit = () => {
                                     <option value="S2">S2</option>
                                     <option value="S3">S3</option>
                                 </select>
+                                <p
+                                    v-if="!canEditEducation"
+                                    class="mt-1 text-sm text-gray-500"
+                                >
+                                    Education section cannot be modified while
+                                    files are pending/accepted
+                                </p>
+                                <p
+                                    v-if="canEditEducation && sectionLocked"
+                                    class="mt-1 text-sm text-blue-500"
+                                >
+                                    You can now modify education details since
+                                    files were rejected
+                                </p>
                             </div>
 
                             <div>
@@ -211,6 +294,7 @@ const submit = () => {
                                 <input
                                     type="text"
                                     v-model="form.major"
+                                    :disabled="!canEditEducation"
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                                 />
                             </div>
@@ -223,6 +307,7 @@ const submit = () => {
                                 <input
                                     type="text"
                                     v-model="form.institution"
+                                    :disabled="!canEditEducation"
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                                 />
                             </div>
@@ -235,6 +320,7 @@ const submit = () => {
                                 <input
                                     type="number"
                                     v-model="form.graduation_year"
+                                    :disabled="!canEditEducation"
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                                 />
                             </div>
