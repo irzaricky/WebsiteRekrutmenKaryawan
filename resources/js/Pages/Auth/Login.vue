@@ -26,7 +26,7 @@ const form = useForm({
     email: "",
     password: "",
     remember: false,
-    recaptcha: "", // Add recaptcha token
+    recaptcha: "",
 });
 
 const handleRecaptchaVerify = (token) => {

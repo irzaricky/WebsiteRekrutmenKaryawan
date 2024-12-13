@@ -6,13 +6,23 @@ import Sidebar from "../../components/Dashboard/Sidebar.vue";
 const props = defineProps({
     title: String,
     user: Object,
+    hrdDetail: Object,
     flash: Object,
 });
+
+// Helper function to format date
+const formatDateForInput = (dateString) => {
+    if (!dateString) return "";
+    return dateString.split('T')[0];
+};
 
 const form = useForm({
     name: props.user?.name || "",
     email: props.user?.email || "",
     role: props.user?.role || "HRD",
+    nik: props.hrdDetail?.nik || "",
+    address: props.hrdDetail?.address || "",
+    birth_date: formatDateForInput(props.hrdDetail?.birth_date) || "",
 });
 
 const submit = () => {
@@ -58,11 +68,13 @@ const submit = () => {
                         <div
                             class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6"
                         >
+                            <!-- Name -->
                             <div>
                                 <label
                                     class="block text-sm font-medium text-gray-700"
-                                    >Full Name</label
                                 >
+                                    Full Name
+                                </label>
                                 <input
                                     type="text"
                                     v-model="form.name"
@@ -76,11 +88,13 @@ const submit = () => {
                                 </div>
                             </div>
 
+                            <!-- Email -->
                             <div>
                                 <label
                                     class="block text-sm font-medium text-gray-700"
-                                    >Email</label
                                 >
+                                    Email
+                                </label>
                                 <input
                                     type="email"
                                     v-model="form.email"
@@ -94,11 +108,74 @@ const submit = () => {
                                 </div>
                             </div>
 
+                            <!-- NIK -->
                             <div>
                                 <label
                                     class="block text-sm font-medium text-gray-700"
-                                    >Role</label
                                 >
+                                    NIK
+                                </label>
+                                <input
+                                    type="text"
+                                    v-model="form.nik"
+                                    maxlength="16"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                />
+                                <div
+                                    v-if="form.errors.nik"
+                                    class="text-red-500 text-sm mt-1"
+                                >
+                                    {{ form.errors.nik }}
+                                </div>
+                            </div>
+
+                            <!-- Birth Date -->
+                            <div>
+                                <label
+                                    class="block text-sm font-medium text-gray-700"
+                                >
+                                    Birth Date
+                                </label>
+                                <input
+                                    type="date"
+                                    v-model="form.birth_date"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                />
+                                <div
+                                    v-if="form.errors.birth_date"
+                                    class="text-red-500 text-sm mt-1"
+                                >
+                                    {{ form.errors.birth_date }}
+                                </div>
+                            </div>
+
+                            <!-- Address -->
+                            <div class="md:col-span-2">
+                                <label
+                                    class="block text-sm font-medium text-gray-700"
+                                >
+                                    Address
+                                </label>
+                                <input
+                                    v-model="form.address"
+                                    rows="3"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                ></input>
+                                <div
+                                    v-if="form.errors.address"
+                                    class="text-red-500 text-sm mt-1"
+                                >
+                                    {{ form.errors.address }}
+                                </div>
+                            </div>
+
+                            <!-- Role (Disabled) -->
+                            <div>
+                                <label
+                                    class="block text-sm font-medium text-gray-700"
+                                >
+                                    Role
+                                </label>
                                 <input
                                     type="text"
                                     v-model="form.role"
