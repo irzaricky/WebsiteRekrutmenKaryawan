@@ -5,11 +5,11 @@ import { Link, usePage } from "@inertiajs/vue3";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
 const props = defineProps({
-    title: String
+    title: String,
 });
 
 const isCollapsed = ref(false);
-const user = usePage().props.auth.user; 
+const user = usePage().props.auth.user;
 
 function toggleSidebar() {
     isCollapsed.value = !isCollapsed.value;
@@ -84,7 +84,7 @@ const img = [{ id: "1", href: "/assets/images/for.png", link: "/" }];
         <!-- Main Content Area -->
         <div class="flex-1 bg-[#EDF2F4]">
             <!-- Header with title -->
-            <DashboardHeader :user="user" :title="title" />
+            <DashboardHeader :user="$page.props.auth.user" :title="title" />
 
             <!-- Page Content -->
             <div class="p-6 pt-3">

@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->string('nik', 16)->unique();
             $table->text('address')->nullable();
             $table->date('birth_date')->nullable();
-            $table->string('photo_path')->nullable();
+            $table->string('profile_image')->nullable();
             $table->timestamps();
         });
     }

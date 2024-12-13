@@ -135,15 +135,6 @@ const submit = () => {
                     <InputError class="mt-2" :message="form.errors.password" />
                 </div>
 
-                <div>
-                    <Link
-                        href="/register"
-                        class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                        Belum register?
-                    </Link>
-                </div>
-
                 <div class="mt-4">
                     <ReCaptcha
                         site-key="6LcrhJMqAAAAAPczKz8OfJ3RUdAO9x8jxhL5qI-T"
@@ -153,23 +144,23 @@ const submit = () => {
                     <InputError class="mt-2" :message="form.errors.recaptcha" />
                 </div>
 
-                <div class="mt-4 flex items-center justify-end">
-                    <label class="flex items-center">
-                        <Checkbox
-                            name="remember"
-                            v-model:checked="form.remember"
-                        />
-                        <span class="ms-2 text-sm text-gray-600"
-                            >Remember me</span
-                        >
-                    </label>
+                <div class="mt-4">
                     <PrimaryButton
-                        class="ms-4"
+                        class="w-full justify-center"
                         :class="{ 'opacity-25': form.processing }"
                         :disabled="form.processing"
                     >
                         Log in
                     </PrimaryButton>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <Link
+                        href="/register"
+                        class="text-sm text-gray-600 underline hover:text-gray-900"
+                    >
+                        Don't have account?
+                    </Link>
                 </div>
             </form>
         </div>

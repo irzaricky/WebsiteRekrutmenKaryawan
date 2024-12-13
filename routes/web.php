@@ -68,6 +68,8 @@ Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {
 
     Route::get('/hrd/profile', [HRDProfileController::class, 'index'])->name('hrd.profile');
     Route::post('/hrd/profile', [HRDProfileController::class, 'update'])->name('hrd.profile.update');
+    Route::get('hrd/profile-image/{filename}', [HRDProfileController::class, 'getProfileImage'])
+        ->name('hrd.profile.image');
 
     //menampilkan data kandidat
     Route::get('/dashboard/data-candidate', [DataCandidateController::class, 'getUser'])->name('dashboard.data-candidate');

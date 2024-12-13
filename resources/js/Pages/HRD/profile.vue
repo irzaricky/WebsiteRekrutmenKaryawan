@@ -1,6 +1,6 @@
 <script setup>
 import { Head, useForm } from "@inertiajs/vue3";
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import Sidebar from "../../components/Dashboard/Sidebar.vue";
 
 const props = defineProps({
@@ -23,11 +23,27 @@ const form = useForm({
     nik: props.hrdDetail?.nik || "",
     address: props.hrdDetail?.address || "",
     birth_date: formatDateForInput(props.hrdDetail?.birth_date) || "",
+    profile_image: null
 });
+
+// Add preview handling
+const imagePreview = ref(props.hrdDetail?.profile_image_url || null);
+const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        form.profile_image = file;
+        // Create preview URL
+        imagePreview.value = URL.createObjectURL(file);
+    }
+};
 
 const submit = () => {
     form.post(route("hrd.profile.update"), {
         preserveScroll: true,
+        forceFormData: true, // Important for file upload
+        onSuccess: () => {
+            form.reset('profile_image');
+        },
     });
 };
 </script>
@@ -60,6 +76,41 @@ const submit = () => {
                 class="bg-white rounded-xl shadow-lg"
             >
                 <div class="p-6 sm:p-8 space-y-10">
+                    <!-- Profile Image Upload -->
+                    <div class="mb-8">
+                        <div class="flex items-center space-x-6">
+                            <!-- Profile Image Preview -->
+                            <div class="shrink-0">
+                                <img 
+                                    :src="imagePreview || (props.hrdDetail?.profile_image_url || '/default-avatar.png')"
+                                    class="h-24 w-24 object-cover rounded-full"
+                                    alt="Profile photo"
+                                />
+                            </div>
+                            
+                            <!-- Upload Button -->
+                            <label class="block">
+                                <span class="block text-sm font-medium text-gray-700 mb-2">
+                                    Change Profile Photo
+                                </span>
+                                <input 
+                                    type="file"
+                                    @change="handleImageUpload"
+                                    class="block w-full text-sm text-gray-500
+                                        file:mr-4 file:py-2 file:px-4
+                                        file:rounded-full file:border-0
+                                        file:text-sm file:font-semibold
+                                        file:bg-blue-50 file:text-blue-700
+                                        hover:file:bg-blue-100"
+                                    accept="image/*"
+                                />
+                                <div v-if="form.errors.profile_image" class="text-red-500 text-sm mt-1">
+                                    {{ form.errors.profile_image }}
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
                     <!-- Personal Information -->
                     <div>
                         <h2 class="text-xl font-semibold text-gray-900 mb-6">

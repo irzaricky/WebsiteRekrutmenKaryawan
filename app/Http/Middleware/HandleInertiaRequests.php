@@ -29,9 +29,19 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
+        if ($user && $user->role === 'HRD') {
+            $hrdDetail = $user->hrdDetail;
+            if ($hrdDetail && $hrdDetail->profile_image) {
+                $filename = basename($hrdDetail->profile_image);
+                $hrdDetail->profile_image_url = route('hrd.profile.image', $filename);
+            }
+            $user->hrd_detail = $hrdDetail;
+        }
+
         return array_merge(parent::share($request), [
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
             ],
             'flash' => [
                 'success' => fn() => $request->session()->get('success'),

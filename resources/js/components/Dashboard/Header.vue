@@ -1,6 +1,6 @@
 <script setup>
 import { Link } from "@inertiajs/vue3";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
 const props = defineProps({
     user: Object,
@@ -24,6 +24,11 @@ const closeDropdown = (e) => {
 if (typeof window !== "undefined") {
     document.addEventListener("click", closeDropdown);
 }
+
+// Add computed property for profile image
+const profileImage = computed(() => {
+    return props.user?.hrd_detail?.profile_image_url || null;
+});
 </script>
 
 <template>
@@ -50,9 +55,15 @@ if (typeof window !== "undefined") {
                         class="flex items-center gap-2 text-sm focus:outline-none"
                     >
                         <div
-                            class="h-9 w-9 rounded-full bg-blue-500 flex items-center justify-center hover:bg-blue-600 transition-colors duration-200"
+                            class="h-9 w-9 rounded-full bg-blue-500 flex items-center justify-center hover:bg-blue-600 transition-colors duration-200 overflow-hidden"
                         >
-                            <span class="text-white font-medium">
+                            <img
+                                v-if="profileImage"
+                                :src="profileImage"
+                                class="h-full w-full object-cover"
+                                alt="Profile"
+                            />
+                            <span v-else class="text-white font-medium">
                                 {{ user?.name?.[0]?.toUpperCase() }}
                             </span>
                         </div>

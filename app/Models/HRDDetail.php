@@ -16,7 +16,7 @@ class HRDDetail extends Model
         'nik',
         'address',
         'birth_date',
-        'photo_path'
+        'profile_image'
     ];
 
     protected $casts = [
