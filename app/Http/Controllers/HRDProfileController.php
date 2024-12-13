@@ -8,6 +8,9 @@ use Inertia\Inertia;
 use App\Rules\ValidNIK;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Carbon\Carbon;
 
 class HRDProfileController extends Controller
 {
@@ -16,23 +19,6 @@ class HRDProfileController extends Controller
         $user = Auth::user();
         $hrdDetail = $user->hrdDetail;
 
-        // Format the birth date
-        if ($hrdDetail && $hrdDetail->birth_date) {
-            $hrdDetail->birth_date = $hrdDetail->birth_date->format('Y-m-d');
-        }
-
-        // Add image URL with proper error handling
-        if ($hrdDetail && $hrdDetail->profile_image) {
-            try {
-                $filename = basename($hrdDetail->profile_image);
-                $hrdDetail->profile_image_url = route('hrd.profile.image', $filename);
-            } catch (\Exception $e) {
-                \Log::error('Error generating profile image URL: ' . $e->getMessage());
-                $hrdDetail->profile_image_url = null;
-            }
-        }
-
-        $user->hrd_detail = $hrdDetail;
         return Inertia::render('HRD/profile', [
             'title' => 'HRD Profile',
             'user' => $user,
@@ -44,58 +30,82 @@ class HRDProfileController extends Controller
         ]);
     }
 
+
     public function update(Request $request)
     {
         try {
+            // Validate request data
             $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|email|unique:users,email,' . Auth::id(),
-                'nik' => ['required', 'string', 'size:16', new ValidNIK],
-                'address' => 'required|string',
-                'birth_date' => 'required|date',
-                'profile_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'name' => ['required', 'string', 'max:255'],
+                'email' => [
+                    'required',
+                    'string',
+                    'email',
+                    'max:255',
+                    Rule::unique('users')->ignore(Auth::id()),
+                ],
+                'nik' => [
+                    'required',
+                    'string',
+                    'size:16',
+                    Rule::unique('hrd_details')->ignore(Auth::id(), 'user_id'),
+                    new ValidNIK,
+                ],
+                'address' => ['nullable', 'string'],
+                'birth_date' => ['nullable', 'date'],
+                'profile_image' => ['nullable', 'image', 'max:2048'], // 2MB max
             ]);
 
-            $user = Auth::user();
-            $user->update($request->only(['name', 'email']));
+            DB::beginTransaction();
 
-            $data = [
-                'nik' => $request->nik,
-                'address' => $request->address,
-                'birth_date' => $request->birth_date,
-            ];
+            try {
+                // 1. Update user basic info
+                $user = Auth::user();
+                $user->update([
+                    'name' => $request->name,
+                    'email' => $request->email,
+                ]);
 
-            if ($request->hasFile('profile_image')) {
-                if ($user->hrdDetail?->profile_image) {
-                    Storage::disk('private')->delete($user->hrdDetail->profile_image);
+                // 2. Update or create HRD details
+                $hrdDetail = $user->hrdDetail ?? new \App\Models\HRDDetail();
+
+                if (!$hrdDetail->exists) {
+                    $hrdDetail->user_id = $user->id;
                 }
 
-                $path = $request->file('profile_image')->store('profile-images', 'private');
-                if (!$path) {
-                    throw new \Exception('Failed to store profile image');
+                // Handle profile image upload
+                if ($request->hasFile('profile_image')) {
+                    if ($hrdDetail->profile_image) {
+                        Storage::disk('private')->delete($hrdDetail->profile_image);
+                    }
+                    $path = $request->file('profile_image')->store('profile-images', 'private');
+                    $hrdDetail->profile_image = $path;
                 }
-                $data['profile_image'] = $path;
+
+                // Update HRD details
+                $hrdDetail->fill([
+                    'nik' => $request->nik,
+                    'address' => $request->address,
+                    'birth_date' => $request->birth_date ? Carbon::parse($request->birth_date) : null,
+                ]);
+
+                $hrdDetail->save();
+
+                DB::commit();
+
+                return redirect()->back()->with('success', 'Profile updated successfully');
+
+            } catch (\Exception $e) {
+                DB::rollback();
+                \Log::error('Profile update failed: ' . $e->getMessage());
+                return redirect()->back()->withErrors(['error' => 'Failed to update profile']);
             }
 
-            $hrdDetail = $user->hrdDetail()->updateOrCreate(
-                ['user_id' => $user->id],
-                $data
-            );
-
-            // Generate image URL after update
-            if ($hrdDetail->profile_image) {
-                $filename = basename($hrdDetail->profile_image);
-                $hrdDetail->profile_image_url = route('hrd.profile.image', $filename);
-                $user->hrd_detail = $hrdDetail;
-            }
-
-            return back()->with([
-                'success' => 'Profile updated successfully',
-                'user' => $user
-            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()->withErrors($e->validator->errors());
         } catch (\Exception $e) {
             \Log::error('Profile update failed: ' . $e->getMessage());
-            return back()->with('error', 'Failed to update profile: ' . $e->getMessage());
+            return redirect()->back()->withErrors(['error' => 'An unexpected error occurred']);
         }
     }
 

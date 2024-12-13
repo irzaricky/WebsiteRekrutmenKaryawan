@@ -40,7 +40,7 @@ const handleImageUpload = (e) => {
 const submit = () => {
     form.post(route("hrd.profile.update"), {
         preserveScroll: true,
-        forceFormData: true, // Important for file upload
+        forceFormData: true,
         onSuccess: () => {
             form.reset('profile_image');
         },

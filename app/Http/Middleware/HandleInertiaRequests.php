@@ -36,7 +36,6 @@ class HandleInertiaRequests extends Middleware
                 $filename = basename($hrdDetail->profile_image);
                 $hrdDetail->profile_image_url = route('hrd.profile.image', $filename);
             }
-            $user->hrd_detail = $hrdDetail;
         }
 
         return array_merge(parent::share($request), [
