@@ -7,6 +7,7 @@ import TextInput from "@/Components/TextInput.vue";
 import Checkbox from "@/components/Checkbox.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import ReCaptcha from "@/Components/ReCaptcha.vue";
+import { ref } from "vue";
 
 defineProps({
     canResetPassword: {
@@ -29,19 +30,28 @@ const form = useForm({
     recaptcha: "",
 });
 
+const isRecaptchaVerified = ref(false);
+
 const handleRecaptchaVerify = (token) => {
     form.recaptcha = token;
+    isRecaptchaVerified.value = true;
 };
 
 const handleRecaptchaExpire = () => {
     form.recaptcha = "";
+    isRecaptchaVerified.value = false;
 };
 
 const submit = () => {
+    if (!isRecaptchaVerified.value) {
+        return;
+    }
+
     form.post(route("login"), {
         onFinish: () => {
             form.reset("password");
             window.grecaptcha?.reset();
+            isRecaptchaVerified.value = false;
         },
     });
 };
@@ -147,8 +157,12 @@ const submit = () => {
                 <div class="mt-4">
                     <PrimaryButton
                         class="w-full justify-center"
-                        :class="{ 'opacity-25': form.processing }"
-                        :disabled="form.processing"
+                        :class="{
+                            'opacity-25':
+                                form.processing || !isRecaptchaVerified,
+                            'cursor-not-allowed': !isRecaptchaVerified,
+                        }"
+                        :disabled="form.processing || !isRecaptchaVerified"
                     >
                         Log in
                     </PrimaryButton>
