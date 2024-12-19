@@ -106,7 +106,7 @@ const hasEducationInfo = computed(() => {
 <template>
     <Head :title="title" />
     <Dashboard>
-        <main class="min-h-screen py-12 lg:py-16">
+        <main class="min-h-screen">
             <!-- Gradient background -->
             <div
                 class="absolute inset-x-0 top-0 -z-10 transform-gpu overflow-hidden px-36 blur-3xl"
@@ -138,57 +138,120 @@ const hasEducationInfo = computed(() => {
             </div>
 
             <div class="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-                <!-- Header -->
-                <div class="mb-10">
-                    <h1 class="text-3xl font-bold tracking-tight text-gray-900">
+                <!-- Enhanced Header with improved typography and spacing -->
+                <div class="mb-12">
+                    <h1
+                        class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
+                    >
                         Document Status
                     </h1>
+                    <p class="mt-3 text-lg text-gray-600">
+                        Track the status of your submitted documents
+                    </p>
                 </div>
 
-                <!-- Profile Required Warning -->
+                <!-- Profile Required Warning - Enhanced with better visual hierarchy -->
                 <div
                     v-if="!hasProfile"
-                    class="mb-8 bg-yellow-100 border border-yellow-400 text-yellow-700 px-6 py-4 rounded-lg"
+                    class="mb-8 relative overflow-hidden rounded-xl bg-gradient-to-r from-yellow-50 to-yellow-100 border-l-4 border-yellow-400 p-6"
                 >
-                    <p class="font-bold">Profile Data Required</p>
-                    <p class="mt-1">
-                        Please complete your profile information before
-                        uploading documents.
-                    </p>
-                    <Link
-                        :href="route('candidate.profile')"
-                        class="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors duration-150 ease-in-out"
-                    >
-                        Complete Profile
-                    </Link>
+                    <div class="flex items-center gap-4">
+                        <div class="flex-shrink-0">
+                            <svg
+                                class="h-6 w-6 text-yellow-400"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                />
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold text-yellow-800">
+                                Profile Data Required
+                            </h3>
+                            <p class="mt-1 text-yellow-700">
+                                Please complete your profile information before
+                                uploading documents.
+                            </p>
+                            <Link
+                                :href="route('candidate.profile')"
+                                class="mt-4 inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 text-white px-6 py-2.5 rounded-lg transition-all duration-200 font-medium shadow-sm"
+                            >
+                                <span>Complete Profile</span>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M9 5l7 7-7 7"
+                                    />
+                                </svg>
+                            </Link>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Education Required Warning -->
+                <!-- Education Required Warning - Enhanced with better visual hierarchy -->
                 <div
                     v-if="!hasEducationInfo"
-                    class="mb-8 bg-yellow-100 border border-yellow-400 text-yellow-700 px-6 py-4 rounded-lg"
+                    class="mb-8 relative overflow-hidden rounded-xl bg-gradient-to-r from-yellow-50 to-yellow-100 border-l-4 border-yellow-400 p-6"
                 >
-                    <p class="font-bold">Education Information Required</p>
-                    <p class="mt-1">
-                        Please complete your education information before
-                        uploading documents.
-                    </p>
-                    <Link
-                        :href="route('candidate.profile')"
-                        class="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors duration-150 ease-in-out"
-                    >
-                        Complete Education Info
-                    </Link>
-                </div>
-
-                <!-- Upload Document Button -->
-                <div v-if="hasEducationInfo && !allFilesAccepted" class="mb-8">
-                    <Link
-                        :href="route('candidate.upload')"
-                        class="inline-block bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors duration-150 ease-in-out"
-                    >
-                        Upload Document
-                    </Link>
+                    <div class="flex items-center gap-4">
+                        <div class="flex-shrink-0">
+                            <svg
+                                class="h-6 w-6 text-yellow-400"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                                />
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold text-yellow-800">
+                                Education Information Required
+                            </h3>
+                            <p class="mt-1 text-yellow-700">
+                                Please complete your education information
+                                before uploading documents.
+                            </p>
+                            <Link
+                                :href="route('candidate.profile')"
+                                class="mt-4 inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 text-white px-6 py-2.5 rounded-lg transition-all duration-200 font-medium shadow-sm"
+                            >
+                                <span>Complete Education Info</span>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M9 5l7 7-7 7"
+                                    />
+                                </svg>
+                            </Link>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Document Status Cards -->

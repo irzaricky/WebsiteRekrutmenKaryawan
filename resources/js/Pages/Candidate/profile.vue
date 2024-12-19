@@ -1,6 +1,6 @@
 <script setup>
 import { Head, useForm, Link, usePage } from "@inertiajs/vue3";
-import { onMounted, computed } from "vue";
+import { onMounted, computed, ref } from "vue";
 import Dashboard from "./Dashboard.vue";
 
 const props = defineProps({
@@ -110,43 +110,124 @@ const canEditEducation = computed(() => {
 
 // Access flash messages
 const flash = computed(() => usePage().props.flash);
+
+// Add state for managing message visibility
+const showFlash = ref(true);
+
+const dismissFlash = () => {
+    showFlash.value = false;
+};
 </script>
 
 <template>
     <Head :title="title" />
     <Dashboard>
         <div class="container mx-auto max-w-5xl">
-            <!-- Flash Messages -->
-            <div class="mb-10 space-y-4">
-                <div
-                    v-if="$page.props.flash.success"
-                    class="p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg"
-                >
-                    {{ $page.props.flash.success }}
-                </div>
-
-                <div
-                    v-if="$page.props.flash.error"
-                    class="p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg"
-                >
-                    {{ $page.props.flash.error }}
-                </div>
-            </div>
-
-            <!-- Add alert component -->
-            <div
-                v-if="$page.props.flash.message"
-                :class="{
-                    'bg-green-100 border border-green-400 text-green-700':
-                        $page.props.flash.type === 'success',
-                    'bg-red-100 border border-red-400 text-red-700':
-                        $page.props.flash.type === 'error',
-                }"
-                class="p-4 rounded mb-4"
-                role="alert"
+            <!-- Enhanced Flash Messages -->
+            <TransitionGroup
+                enter-active-class="transition duration-300 ease-out"
+                enter-from-class="transform opacity-0 scale-95"
+                enter-to-class="transform opacity-100 scale-100"
+                leave-active-class="transition duration-200 ease-in"
+                leave-from-class="transform opacity-100 scale-100"
+                leave-to-class="transform opacity-0 scale-95"
             >
-                {{ $page.props.flash.message }}
-            </div>
+                <!-- Success Message -->
+                <div
+                    v-if="showFlash && $page.props.flash.success"
+                    :key="'success'"
+                    class="relative mb-6 flex items-center gap-4 rounded-lg border border-green-400 bg-green-50 p-4 shadow-sm"
+                    role="alert"
+                    aria-live="polite"
+                >
+                    <!-- Success Icon -->
+                    <div class="flex-shrink-0">
+                        <svg
+                            class="h-5 w-5 text-green-400"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                        >
+                            <path
+                                fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                    </div>
+
+                    <!-- Message -->
+                    <div class="flex-1 text-sm font-medium text-green-800">
+                        {{ $page.props.flash.success }}
+                    </div>
+
+                    <!-- Dismiss Button -->
+                    <button
+                        @click="dismissFlash"
+                        class="flex-shrink-0 rounded-lg p-1.5 text-green-500 hover:bg-green-100 hover:text-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2"
+                    >
+                        <span class="sr-only">Dismiss</span>
+                        <svg
+                            class="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                        >
+                            <path
+                                fill-rule="evenodd"
+                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Error Message -->
+                <div
+                    v-if="showFlash && $page.props.flash.error"
+                    :key="'error'"
+                    class="relative mb-6 flex items-center gap-4 rounded-lg border border-red-400 bg-red-50 p-4 shadow-sm"
+                    role="alert"
+                    aria-live="assertive"
+                >
+                    <!-- Error Icon -->
+                    <div class="flex-shrink-0">
+                        <svg
+                            class="h-5 w-5 text-red-400"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                        >
+                            <path
+                                fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                    </div>
+
+                    <!-- Message -->
+                    <div class="flex-1 text-sm font-medium text-red-800">
+                        {{ $page.props.flash.error }}
+                    </div>
+
+                    <!-- Dismiss Button -->
+                    <button
+                        @click="dismissFlash"
+                        class="flex-shrink-0 rounded-lg p-1.5 text-red-500 hover:bg-red-100 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2"
+                    >
+                        <span class="sr-only">Dismiss</span>
+                        <svg
+                            class="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                        >
+                            <path
+                                fill-rule="evenodd"
+                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                    </button>
+                </div>
+            </TransitionGroup>
 
             <!-- Add below flash messages -->
             <!-- Form validation errors -->
@@ -166,7 +247,7 @@ const flash = computed(() => usePage().props.flash);
 
             <!-- Page Title -->
             <div class="mb-10">
-                <h1 class="text-3xl font-bold tracking-tight text-gray-900">
+                <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
                     Profile
                 </h1>
             </div>

@@ -138,7 +138,7 @@ const handleUpload = () => {
 <template>
     <Head :title="title" />
     <Dashboard>
-        <main class="min-h-screen py-12 lg:py-16">
+        <main class="min-h-screen">
             <!-- Gradient background -->
             <div
                 class="absolute inset-x-0 top-0 -z-10 transform-gpu overflow-hidden px-36 blur-3xl"
@@ -170,39 +170,106 @@ const handleUpload = () => {
             </div>
 
             <div class="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-                <!-- Header -->
+                <!-- Header with improved typography -->
                 <div class="mb-10">
-                    <h1 class="text-3xl font-bold tracking-tight text-gray-900">
+                    <h1
+                        class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
+                    >
                         Upload Document
                     </h1>
+                    <p class="mt-2 text-sm text-gray-600">
+                        Please upload the required documents in the correct
+                        format.
+                    </p>
                 </div>
 
-                <!-- Flash Messages -->
+                <!-- Enhanced Flash Messages with icons -->
                 <div
                     v-if="$page.props.flash.message"
                     :class="{
-                        'bg-yellow-100 border-yellow-400 text-yellow-700':
+                        'bg-yellow-50 border-yellow-200 text-yellow-800':
                             $page.props.flash.type === 'warning',
-                        'bg-green-100 border-green-400 text-green-700':
+                        'bg-green-50 border-green-200 text-green-800':
                             $page.props.flash.type === 'success',
-                        'bg-red-100 border-red-400 text-red-700':
+                        'bg-red-50 border-red-200 text-red-800':
                             $page.props.flash.type === 'error',
                     }"
-                    class="p-4 mb-8 rounded-lg border"
+                    class="p-4 mb-8 rounded-lg border flex items-center gap-3 shadow-sm"
                 >
-                    {{ $page.props.flash.message }}
+                    <!-- Dynamic icon based on message type -->
+                    <div class="flex-shrink-0">
+                        <svg
+                            v-if="$page.props.flash.type === 'success'"
+                            class="h-5 w-5 text-green-400"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                        >
+                            <path
+                                fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                        <svg
+                            v-else-if="$page.props.flash.type === 'warning'"
+                            class="h-5 w-5 text-yellow-400"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                        >
+                            <path
+                                fill-rule="evenodd"
+                                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                        <svg
+                            v-else
+                            class="h-5 w-5 text-red-400"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                        >
+                            <path
+                                fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                    </div>
+                    <p class="text-sm font-medium">
+                        {{ $page.props.flash.message }}
+                    </p>
                 </div>
 
-                <!-- Validation Errors -->
+                <!-- Enhanced Validation Errors with better spacing and icons -->
                 <div
                     v-if="Object.keys(form.errors).length > 0"
-                    class="mb-8 bg-red-50 border border-red-200 text-red-700 p-6 rounded-lg"
+                    class="mb-8 bg-red-50 border border-red-200 rounded-lg p-6 shadow-sm"
                 >
-                    <p class="font-semibold mb-2">
-                        Please fix the following errors:
-                    </p>
-                    <ul class="list-disc list-inside">
-                        <li v-for="(error, key) in form.errors" :key="key">
+                    <div class="flex items-center gap-3 mb-4">
+                        <svg
+                            class="h-5 w-5 text-red-400"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                        >
+                            <path
+                                fill-rule="evenodd"
+                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                        <h3 class="text-lg font-medium text-red-800">
+                            Please fix the following errors
+                        </h3>
+                    </div>
+                    <ul class="space-y-2 ml-6">
+                        <li
+                            v-for="(error, key) in form.errors"
+                            :key="key"
+                            class="flex items-center gap-2 text-sm text-red-700"
+                        >
+                            <span
+                                class="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0"
+                            ></span>
                             {{ error }}
                         </li>
                     </ul>
