@@ -73,26 +73,16 @@ class DatabaseService
         $mysqldump = $this->getMysqldumpPath();
 
         // Build command based on whether password is set
-        if (empty($password)) {
-            $command = sprintf(
-                '"%s" --host="%s" --user="%s" --databases "%s" > "%s"',
-                $mysqldump,
-                $host,
-                $username,
-                $database,
-                $path
-            );
-        } else {
-            $command = sprintf(
-                '"%s" --host="%s" --user="%s" --password="%s" --databases "%s" > "%s"',
-                $mysqldump,
-                $host,
-                $username,
-                $password,
-                $database,
-                $path
-            );
-        }
+        $command = sprintf(
+            '"%s" --host="%s" --user="%s" %s --databases "%s" --ignore-table=%s.database_backups > "%s"',
+            $mysqldump,
+            $host,
+            $username,
+            $password ? '--password="' . $password . '"' : '',
+            $database,
+            $database,
+            $path
+        );
 
         exec($command . ' 2>&1', $output, $returnCode);
 
@@ -123,7 +113,10 @@ class DatabaseService
 
         $mysql = $this->getMysqlPath();
 
-        // Build command with proper escaping and error redirection
+        // First save current database_backups data
+        $backupsData = \DB::table('database_backups')->get();
+
+        // Execute restore
         $command = sprintf(
             '"%s" -h %s -u %s %s %s < "%s" 2>&1',
             $mysql,
@@ -134,7 +127,6 @@ class DatabaseService
             $path
         );
 
-        // Execute command and capture output
         exec($command, $output, $returnCode);
 
         if ($returnCode !== 0) {
@@ -143,6 +135,15 @@ class DatabaseService
                 'command' => preg_replace('/-p[^ ]+/', '-p***', $command)
             ]);
             throw new \Exception('Database restore failed: ' . implode("\n", $output));
+        }
+
+        // Restore database_backups data
+        foreach ($backupsData as $backup) {
+            \DB::table('database_backups')
+                ->updateOrInsert(
+                    ['id' => $backup->id],
+                    (array) $backup
+                );
         }
 
         return true;
