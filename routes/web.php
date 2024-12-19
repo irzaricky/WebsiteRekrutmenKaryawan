@@ -8,6 +8,7 @@ use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Controllers\CandidateRankingController;
 use App\Http\Controllers\CandidateUploadController;
 use App\Http\Controllers\CandidateProfileController;
+use App\Http\Controllers\DatabaseBackupController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HRDHistoryController;
 use App\Http\Controllers\HRDProfileController;
@@ -93,6 +94,13 @@ Route::middleware(['auth', EnsureUserIsHRD::class, EnsureUserIsActive::class])->
         ->name('dashboard.update-file-status');
     Route::get('/dashboard/pending-files', [DataCandidateController::class, 'getPendingFiles'])
         ->name('dashboard.pending-files');
+
+    // Database backup routes
+    Route::get('/dashboard/database', [DatabaseBackupController::class, 'index'])->name('backup.index');
+    Route::post('/dashboard/database/backup', [DatabaseBackupController::class, 'backup'])->name('backup.create');
+    Route::post('/dashboard/database/restore', [DatabaseBackupController::class, 'restore'])->name('backup.restore');
+    Route::get('/dashboard/database/download/{filename}', [DatabaseBackupController::class, 'download'])->name('backup.download');
+    Route::delete('/dashboard/database/delete/{filename}', [DatabaseBackupController::class, 'delete'])->name('backup.delete');
 });
 
 

@@ -21,6 +21,7 @@ const navigation = [
     { name: "Konfirmasi Files candidate", href: "/dashboard/pending-files" },
     { name: "Histori HRD", href: "/dashboard/history" },
     { name: "Ranking candidate", href: "/dashboard/ranking" },
+    { name: "Database Management", href: "/dashboard/database" },
 ];
 
 const img = [{ id: "1", href: "/assets/images/for.png", link: "/" }];

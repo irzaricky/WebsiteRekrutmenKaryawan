@@ -91,7 +91,6 @@ class RegisteredUserController extends Controller
             DB::commit();
 
             event(new Registered($user));
-            $user->sendEmailVerificationNotification();
             Auth::login($user);
 
             return redirect()->route('verification.notice');
