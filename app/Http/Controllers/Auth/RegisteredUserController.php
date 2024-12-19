@@ -50,31 +50,16 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
-            'status' => 'active'
+            'status' => 'pending'
         ]);
 
-        // Create initial test scores if user is a Candidate
-        if ($request->role === 'Candidate') {
-            $tests = TestsList::all();
-
-            foreach ($tests as $test) {
-                TestResult::create([
-                    'user_id' => $user->id,
-                    'test_id' => $test->id,
-                    'score' => 0
-                ]);
-            }
-
-            // Create candidate details record
-            CandidateDetail::create([
-                'user_id' => $user->id,
-                'nik' => $request->nik,
-            ]);
-        }
-
         event(new Registered($user));
+
+        // Send verification email
+        $user->sendEmailVerificationNotification();
+
         Auth::login($user);
 
-        return redirect()->intended(route('home'));
+        return redirect()->route('verification.notice');
     }
 }

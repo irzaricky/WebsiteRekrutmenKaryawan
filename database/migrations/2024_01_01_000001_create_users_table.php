@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->string('password');
             $table->enum('role', ['Candidate', 'HRD'])->default('Candidate');
             ;
-            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->enum('status', ['pending', 'active', 'inactive'])->default('active');
             $table->rememberToken();
             $table->timestamps();
         });

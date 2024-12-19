@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DataCandidateController;
 use App\Http\Middleware\EnsureUserIsCandidate;
 use App\Http\Middleware\EnsureUserIsHRD;
+use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Controllers\CandidateRankingController;
 use App\Http\Controllers\CandidateUploadController;
 use App\Http\Controllers\CandidateProfileController;
@@ -37,14 +38,13 @@ Route::get('/product', function () {
     ]);
 });
 
-// Pindahkan rute file di luar group middleware
 Route::get('/candidate/file/{type}/{filename}', [CandidateUploadController::class, 'getFile'])
     ->name('candidate.file')
     ->middleware('auth'); // Hanya perlu auth
 
 
 
-Route::middleware(['auth', EnsureUserIsCandidate::class])->group(function () {
+Route::middleware(['auth', EnsureUserIsCandidate::class, EnsureUserIsActive::class])->group(function () {
     // Routes khusus untuk Candidate
     Route::get('/candidate/upload', [CandidateUploadController::class, 'index'])
         ->name('candidate.upload');
@@ -58,7 +58,7 @@ Route::middleware(['auth', EnsureUserIsCandidate::class])->group(function () {
         ->name('candidate.file-status');
 });
 
-Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {
+Route::middleware(['auth', EnsureUserIsHRD::class, EnsureUserIsActive::class])->group(function () {
 
     Route::get('/dashboard', function () {
         $controller = new CandidateRankingController();
@@ -96,7 +96,7 @@ Route::middleware(['auth', EnsureUserIsHRD::class])->group(function () {
 });
 
 
-Route::middleware(['auth', EnsureUserIsCandidate::class])->group(function () {
+Route::middleware(['auth', EnsureUserIsCandidate::class, EnsureUserIsActive::class])->group(function () {
     // Profile routes
     Route::get('/candidate/profile', [CandidateProfileController::class, 'index'])
         ->name('candidate.profile');
@@ -114,7 +114,7 @@ Route::middleware(['auth', EnsureUserIsCandidate::class])->group(function () {
         ->name('candidate.file-status');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', EnsureUserIsActive::class])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
