@@ -17,6 +17,7 @@ use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Rules\ValidNIK;
+use Illuminate\Support\Facades\DB;
 
 class RegisteredUserController extends Controller
 {
@@ -45,21 +46,59 @@ class RegisteredUserController extends Controller
             'nik' => ['required', 'string', 'size:16', 'unique:candidate_details', new ValidNIK],
         ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-            'status' => 'pending'
-        ]);
+        try {
+            DB::beginTransaction();
 
-        event(new Registered($user));
+            // Create user
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => $request->role,
+                'status' => 'pending'
+            ]);
 
-        // Send verification email
-        $user->sendEmailVerificationNotification();
+            // Create candidate detail if role is Candidate
+            if ($request->role === 'Candidate') {
+                CandidateDetail::create([
+                    'user_id' => $user->id,
+                    'nik' => $request->nik,
+                    'address' => null,
+                    'birth_date' => null,
+                    'photo_path' => null,
+                    'cv_path' => null,
+                    'education_level' => null,
+                    'major' => null,
+                    'institution' => null,
+                    'graduation_year' => null,
+                    'photo_status' => null,
+                    'cv_status' => null,
+                    'ijazah_smp_path' => null,
+                    'ijazah_sma_path' => null,
+                    'ijazah_d3_path' => null,
+                    'ijazah_s1_path' => null,
+                    'ijazah_s2_path' => null,
+                    'ijazah_s3_path' => null,
+                    'ijazah_smp_status' => null,
+                    'ijazah_sma_status' => null,
+                    'ijazah_d3_status' => null,
+                    'ijazah_s1_status' => null,
+                    'ijazah_s2_status' => null,
+                    'ijazah_s3_status' => null
+                ]);
+            }
 
-        Auth::login($user);
+            DB::commit();
 
-        return redirect()->route('verification.notice');
+            event(new Registered($user));
+            $user->sendEmailVerificationNotification();
+            Auth::login($user);
+
+            return redirect()->route('verification.notice');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Registration failed: ' . $e->getMessage()]);
+        }
     }
 }

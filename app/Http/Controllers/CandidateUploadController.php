@@ -25,10 +25,19 @@ class CandidateUploadController extends Controller
         $user = Auth::user();
         $candidateDetail = $user->candidateDetail;
 
-        // Redirect if profile not complete
-        if (!$candidateDetail || !$candidateDetail->nik) {
+        // Check education fields only
+        if (
+            !$candidateDetail ||
+            !$candidateDetail->education_level ||
+            !$candidateDetail->major ||
+            !$candidateDetail->institution ||
+            !$candidateDetail->graduation_year
+        ) {
             return redirect()->route('candidate.profile')
-                ->with('message', 'Please complete your profile before uploading documents.');
+                ->with([
+                    'message' => 'Please complete your education information before uploading documents.',
+                    'type' => 'warning'
+                ]);
         }
 
         return Inertia::render('Candidate/candidate_upload', [
@@ -43,10 +52,19 @@ class CandidateUploadController extends Controller
             $user = Auth::user();
             $candidateDetail = $user->candidateDetail;
 
-            // Check profile completion first
-            if (!$candidateDetail || !$candidateDetail->nik) {
+            // Check education fields only
+            if (
+                !$candidateDetail ||
+                !$candidateDetail->education_level ||
+                !$candidateDetail->major ||
+                !$candidateDetail->institution ||
+                !$candidateDetail->graduation_year
+            ) {
                 return redirect()->route('candidate.profile')
-                    ->with('message', 'Please complete your profile before uploading documents.');
+                    ->with([
+                        'message' => 'Please complete your education information before uploading documents.',
+                        'type' => 'warning'
+                    ]);
             }
 
             // Validate basic files
@@ -341,7 +359,7 @@ class CandidateUploadController extends Controller
             return response()->json(['message' => 'Candidate detail not found'], 404);
         }
 
-        $field = $request->file_type . '_confirmed';    
+        $field = $request->file_type . '_confirmed';
         $currentValue = $candidateDetail->$field;
 
         // Toggle confirmation status

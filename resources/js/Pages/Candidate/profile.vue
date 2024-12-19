@@ -1,5 +1,5 @@
 <script setup>
-import { Head, useForm, Link } from "@inertiajs/vue3";
+import { Head, useForm, Link, usePage } from "@inertiajs/vue3";
 import { onMounted, computed } from "vue";
 
 const props = defineProps({
@@ -106,6 +106,9 @@ const canEditEducation = computed(() => {
 
     return educationFiles.every((status) => !status || status === "rejected");
 });
+
+// Access flash messages
+const flash = computed(() => usePage().props.flash);
 </script>
 
 <template>
@@ -160,6 +163,37 @@ const canEditEducation = computed(() => {
                 </div>
             </div>
 
+            <!-- Add alert component -->
+            <div
+                v-if="$page.props.flash.message"
+                :class="{
+                    'bg-green-100 border border-green-400 text-green-700':
+                        $page.props.flash.type === 'success',
+                    'bg-red-100 border border-red-400 text-red-700':
+                        $page.props.flash.type === 'error',
+                }"
+                class="p-4 rounded mb-4"
+                role="alert"
+            >
+                {{ $page.props.flash.message }}
+            </div>
+
+            <!-- Add below flash messages -->
+            <!-- Form validation errors -->
+            <div
+                v-if="Object.keys(form.errors).length > 0"
+                class="mb-8 bg-red-50 border border-red-200 text-red-700 p-6 rounded-lg"
+            >
+                <p class="font-semibold mb-2">
+                    Please fix the following errors:
+                </p>
+                <ul class="list-disc list-inside">
+                    <li v-for="(error, key) in form.errors" :key="key">
+                        {{ error }}
+                    </li>
+                </ul>
+            </div>
+
             <!-- Page Title -->
             <div class="mb-10">
                 <h1 class="text-3xl font-bold tracking-tight text-gray-900">
@@ -191,6 +225,9 @@ const canEditEducation = computed(() => {
                                     v-model="form.nik"
                                     maxlength="16"
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                    :class="{
+                                        'border-red-500': form.errors.nik,
+                                    }"
                                 />
                                 <div
                                     v-if="form.errors.nik"
@@ -222,6 +259,10 @@ const canEditEducation = computed(() => {
                                     type="date"
                                     v-model="form.birth_date"
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                    :class="{
+                                        'border-red-500':
+                                            form.errors.birth_date,
+                                    }"
                                 />
                                 <div
                                     v-if="form.errors.birth_date"
@@ -262,6 +303,10 @@ const canEditEducation = computed(() => {
                                     v-model="form.education_level"
                                     :disabled="!canEditEducation"
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                    :class="{
+                                        'border-red-500':
+                                            form.errors.education_level,
+                                    }"
                                 >
                                     <option value="">Pilih Pendidikan</option>
                                     <option value="SMA">SMA/SMK</option>
@@ -270,6 +315,12 @@ const canEditEducation = computed(() => {
                                     <option value="S2">S2</option>
                                     <option value="S3">S3</option>
                                 </select>
+                                <div
+                                    v-if="form.errors.education_level"
+                                    class="text-red-500 text-sm mt-1"
+                                >
+                                    {{ form.errors.education_level }}
+                                </div>
                                 <p
                                     v-if="!canEditEducation"
                                     class="mt-1 text-sm text-gray-500"

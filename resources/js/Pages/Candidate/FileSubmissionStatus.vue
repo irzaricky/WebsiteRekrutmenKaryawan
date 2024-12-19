@@ -90,6 +90,16 @@ const requiredIjazah = computed(() => {
 const requiredDocs = computed(() => {
     // ... same implementation as above ...
 });
+
+// Add education validation check
+const hasEducationInfo = computed(() => {
+    return !!(
+        props.candidateDetail?.education_level &&
+        props.candidateDetail?.major &&
+        props.candidateDetail?.institution &&
+        props.candidateDetail?.graduation_year
+    );
+});
 </script>
 
 <template>
@@ -152,8 +162,26 @@ const requiredDocs = computed(() => {
                 </Link>
             </div>
 
+            <!-- Education Required Warning -->
+            <div
+                v-if="!hasEducationInfo"
+                class="mb-8 bg-yellow-100 border border-yellow-400 text-yellow-700 px-6 py-4 rounded-lg"
+            >
+                <p class="font-bold">Education Information Required</p>
+                <p class="mt-1">
+                    Please complete your education information before uploading
+                    documents.
+                </p>
+                <Link
+                    :href="route('candidate.profile')"
+                    class="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors duration-150 ease-in-out"
+                >
+                    Complete Education Info
+                </Link>
+            </div>
+
             <!-- Upload Document Button -->
-            <div v-else-if="!allFilesAccepted" class="mb-8">
+            <div v-if="hasEducationInfo && !allFilesAccepted" class="mb-8">
                 <Link
                     :href="route('candidate.upload')"
                     class="inline-block bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors duration-150 ease-in-out"

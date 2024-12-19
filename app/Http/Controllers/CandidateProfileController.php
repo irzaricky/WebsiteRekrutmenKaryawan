@@ -100,10 +100,16 @@ class CandidateProfileController extends Controller
                 $data
             );
 
-            return back()->with('success', 'Profile updated successfully');
+            return back()->with([
+                'message' => 'Profile updated successfully',
+                'type' => 'success'
+            ]);
 
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => $e->getMessage()]);
+            return back()->with([
+                'message' => $e->getMessage(),
+                'type' => 'error'
+            ]);
         }
     }
 
