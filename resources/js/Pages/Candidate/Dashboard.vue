@@ -1,0 +1,86 @@
+<!-- resources/js/Pages/Candidate/Layout/Dashboard.vue -->
+<script setup>
+import { Link, usePage } from "@inertiajs/vue3";
+import { ref } from "vue";
+import "bootstrap-icons/font/bootstrap-icons.css";
+
+const isCollapsed = ref(false);
+const user = usePage().props.auth.user;
+
+function toggleSidebar() {
+    isCollapsed.value = !isCollapsed.value;
+}
+
+const navigation = [
+    { name: "Profile", href: route("candidate.profile") },
+    { name: "Upload Document", href: route("candidate.upload") },
+    { name: "Document Status", href: route("candidate.file-status") },
+];
+
+const img = [{ id: "1", href: "/assets/images/for.png", link: "/" }];
+</script>
+
+<template>
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <div
+            :class="[
+                'bg-[#2B2D42] min-h-screen p-7 pt-4 relative transition-all top-0',
+                {
+                    'w-64 duration-700': !isCollapsed,
+                    'w-28 duration-700': isCollapsed,
+                },
+            ]"
+        >
+            <!-- Toggle Button -->
+            <i
+                class="bi bi-arrow-left text-black bg-white absolute -right-3.5 top-96 cursor-pointer duration-500 rounded-full w-8 h-8 flex items-center justify-center"
+                :class="{ 'rotate-180 duration-500': isCollapsed }"
+                @click="toggleSidebar"
+            ></i>
+
+            <!-- Logo and Title -->
+            <div class="flex items-center gap-6">
+                <Link
+                    :href="img[0].link"
+                    class="p-1.5 btn avatar bg-white duration-500"
+                    style="height: 4rem"
+                >
+                    <img
+                        :src="img[0].href"
+                        class="h-16 w-auto avatar"
+                        alt="Recruiter Logo"
+                    />
+                </Link>
+                <div v-if="!isCollapsed">
+                    <span class="text-white font-bold text-2xl">Recruiter</span>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <div v-if="!isCollapsed">
+                <ul class="text-white mt-6">
+                    <li
+                        v-for="item in navigation"
+                        :key="item.name"
+                        class="mb-3"
+                    >
+                        <Link
+                            :href="item.href"
+                            class="flex items-center text-sm font-semibold leading-10 text-white rounded-md hover:bg-gray-700 p-2 transition duration-300"
+                        >
+                            {{ item.name }}
+                        </Link>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 bg-[#EDF2F4]">
+            <div class="p-6">
+                <slot />
+            </div>
+        </div>
+    </div>
+</template>
