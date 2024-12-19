@@ -9,9 +9,9 @@
             <directory suffix="Test.php">./tests/Feature</directory>
         </testsuite>
         <testsuite name="awal">
-            <file>./tests/Feature/Auth/RegistrationTest.php</file>
-            <file>./tests/Feature/Auth/AuthenticationTest.php</file>
-            <file>./tests/Feature/DataCandidateControllerTest.php</file>
+            <file>./tests/Feature/Backend/AuthenticationTest.php</file>
+            <file>./tests/Feature/Backend/DataCandidateControllerTest.php</file>
+            <file>./tests/Feature/Backend/IntegrationTest.php</file>
         </testsuite>
     </testsuites>
 
