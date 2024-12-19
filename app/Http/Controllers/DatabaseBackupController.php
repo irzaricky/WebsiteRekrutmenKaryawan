@@ -74,9 +74,18 @@ class DatabaseBackupController extends Controller
         ]);
 
         try {
+            // Verify file exists in database
+            $backup = DatabaseBackup::where('filename', $request->backup_file)->firstOrFail();
+
+            // Attempt restore
             $this->databaseService->restore($request->backup_file);
+
             return redirect()->back()->with('success', 'Database restored successfully');
         } catch (\Exception $e) {
+            \Log::error('Restore failed', [
+                'error' => $e->getMessage(),
+                'file' => $request->backup_file
+            ]);
             return redirect()->back()->with('error', 'Restore failed: ' . $e->getMessage());
         }
     }
