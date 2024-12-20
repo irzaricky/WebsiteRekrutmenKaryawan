@@ -145,7 +145,7 @@ const submit = () => {
                     <InputError class="mt-2" :message="form.errors.password" />
                 </div>
 
-                <div class="mt-4">
+                <div class="mt-4 flex justify-center">
                     <ReCaptcha
                         site-key="6LcrhJMqAAAAAPczKz8OfJ3RUdAO9x8jxhL5qI-T"
                         @verify="handleRecaptchaVerify"
