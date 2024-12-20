@@ -32,6 +32,7 @@ class DatabaseBackupController extends Controller
                     'path' => $backup->path,
                     'size' => $backup->size,
                     'category' => $backup->category,
+                    'type' => $backup->type,
                     'created_by' => $backup->user->name,
                     'created_at' => $backup->created_at->format('Y-m-d H:i:s')
                 ];
@@ -63,6 +64,35 @@ class DatabaseBackupController extends Controller
 
             return redirect()->back()->with('success', 'Database backup created successfully');
         } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Backup failed: ' . $e->getMessage());
+        }
+    }
+
+    public function backupFiles()
+    {
+        try {
+            $backupPath = $this->databaseService->backupFiles();
+            $fullPath = storage_path('app/' . $backupPath);
+
+            // Get file size
+            $fileSize = file_exists($fullPath) ? filesize($fullPath) : 0;
+
+            // Create backup record
+            DatabaseBackup::create([
+                'filename' => basename($backupPath),
+                'path' => $backupPath,
+                'category' => 'manual',
+                'type' => 'files',
+                'user_id' => Auth::id(),
+                'size' => $fileSize
+            ]);
+
+            return redirect()->back()->with('success', 'Project files backup created successfully');
+        } catch (\Exception $e) {
+            \Log::error('Backup failed', [
+                'error' => $e->getMessage(),
+                'type' => 'files'
+            ]);
             return redirect()->back()->with('error', 'Backup failed: ' . $e->getMessage());
         }
     }

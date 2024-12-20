@@ -11,6 +11,7 @@ class DatabaseBackup extends Model
         'filename',
         'path',
         'category',
+        'type',
         'user_id',
         'size'
     ];

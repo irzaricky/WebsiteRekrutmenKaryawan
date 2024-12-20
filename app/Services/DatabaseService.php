@@ -5,6 +5,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use ZipArchive;
 
 class DatabaseService
 {
@@ -147,5 +148,47 @@ class DatabaseService
         }
 
         return true;
+    }
+
+    public function backupFiles()
+    {
+        try {
+            $filename = 'files_backup_' . date('Y-m-d_H-i-s') . '.zip';
+            $path = 'backups/' . $filename;
+            $fullPath = storage_path('app/' . $path);
+
+            $zip = new ZipArchive();
+            if ($zip->open($fullPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
+                $this->addFolderToZip(base_path(), $zip);
+                $zip->close();
+                return $path;
+            }
+            throw new \Exception("Could not create zip file");
+        } catch (\Exception $e) {
+            \Log::error('Files backup failed', [
+                'error' => $e->getMessage(),
+                'path' => $fullPath ?? null
+            ]);
+            throw $e;
+        }
+    }
+
+    private function addFolderToZip($folder, $zip, $exclude = ['vendor', 'node_modules', 'storage/app/backups'])
+    {
+        $dir = opendir($folder);
+        while ($file = readdir($dir)) {
+            if ($file == '.' || $file == '..' || in_array($file, $exclude)) {
+                continue;
+            }
+
+            $filePath = $folder . '/' . $file;
+            if (is_file($filePath)) {
+                $zip->addFile($filePath, str_replace(base_path() . '/', '', $filePath));
+            } elseif (is_dir($filePath)) {
+                $zip->addEmptyDir(str_replace(base_path() . '/', '', $filePath));
+                $this->addFolderToZip($filePath, $zip, $exclude);
+            }
+        }
+        closedir($dir);
     }
 }

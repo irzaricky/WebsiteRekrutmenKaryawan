@@ -12,6 +12,7 @@ return new class extends Migration {
             $table->string('filename');
             $table->string('path');
             $table->enum('category', ['manual', 'automatic'])->default('manual');
+            $table->enum('type', ['database', 'files'])->default('database');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->bigInteger('size')->nullable();
             $table->timestamps();

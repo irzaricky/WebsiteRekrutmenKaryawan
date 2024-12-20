@@ -98,6 +98,8 @@ Route::middleware(['auth', EnsureUserIsHRD::class, EnsureUserIsActive::class])->
     // Database backup routes
     Route::get('/dashboard/database', [DatabaseBackupController::class, 'index'])->name('backup.index');
     Route::post('/dashboard/database/backup', [DatabaseBackupController::class, 'backup'])->name('backup.create');
+    Route::post('/dashboard/database/backup-files', [DatabaseBackupController::class, 'backupFiles'])
+        ->name('backup.files');
     Route::post('/dashboard/database/restore', [DatabaseBackupController::class, 'restore'])->name('backup.restore');
     Route::get('/dashboard/database/download/{filename}', [DatabaseBackupController::class, 'download'])->name('backup.download');
     Route::delete('/dashboard/database/delete/{filename}', [DatabaseBackupController::class, 'delete'])->name('backup.delete');
