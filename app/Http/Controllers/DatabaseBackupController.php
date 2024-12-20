@@ -115,19 +115,19 @@ class DatabaseBackupController extends Controller
 
     public function delete($filename)
     {
-        // Find backup record first
-        $backup = DatabaseBackup::where('filename', $filename)->first();
-
-        if (!$backup) {
-            return redirect()->back()->with('error', 'Backup record not found');
-        }
-
-        $path = 'backups/' . $filename;
-
         try {
-            // Delete file if exists
+            // Find backup record first
+            $backup = DatabaseBackup::where('filename', $filename)->firstOrFail();
+
+            // Get full path to backup file
+            $path = 'backups/' . $filename;
+            $fullPath = storage_path('app/' . $path);
+
+            // Delete physical file if exists
             if (Storage::exists($path)) {
                 Storage::delete($path);
+            } elseif (file_exists($fullPath)) {
+                unlink($fullPath);
             }
 
             // Delete database record
@@ -135,6 +135,10 @@ class DatabaseBackupController extends Controller
 
             return redirect()->back()->with('success', 'Backup deleted successfully');
         } catch (\Exception $e) {
+            \Log::error('Backup deletion failed', [
+                'error' => $e->getMessage(),
+                'filename' => $filename
+            ]);
             return redirect()->back()->with('error', 'Failed to delete backup: ' . $e->getMessage());
         }
     }

@@ -1,7 +1,7 @@
 <script setup>
 import { Head, Link, router } from "@inertiajs/vue3";
 import Sidebar from "@/components/Dashboard/Sidebar.vue";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, onUnmounted, watch } from "vue";
 
 const props = defineProps({
     title: String,
@@ -13,6 +13,7 @@ const props = defineProps({
 });
 
 const backupsList = ref(props.backups);
+let refreshInterval;
 
 // Format file size helper
 const formatFileSize = (bytes) => {
@@ -34,8 +35,38 @@ const confirmRestore = (filename) => {
     }
 };
 
+const confirmDelete = (filename) => {
+    if (
+        confirm(
+            "Are you sure you want to delete this backup? This action cannot be undone."
+        )
+    ) {
+        router.delete(route("backup.delete", filename));
+    }
+};
+
+// Refresh function to fetch latest backups
+const refreshBackups = () => {
+    router.reload({ only: ["backups"] });
+};
+
+// Watch for props.backups changes
+watch(
+    () => props.backups,
+    (newBackups) => {
+        backupsList.value = newBackups;
+    }
+);
+
 onMounted(() => {
-    console.log("Backups:", props.backups);
+    refreshInterval = setInterval(refreshBackups, 60000);
+});
+
+onUnmounted(() => {
+    // Clean up interval
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+    }
 });
 </script>
 
@@ -57,7 +88,7 @@ onMounted(() => {
                 {{ $page.props.flash.error }}
             </div>
 
-            <!-- Actions -->
+            <!  -- Actions -->
             <div class="mb-6 flex gap-4">
                 <Link
                     :href="route('backup.create')"
@@ -151,19 +182,12 @@ onMounted(() => {
                                     >
                                         Restore
                                     </button>
-                                    <Link
-                                        :href="
-                                            route(
-                                                'backup.delete',
-                                                backup.filename
-                                            )
-                                        "
-                                        method="delete"
-                                        as="button"
-                                        class="text-red-600 hover:text-red-900"
+                                    <button
+                                        @click="confirmDelete(backup.filename)"
+                                        class="text-red-600 hover:text-red-900 cursor-pointer"
                                     >
                                         Delete
-                                    </Link>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
