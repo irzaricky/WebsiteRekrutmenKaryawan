@@ -1,12 +1,12 @@
 <script setup>
 import BaseHeader from "@/components/BaseHeader.vue";
-import InputError from "@/Components/InputError.vue";
-import InputLabel from "@/Components/InputLabel.vue";
-import PrimaryButton from "@/Components/PrimaryButton.vue";
-import TextInput from "@/Components/TextInput.vue";
+import InputError from "@/components/InputError.vue";
+import InputLabel from "@/components/InputLabel.vue";
+import PrimaryButton from "@/components/PrimaryButton.vue";
+import TextInput from "@/components/TextInput.vue";
 import Checkbox from "@/components/Checkbox.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
-import ReCaptcha from "@/Components/ReCaptcha.vue";
+import ReCaptcha from "@/components/ReCaptcha.vue";
 import { ref } from "vue";
 
 defineProps({
